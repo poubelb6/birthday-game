@@ -47,7 +47,7 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
           </div>
 
           {/* Calendar Body */}
-          <div className="bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-black/60 ring-1 ring-slate-900/5 overflow-hidden relative group">
+          <div className=" bg-[#FEFFEE] rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-black/60 ring-1 ring-slate-900/5 overflow-hidden relative group">
             {/* Red Header */}
             <div className="bg-rose-500 p-4 pt-6 text-center border-b-4 border-rose-600/20">
               <h4 className="text-white font-black uppercase tracking-widest text-sm drop-shadow-sm">
@@ -56,7 +56,7 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
             </div>
 
             {/* Days Grid */}
-            <div className="p-4 bg-gradient-to-b from-white to-slate-50 border-x border-b border-black/60 rounded-b-3xl">
+            <div className="p-4  bg-[#FEFFEE] border-b border-black/60 rounded-b-3xl">
               <div className="grid grid-cols-7 gap-1 mb-2">
                 {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day, i) => (
                   <div key={`${day}-${i}`} className={`text-center text-[11px] font-black py-1 ${i >= 5 ? 'text-rose-600' : 'text-slate-600'}`}>
