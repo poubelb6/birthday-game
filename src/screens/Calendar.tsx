@@ -77,7 +77,7 @@ export function Calendar({ birthdays, onAddBirthday }: { birthdays: Birthday[], 
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-[32px] border border-black/60 shadow-sm">
+      <div className="bg-[#FEFFEE] p-6 rounded-[32px] border border-black/60 shadow-sm">
         <div className="grid grid-cols-7 gap-2">
           {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day, i) => (
             <div key={`${day}-${i}`} className={`text-center text-[11px] font-black py-2 ${i >= 5 ? 'text-rose-600' : 'text-slate-600'}`}>
