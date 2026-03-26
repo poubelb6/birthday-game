@@ -1,0 +1,74 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User's personal profile and gamification stats.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "User's unique ID." },
+        "name": { "type": "string", "description": "User's name." },
+        "birthDate": { "type": "string", "format": "date", "description": "User's birth date." },
+        "photoUrl": { "type": "string", "description": "User's profile photo URL." },
+        "socials": {
+          "type": "object",
+          "properties": {
+            "instagram": { "type": "string" },
+            "snapchat": { "type": "string" },
+            "tiktok": { "type": "string" },
+            "twitter": { "type": "string" },
+            "facebook": { "type": "string" }
+          }
+        },
+        "wishlist": { "type": "array", "items": { "type": "string" } },
+        "zodiac": { "type": "string" },
+        "xp": { "type": "number" },
+        "level": { "type": "number" },
+        "collectedCards": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["id", "name", "birthDate", "zodiac", "xp", "level", "collectedCards"]
+    },
+    "Birthday": {
+      "title": "Birthday",
+      "description": "A birthday entry in a user's collection.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "birthDate": { "type": "string", "format": "date" },
+        "photoUrl": { "type": "string" },
+        "zodiac": { "type": "string" },
+        "addedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "birthDate", "zodiac", "addedAt"]
+    },
+    "Challenge": {
+      "title": "Challenge",
+      "description": "A gamification challenge.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "progress": { "type": "number" },
+        "target": { "type": "number" },
+        "rewardXp": { "type": "number" },
+        "rewardCardId": { "type": "string" }
+      },
+      "required": ["id", "title", "description", "progress", "target", "rewardXp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User's profile document."
+    },
+    "/users/{userId}/birthdays/{birthdayId}": {
+      "schema": "Birthday",
+      "description": "Collection of birthdays added by the user."
+    },
+    "/users/{userId}/challenges/{challengeId}": {
+      "schema": "Challenge",
+      "description": "Collection of challenges for the user."
+    }
+  }
+}

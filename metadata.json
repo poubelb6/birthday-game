@@ -1,0 +1,5 @@
+{
+  "name": "Birthday Game",
+  "description": "A gamified birthday sharing and collection app with QR codes, challenges, and collectible cards.",
+  "requestFramePermissions": ["camera"]
+}
