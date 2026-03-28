@@ -74,6 +74,9 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
               </div>
 
               <div className="grid grid-cols-7 gap-2">
+                {Array.from({ length: (monthStart.getDay() + 6) % 7 }).map((_, i) => (
+                  <div key={`empty-${i}`} />
+                ))}
                 {days.map(day => {
                   const dayBirthdays = getBirthdaysForDay(day);
                   const hasBirthdays = dayBirthdays.length > 0;
@@ -88,7 +91,7 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
                           ? 'border-2 border-rose-500 text-rose-500'
                           : hasBirthdays
                           ? 'border-2 border-green-400 text-green-600'
-                          : 'bg-white/60 text-slate-600'
+                          : 'bg-white/60 text-slate-800'
                       }`}
                     >
                       {hasBirthdays && !isToday ? (
@@ -117,7 +120,7 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
                           </motion.div>
                         </AnimatePresence>
                       ) : (
-                        <span className="text-[11px] font-black">{format(day, 'd')}</span>
+                        <span className="text-[11px] font-black text-slate-800">{format(day, 'd')}</span>
                       )}
                     </motion.div>
                   );
