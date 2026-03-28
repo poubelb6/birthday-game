@@ -153,20 +153,22 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 gap-4">
-        <motion.div 
-          whileHover={{ y: -4 }}
-          className="bg-rose-400 p-6 rounded-3xl text-white space-y-1 shadow-lg shadow-rose-100"
-        >
-          <p className="text-[10px] font-black uppercase tracking-widest opacity-70">Total Amis</p>
-          <p className="text-3xl font-black">{birthdays.length}</p>
-        </motion.div>
-        <motion.div 
-          whileHover={{ y: -4 }}
-          className="bg-emerald-400 p-6 rounded-3xl text-white space-y-1 shadow-lg shadow-emerald-100"
-        >
-          <p className="text-[10px] font-black uppercase tracking-widest opacity-70">Cartes</p>
-          <p className="text-3xl font-black">{user?.collectedCards.length ?? 0}</p>
-        </motion.div>
+       <motion.div
+        whileHover={{ y: -4 }}
+        className="bg-rose-400 p-6 rounded-3xl text-white space-y-1 shadow-lg shadow-rose-100 border-"
+        style={{ boxShadow: '0 5px 0 #e57373' }}
+      >
+        <p className="text-sm font-black uppercase tracking-widest opacity-70 text-center">Total Amis</p>
+        <p className="text-3xl font-black text-center">{birthdays.length}</p>
+      </motion.div>
+      <motion.div
+        whileHover={{ y: -4 }}
+        className="bg-emerald-400 p-6 rounded-3xl text-white space-y-1 shadow-lg shadow-emerald-100 border-"
+        style={{ boxShadow: '0 5px 0 #6abf69' }}
+      >
+        <p className="text-sm font-black uppercase tracking-widest opacity-70 text-center">Cartes</p>
+        <p className="text-3xl font-black text-center">{user?.collectedCards.length ?? 0}</p>
+      </motion.div>
       </div>
     </div>
   );
