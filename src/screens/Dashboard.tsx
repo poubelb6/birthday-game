@@ -29,10 +29,13 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
   };
     const [showCake, setShowCake] = useState(true);
 
-    useEffect(() => {
-      const interval = setInterval(() => {
-        setShowCake(prev => !prev);
-      }, 2000);
+        useEffect(() => {
+      const cycle = () => {
+        setShowCake(true);
+        setTimeout(() => setShowCake(false), 6000);
+      };
+      cycle();
+      const interval = setInterval(cycle, 8000);
       return () => clearInterval(interval);
     }, []);
 
@@ -92,10 +95,29 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
                           : 'bg-white/60 text-slate-400'
                       }`}
                     >
-                      {hasBirthdays && !isToday && (
-                        <div className="text-[10px] leading-none">🎂</div>
-                      )}
-                      <div className="relative z-10 text-[11px] leading-none">{format(day, 'd')}</div>
+                      {hasBirthdays && !isToday ? (
+                <motion.div
+                  key={showCake ? 'cake' : 'date'}
+                  initial={{ opacity: 0, y: 3 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4 }}
+                  className="flex items-center justify-center"
+                >
+                  {showCake ? (
+                    <motion.span
+                      animate={{ y: [0, -2, 0] }}
+                      transition={{ duration: 1, repeat: Infinity }}
+                      className="text-[18px]"
+                    >
+                      🎉
+                    </motion.span>
+                  ) : (
+                    <span className="text-[11px] font-black text-green-700">{format(day, 'd')}</span>
+                  )}
+                </motion.div>
+              ) : (
+                <span className="text-[11px] font-black text-slate-600">{format(day, 'd')}</span>
+              )}
                     </motion.div>
                   );
                 })}
