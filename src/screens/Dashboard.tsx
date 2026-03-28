@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useState, useEffect } from 'react';
 import { Star, Calendar as CalendarIcon } from 'lucide-react';
 import { Birthday, UserProfile } from '../types';
@@ -10,6 +10,18 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
   const monthStart = startOfMonth(today);
   const monthEnd = endOfMonth(today);
   const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
+
+  const [showCake, setShowCake] = useState(true);
+
+    useEffect(() => {
+      const cycle = () => {
+        setShowCake(true);
+        setTimeout(() => setShowCake(false), 6000);
+      };
+      cycle();
+      const interval = setInterval(cycle, 8000);
+      return () => clearInterval(interval);
+    }, []);
 
   const upcoming = birthdays
     .map(b => {
@@ -27,21 +39,9 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
       return bDate.getDate() === day.getDate() && bDate.getMonth() === day.getMonth();
     });
   };
-    const [showCake, setShowCake] = useState(true);
-
-        useEffect(() => {
-      const cycle = () => {
-        setShowCake(true);
-        setTimeout(() => setShowCake(false), 6000);
-      };
-      cycle();
-      const interval = setInterval(cycle, 8000);
-      return () => clearInterval(interval);
-    }, []);
 
   return (
     <div className="p-6 space-y-8">
-      {/* Mini Calendar - Game Style */}
       <section className="space-y-4 relative">
         <div className="flex flex-col items-center justify-center text-center">
           <h3 className="font-display text-lg font-black text-slate-900 flex items-center gap-2">
@@ -51,24 +51,20 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
         </div>
 
         <div className="relative pt-4">
-          {/* Spiral Rings */}
           <div className="absolute top-0 left-0 right-0 flex justify-around px-8 z-20">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="w-3 h-6 bg-slate-700 rounded-full border-2 border-slate-800 shadow-sm" />
             ))}
           </div>
 
-          {/* Calendar Body */}
-          <div className="bg-[#FEFFEE] rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-black/60 ring-1 ring-slate-900/5 overflow-hidden relative group">
-            {/* Red Header */}
+          <div className="bg-[#FEFFEE] rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-black/60 overflow-hidden relative">
             <div className="bg-rose-500 p-4 pt-6 text-center border-b-4 border-rose-600/20">
-              <h4 className="text-white font-black uppercase tracking-widest text-sm drop-shadow-sm">
+              <h4 className="text-white font-black uppercase tracking-widest text-sm">
                 {format(today, 'MMMM yyyy', { locale: fr })}
               </h4>
             </div>
 
-            {/* Days Grid */}
-            <div className="p-4 bg-[#FEFFEE] border-b border-black/60 rounded-b-3xl">
+            <div className="p-4 bg-[#FEFFEE]">
               <div className="grid grid-cols-7 gap-1 mb-2">
                 {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day, i) => (
                   <div key={`${day}-${i}`} className={`text-center text-[11px] font-black py-1 ${i >= 5 ? 'text-rose-600' : 'text-slate-600'}`}>
@@ -92,45 +88,46 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
                           ? 'border-2 border-rose-500 text-rose-500'
                           : hasBirthdays
                           ? 'border-2 border-green-400 text-green-600'
-                          : 'bg-white/60 text-slate-400'
+                          : 'bg-white/60 text-slate-600'
                       }`}
                     >
                       {hasBirthdays && !isToday ? (
-                <motion.div
-                  key={showCake ? 'cake' : 'date'}
-                  initial={{ opacity: 0, y: 3 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4 }}
-                  className="flex items-center justify-center"
-                >
-                  {showCake ? (
-                    <motion.span
-                      animate={{ y: [0, -2, 0] }}
-                      transition={{ duration: 1, repeat: Infinity }}
-                      className="text-[18px]"
-                    >
-                      🎉
-                    </motion.span>
-                  ) : (
-                    <span className="text-[11px] font-black text-green-700">{format(day, 'd')}</span>
-                  )}
-                </motion.div>
-              ) : (
-                <span className="text-[11px] font-black text-slate-600">{format(day, 'd')}</span>
-              )}
+                        <AnimatePresence mode="wait">
+                          <motion.div
+                            key={showCake ? 'cake' : 'date'}
+                            initial={{ opacity: 0, y: 3 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -3 }}
+                            transition={{ duration: 0.4 }}
+                            className="flex items-center justify-center"
+                          >
+                            {showCake ? (
+                              <motion.span
+                                animate={{ y: [0, -2, 0] }}
+                                transition={{ duration: 1, repeat: Infinity }}
+                                className="text-[18px]"
+                              >
+                                🎉
+                              </motion.span>
+                            ) : (
+                              <span className="text-[11px] font-black text-green-700">
+                                {format(day, 'd')}
+                              </span>
+                            )}
+                          </motion.div>
+                        </AnimatePresence>
+                      ) : (
+                        <span className="text-[11px] font-black">{format(day, 'd')}</span>
+                      )}
                     </motion.div>
                   );
                 })}
               </div>
             </div>
-
-            {/* Page Curl Effect */}
-            <div className="absolute bottom-0 right-0 w-8 h-8 bg-gradient-to-tl from-slate-200 to-transparent pointer-events-none opacity-50" />
           </div>
         </div>
       </section>
 
-      {/* Upcoming Birthdays */}
       <section className="space-y-4">
         <div className="flex flex-col items-center justify-center text-center">
           <h3 className="font-display text-lg font-black text-slate-900">Prochains Anniversaires</h3>
@@ -181,7 +178,6 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
         )}
       </section>
 
-      {/* Quick Stats */}
       <div className="grid grid-cols-2 gap-4">
         <motion.div
           whileHover={{ y: -4 }}
