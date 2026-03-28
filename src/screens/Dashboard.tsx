@@ -86,7 +86,9 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
                     <motion.div
                       key={day.toString()}
                       whileHover={{ scale: 1.15, zIndex: 10 }}
-                      className={`aspect-square rounded-full flex flex-col items-center justify-center font-black relative transition-all duration-300 ${
+                      animate={hasBirthdays && !isToday && showCake ? { scale: [1, 1.12, 1] } : { scale: 1 }}
+                      transition={hasBirthdays && !isToday && showCake ? { duration: 0.5, ease: 'easeInOut' } : {}}
+                      className={`aspect-square rounded-full flex flex-col items-center justify-center font-black relative ${
                         isToday
                           ? 'border-2 border-rose-500 text-rose-500'
                           : hasBirthdays
