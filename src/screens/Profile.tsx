@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Share2, Settings, Instagram, Ghost, Gift, ChevronRight, Sparkles, Users, Trophy, ExternalLink, Copy, Twitter, Facebook, Save, X, Smartphone } from 'lucide-react';
+import { Share2, Settings, Instagram, Gift, ChevronRight, Sparkles, Users, Trophy, ExternalLink, Copy, Twitter, Facebook, Save, X, Smartphone } from 'lucide-react';
 import { UserProfile } from '../types';
 import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -58,7 +58,15 @@ export function Profile({ user, onUpdate, birthdays = [], challenges = [] }: { u
       setSaving(false);
     }
   };
-
+const getZodiacEmoji = (zodiac: string) => {
+  const emojis: Record<string, string> = {
+    'Bélier': '♈', 'Taureau': '♉', 'Gémeaux': '♊',
+    'Cancer': '♋', 'Lion': '♌', 'Vierge': '♍',
+    'Balance': '♎', 'Scorpion': '♏', 'Sagittaire': '♐',
+    'Capricorne': '♑', 'Verseau': '♒', 'Poissons': '♓'
+  };
+  return emojis[zodiac] || '⭐';
+};
   return (
     <div className="pb-24">
       {/* Header / Cover Area */}
@@ -112,7 +120,7 @@ export function Profile({ user, onUpdate, birthdays = [], challenges = [] }: { u
                 </p>
                 <span className="w-1 h-1 bg-slate-200 rounded-full" />
                 <div className="flex items-center gap-1 text-slate-400">
-                  <Ghost size={12} />
+                  <span className="text-sm">{getZodiacEmoji(user.zodiac)}</span>
                   <span className="text-[10px] font-black uppercase tracking-widest">{user.zodiac}</span>
                 </div>
               </div>
