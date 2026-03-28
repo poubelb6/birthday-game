@@ -1,5 +1,6 @@
 import { motion } from 'motion/react';
-import { Gift, Star, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Star, Calendar as CalendarIcon } from 'lucide-react';
 import { Birthday, UserProfile } from '../types';
 import { format, differenceInDays, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -26,6 +27,14 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
       return bDate.getDate() === day.getDate() && bDate.getMonth() === day.getMonth();
     });
   };
+    const [showCake, setShowCake] = useState(true);
+
+    useEffect(() => {
+      const interval = setInterval(() => {
+        setShowCake(prev => !prev);
+      }, 2000);
+      return () => clearInterval(interval);
+    }, []);
 
   return (
     <div className="p-6 space-y-8">
@@ -47,7 +56,7 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
           </div>
 
           {/* Calendar Body */}
-          <div className=" bg-[#FEFFEE] rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-black/60 ring-1 ring-slate-900/5 overflow-hidden relative group">
+          <div className="bg-[#FEFFEE] rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-black/60 ring-1 ring-slate-900/5 overflow-hidden relative group">
             {/* Red Header */}
             <div className="bg-rose-500 p-4 pt-6 text-center border-b-4 border-rose-600/20">
               <h4 className="text-white font-black uppercase tracking-widest text-sm drop-shadow-sm">
@@ -56,7 +65,7 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
             </div>
 
             {/* Days Grid */}
-            <div className="p-4  bg-[#FEFFEE] border-b border-black/60 rounded-b-3xl">
+            <div className="p-4 bg-[#FEFFEE] border-b border-black/60 rounded-b-3xl">
               <div className="grid grid-cols-7 gap-1 mb-2">
                 {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day, i) => (
                   <div key={`${day}-${i}`} className={`text-center text-[11px] font-black py-1 ${i >= 5 ? 'text-rose-600' : 'text-slate-600'}`}>
@@ -64,30 +73,29 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
                   </div>
                 ))}
               </div>
-              
+
               <div className="grid grid-cols-7 gap-2">
                 {days.map(day => {
                   const dayBirthdays = getBirthdaysForDay(day);
                   const hasBirthdays = dayBirthdays.length > 0;
                   const isToday = isSameDay(day, today);
-                  const isWeekend = day.getDay() === 0 || day.getDay() === 6;
 
                   return (
-                    <motion.div 
-                      key={day.toString()} 
-                      whileHover={{ scale: 1.15, zIndex: 10, rotate: [0, -5, 5, 0] }}
-                      className={`aspect-square rounded-full flex flex-col items-center justify-center text-[11px] font-black relative transition-all duration-300 border hover:ring-4 hover:ring-sky-400/30 active:ring-8 active:ring-sky-500/40 ${
-                        isToday ? 'bg-rose-500 text-white border-rose-600 shadow-[0_4px_12px_rgba(225,29,72,0.3)] -translate-y-1' : 
-                        hasBirthdays ? 'bg-sky-400 text-white border-sky-500 shadow-[0_4px_12px_rgba(14,165,233,0.3)]' : 
-                        'bg-white text-slate-400 border-black/60 shadow-sm hover:shadow-md hover:border-black/80'
+                    <motion.div
+                      key={day.toString()}
+                      whileHover={{ scale: 1.15, zIndex: 10 }}
+                      className={`aspect-square rounded-full flex flex-col items-center justify-center font-black relative transition-all duration-300 ${
+                        isToday
+                          ? 'border-2 border-rose-500 text-rose-500'
+                          : hasBirthdays
+                          ? 'border-2 border-green-400 text-green-600'
+                          : 'bg-white/60 text-slate-400'
                       }`}
                     >
-                      <div className="relative z-10">{format(day, 'd')}</div>
-                      {/* Bubble Highlight */}
-                      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 to-transparent pointer-events-none" />
                       {hasBirthdays && !isToday && (
-                        <div className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-amber-400 rounded-full border-2 border-white animate-bounce shadow-sm z-20" />
+                        <div className="text-[10px] leading-none">🎂</div>
                       )}
+                      <div className="relative z-10 text-[11px] leading-none">{format(day, 'd')}</div>
                     </motion.div>
                   );
                 })}
@@ -106,11 +114,11 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
           <h3 className="font-display text-lg font-black text-slate-900">Prochains Anniversaires</h3>
           <span className="text-xs font-bold text-rose-400 uppercase tracking-wider">Calendrier</span>
         </div>
-        
+
         {upcoming.length > 0 ? (
           <div className="space-y-3">
             {upcoming.map((b, i) => (
-              <motion.div 
+              <motion.div
                 key={b.id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -129,7 +137,7 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
                 </div>
                 <div className="text-right">
                   <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                    b.daysUntil === 0 ? 'bg-rose-100 text-rose-600 animate-pulse' : 
+                    b.daysUntil === 0 ? 'bg-rose-100 text-rose-600 animate-pulse' :
                     b.daysUntil < 7 ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-500'
                   }`}>
                     {b.daysUntil === 0 ? "C'est aujourd'hui !" : `J-${b.daysUntil}`}
@@ -153,22 +161,22 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 gap-4">
-       <motion.div
-        whileHover={{ y: -4 }}
-        className="bg-rose-400 p-6 rounded-3xl text-white space-y-1 shadow-lg shadow-rose-100 border-"
-        style={{ boxShadow: '0 5px 0 #e57373' }}
-      >
-        <p className="text-sm font-black uppercase tracking-widest opacity-70 text-center">Total Amis</p>
-        <p className="text-3xl font-black text-center">{birthdays.length}</p>
-      </motion.div>
-      <motion.div
-        whileHover={{ y: -4 }}
-        className="bg-emerald-400 p-6 rounded-3xl text-white space-y-1 shadow-lg shadow-emerald-100 border-"
-        style={{ boxShadow: '0 5px 0 #6abf69' }}
-      >
-        <p className="text-sm font-black uppercase tracking-widest opacity-70 text-center">Cartes</p>
-        <p className="text-3xl font-black text-center">{user?.collectedCards.length ?? 0}</p>
-      </motion.div>
+        <motion.div
+          whileHover={{ y: -4 }}
+          className="bg-rose-300 p-6 rounded-3xl text-white space-y-1 shadow-lg shadow-rose-100"
+          style={{ boxShadow: '0 5px 0 #e57373' }}
+        >
+          <p className="text-sm font-black uppercase tracking-widest opacity-70 text-center">Total Amis</p>
+          <p className="text-3xl font-black text-center">{birthdays.length}</p>
+        </motion.div>
+        <motion.div
+          whileHover={{ y: -4 }}
+          className="bg-emerald-300 p-6 rounded-3xl text-white space-y-1 shadow-lg shadow-emerald-100"
+          style={{ boxShadow: '0 5px 0 #6abf69' }}
+        >
+          <p className="text-sm font-black uppercase tracking-widest opacity-70 text-center">Cartes</p>
+          <p className="text-3xl font-black text-center">{user?.collectedCards.length ?? 0}</p>
+        </motion.div>
       </div>
     </div>
   );
