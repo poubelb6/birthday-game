@@ -135,19 +135,11 @@ export function Calendar({ birthdays, onAddBirthday, onDeleteBirthday }: {
     // Célébration
     setToastName(addedName);
     setTimeout(() => setToastName(null), 5000);
-    const end = Date.now() + 5000;
-    const shoot = () => {
-      confetti({
-        particleCount: 18,
-        angle: 90,
-        spread: 70,
-        origin: { x: 0.5, y: 0.5 },
-        colors: ['#FF4B4B', '#58CC02', '#ffffff', '#FEF08A'],
-        scalar: 1.6,
-      });
-      if (Date.now() < end) requestAnimationFrame(shoot);
-    };
-    shoot();
+
+    const colors = ['#FF4B4B', '#58CC02', '#ffffff', '#FEF08A'];
+    const base = { particleCount: 60, angle: 90, spread: 160, colors, scalar: 1.4, startVelocity: 35, ticks: 250, origin: { x: 0.5, y: 0 } };
+    confetti(base);
+    setTimeout(() => confetti({ ...base, particleCount: 40, startVelocity: 28 }), 350);
   };
 
   const handleDayClick = (day: Date) => {
@@ -507,14 +499,17 @@ export function Calendar({ birthdays, onAddBirthday, onDeleteBirthday }: {
       <AnimatePresence>
         {toastName && (
           <motion.div
-            initial={{ y: 80, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 80, opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            className="fixed bottom-24 left-4 right-4 z-[200] mx-auto max-w-sm bg-white border-2 border-green-400 rounded-2xl px-5 py-3.5 shadow-xl"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+            className="fixed inset-x-6 top-1/2 -translate-y-1/2 z-[200] mx-auto max-w-sm bg-white rounded-3xl px-6 py-6"
+            style={{ border: '2px solid #FF4B4B', boxShadow: '0 6px 0 #CC2E2E, 0 12px 40px rgba(255,75,75,0.18)' }}
           >
-            <p className="text-sm font-black text-slate-900 text-center">
-              🎉 Bravo ! Tu as ajouté <span className="text-green-600">{toastName}</span> à ta collection !
+            <p className="text-2xl text-center mb-1">🎉</p>
+            <p className="text-base font-black font-display text-slate-900 text-center leading-snug">
+              Bravo ! Tu as ajouté<br />
+              <span style={{ color: '#FF4B4B' }}>{toastName}</span> à ta collection !
             </p>
           </motion.div>
         )}

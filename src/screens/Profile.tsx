@@ -156,20 +156,14 @@ const getZodiacEmoji = (zodiac: string) => {
           </div>
 
           <div className="relative group">
-            {/* Anneau dégradé chaud */}
-            <div className="p-[3px] rounded-[2.2rem] shadow-[0_8px_24px_rgba(244,63,94,0.25),0_3px_8px_rgba(251,146,60,0.2)]" style={{ background: 'linear-gradient(135deg, #f43f5e, #fb923c, #fbbf24)' }}>
-              {/* Conteneur bulle 3D */}
-              <div className="relative p-5 bg-white rounded-[2rem] shadow-[0_4px_16px_rgba(0,0,0,0.08)] overflow-hidden">
-                {/* Reflet lumineux */}
-                <div className="absolute inset-0 rounded-[2rem] pointer-events-none bg-gradient-to-b from-white/70 to-transparent h-1/2" />
-                <QRCodeSVG
-                  value={profileData}
-                  size={160}
-                  level="M"
-                  includeMargin={true}
-                  fgColor="#f43f5e"
-                />
-              </div>
+            <div className="relative p-4 bg-white rounded-[2rem] shadow-sm border border-slate-100">
+              <QRCodeSVG
+                value={profileData}
+                size={160}
+                level="M"
+                includeMargin={true}
+                fgColor="#f43f5e"
+              />
             </div>
           </div>
 

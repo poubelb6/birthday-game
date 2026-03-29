@@ -170,8 +170,8 @@ function AppContent() {
             whileHover={{ scale: 1.15, rotate: 5 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setActiveScreen('scanner')}
-            className="w-16 h-16 rounded-2xl flex items-center justify-center text-white border-2 border-slate-900 relative overflow-hidden"
-            style={{ background: '#FF4B4B', boxShadow: '0 5px 0 #CC2E2E' }}
+            className="w-16 h-16 rounded-2xl flex items-center justify-center text-white relative overflow-hidden"
+            style={{ background: '#FF4B4B' }}
           >
             <QrCode size={32} strokeWidth={2.5} className="relative z-10" />
           </motion.button>
@@ -201,7 +201,7 @@ function NavButton({ active, onClick, icon, label }: { active: boolean, onClick:
         animate={active ? { y: -4 } : { y: 0 }}
         transition={{ duration: 0.3 }}
         className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 ${
-          active ? 'bg-red-50 border-2 border-slate-900 shadow-[0_3px_0_#0f172a]' : 'bg-transparent border-2 border-transparent'
+          active ? 'bg-red-50' : 'bg-transparent'
         }`}
       >
         <div className={`text-2xl transition-all duration-300 ${active ? 'scale-110' : 'scale-90'}`}>

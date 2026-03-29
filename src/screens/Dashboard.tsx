@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useState, useEffect } from 'react';
 import { Star, Calendar as CalendarIcon } from 'lucide-react';
 import { Birthday, UserProfile } from '../types';
-import { format, differenceInDays, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from 'date-fns';
+import { format, differenceInDays, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, startOfDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: UserProfile | null }) {
@@ -23,12 +23,13 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
       return () => clearInterval(interval);
     }, []);
 
+  const todayStart = startOfDay(today);
   const upcoming = birthdays
     .map(b => {
       const bDate = parseISO(b.birthDate);
-      const nextBday = new Date(today.getFullYear(), bDate.getMonth(), bDate.getDate());
-      if (nextBday < today) nextBday.setFullYear(today.getFullYear() + 1);
-      return { ...b, daysUntil: differenceInDays(nextBday, today) };
+      const nextBday = startOfDay(new Date(today.getFullYear(), bDate.getMonth(), bDate.getDate()));
+      if (nextBday < todayStart) nextBday.setFullYear(today.getFullYear() + 1);
+      return { ...b, daysUntil: differenceInDays(nextBday, todayStart) };
     })
     .sort((a, b) => a.daysUntil - b.daysUntil)
     .slice(0, 3);
@@ -163,12 +164,21 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
                   </p>
                 </div>
                 <div className="text-right">
-                  <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                    b.daysUntil === 0 ? 'bg-rose-100 text-rose-600 animate-pulse' :
-                    b.daysUntil < 7 ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-500'
-                  }`}>
-                    {b.daysUntil === 0 ? "C'est aujourd'hui !" : `J-${b.daysUntil}`}
-                  </div>
+                  <motion.div
+                    className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                      b.daysUntil === 0 ? 'bg-green-100' :
+                      b.daysUntil <= 7 ? 'bg-red-100' : 'bg-slate-100 text-slate-500'
+                    }`}
+                    style={b.daysUntil === 0 ? { color: '#58CC02', border: '1px solid #FF4B4B' } : b.daysUntil <= 7 ? { color: '#FF4B4B' } : {}}
+                    animate={b.daysUntil === 0 ? { scale: [1, 1.08, 1], boxShadow: ['0 0 0px #FF4B4B', '0 0 4px #FF4B4B', '0 0 0px #FF4B4B'] } : {}}
+                    transition={b.daysUntil === 0 ? { duration: 1.4, repeat: Infinity, ease: 'easeInOut' } : {}}
+                  >
+                    {b.daysUntil === 0
+                      ? "C'est aujourd'hui ! 🎉"
+                      : b.daysUntil <= 7
+                      ? `Dans ${b.daysUntil} jour${b.daysUntil > 1 ? 's' : ''} 🎂`
+                      : `J-${b.daysUntil}`}
+                  </motion.div>
                 </div>
               </motion.div>
             ))}
