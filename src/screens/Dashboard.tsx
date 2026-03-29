@@ -196,6 +196,90 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
         )}
       </section>
 
+      <section className="space-y-4">
+        <div className="flex flex-col items-center justify-center text-center">
+          <h3 className="font-display text-lg font-black text-slate-900">Anniversaires par mois</h3>
+          <span className="text-xs font-bold text-rose-400 uppercase tracking-wider">Année {today.getFullYear()}</span>
+        </div>
+        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm px-4 pt-4 pb-3">
+          {(() => {
+            const monthLabels = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+            const monthZodiacs = ['♑','♒','♓','♈','♉','♊','♋','♌','♍','♎','♏','♐'];
+            const uniqueBirthdays = birthdays.filter((b, i, arr) => arr.findIndex(x => x.id === b.id) === i);
+            const counts = Array.from({ length: 12 }, (_, m) =>
+              uniqueBirthdays.filter(b => parseISO(b.birthDate).getMonth() === m).length
+            );
+            const max = Math.max(...counts, 1);
+            const totalYear = counts.reduce((s, c) => s + c, 0);
+            return (
+              <>
+                <div className="flex items-end justify-between gap-1.5" style={{ height: 96 }}>
+                  {counts.map((count, m) => {
+                    const isCurrentMonth = m === today.getMonth();
+                    const barHeightPx = count === 0
+                      ? 6
+                      : Math.max(18, Math.round((count / max) * 80));
+                    return (
+                      <div key={m} className="flex flex-col items-center gap-1 flex-1 h-full justify-end">
+                        {count > 0 && (
+                          <span className={`text-[10px] font-black font-display leading-none ${isCurrentMonth ? 'text-rose-500' : 'text-slate-500'}`}>
+                            {count}
+                          </span>
+                        )}
+                        <motion.div
+                          initial={{ height: 0 }}
+                          animate={{ height: barHeightPx }}
+                          transition={{ duration: 0.7, delay: m * 0.05, ease: [0.34, 1.56, 0.64, 1] }}
+                          className="w-full rounded-[6px]"
+                          style={{
+                            background: isCurrentMonth
+                              ? 'linear-gradient(180deg, #FF6B6B 0%, #FF4B4B 100%)'
+                              : count > 0
+                              ? 'linear-gradient(180deg, #78D44B 0%, #58CC02 100%)'
+                              : '#EEF2FF',
+                            boxShadow: isCurrentMonth
+                              ? '0 3px 0 #CC2E2E'
+                              : count > 0
+                              ? '0 3px 0 #3EA800'
+                              : 'none',
+                          }}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="flex justify-between gap-1.5 mt-1.5">
+                  {monthLabels.map((label, m) => {
+                    const isCurrentMonth = m === today.getMonth();
+                    return (
+                      <div key={m} className="flex flex-col items-center flex-1">
+                        <span className={`text-[8px] font-black font-display uppercase leading-none ${isCurrentMonth ? 'text-rose-500' : 'text-slate-400'}`}>
+                          {label}
+                        </span>
+                        {isCurrentMonth && (
+                          <span className="text-[10px] leading-none mt-0.5">{monthZodiacs[m]}</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-center gap-2">
+                  <span className="text-[11px] font-black font-display text-slate-500 uppercase tracking-widest">
+                    Total {today.getFullYear()}
+                  </span>
+                  <span className="text-base">🎂</span>
+                  <span className="text-[11px] font-black font-display text-slate-900">
+                    {birthdays.length} anniversaire{birthdays.length > 1 ? 's' : ''}
+                  </span>
+                </div>
+              </>
+            );
+          })()}
+        </div>
+      </section>
+
       <div className="grid grid-cols-2 gap-4">
         <motion.div
           whileHover={{ y: -4 }}
