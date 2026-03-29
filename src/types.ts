@@ -29,6 +29,14 @@ export interface Birthday {
   name: string;
   birthDate: string;
   photoUrl?: string;
+  phone?: string;
+  socials?: {
+    instagram?: string;
+    snapchat?: string;
+    tiktok?: string;
+    twitter?: string;
+    facebook?: string;
+  };
   zodiac: ZodiacSign;
   addedAt: string;
 }
