@@ -136,8 +136,8 @@ function AppContent() {
             </p>
           </div>
         </div>
-        <button className="p-2 rounded-full relative group border-2 border-slate-900" style={{ background: '#f0fdf4' }}>
-          <Bell size={20} style={{ color: '#58CC02' }} className="group-hover:rotate-12 transition-transform" />
+        <button className="p-2 rounded-full relative group border-2 border-slate-900" style={{ background: '#FEFCE8' }}>
+          <Bell size={20} style={{ color: '#A16207' }} className="group-hover:rotate-12 transition-transform" />
           <motion.span 
             animate={{ scale: [1, 1.2, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
