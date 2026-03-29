@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { 
-  doc, 
-  setDoc, 
-  getDoc, 
-  collection, 
-  onSnapshot, 
-  query, 
-  orderBy, 
+  doc,
+  setDoc,
+  getDoc,
+  collection,
+  onSnapshot,
+  query,
+  orderBy,
   addDoc,
   updateDoc,
+  deleteDoc,
   FirestoreError
 } from 'firebase/firestore';
 import { auth, db } from '../firebase';
@@ -177,5 +178,15 @@ export function useAppState() {
     }
   };
 
-  return { user, birthdays, challenges, loading, firebaseUser, setUser, addBirthday };
+  const deleteBirthday = async (birthdayId: string) => {
+    if (!firebaseUser) return;
+    const path = `users/${firebaseUser.uid}/birthdays/${birthdayId}`;
+    try {
+      await deleteDoc(doc(db, path));
+    } catch (e) {
+      handleFirestoreError(e, OperationType.DELETE, path);
+    }
+  };
+
+  return { user, birthdays, challenges, loading, firebaseUser, setUser, addBirthday, deleteBirthday };
 }

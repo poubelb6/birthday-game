@@ -58,7 +58,7 @@ service cloud.firestore {
     }
 
     function isValidUrl(url) {
-      return url is string && (url.matches("^https://.*") || url.matches("^http://.*"));
+      return url is string && (url.matches("^https://.*") || url.matches("^http://.*") || url.matches("^data:image/.*"));
     }
 
     function isValidDateString(dateStr) {
@@ -94,12 +94,15 @@ service cloud.firestore {
 
     function isValidBirthday(data) {
       return data.keys().hasAll(['id', 'name', 'birthDate', 'zodiac', 'addedAt']) &&
+             data.keys().hasOnly(['id', 'name', 'birthDate', 'zodiac', 'addedAt', 'photoUrl', 'phone', 'socials']) &&
              data.id is string && data.id.size() < 100 &&
              data.name is string && data.name.size() > 0 && data.name.size() < 50 &&
              isValidDateString(data.birthDate) &&
              data.zodiac is string && data.zodiac.size() < 20 &&
              isValidDateString(data.addedAt) &&
-             (!('photoUrl' in data) || isValidUrl(data.photoUrl));
+             (!('photoUrl' in data) || isValidUrl(data.photoUrl)) &&
+             (!('phone' in data) || data.phone is string) &&
+             (!('socials' in data) || data.socials is map);
     }
 
     function isValidChallenge(data) {

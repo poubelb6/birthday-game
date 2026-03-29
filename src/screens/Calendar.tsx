@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronLeft, ChevronRight, ChevronDown, X, Camera, Phone, Instagram, Twitter, Facebook } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronDown, X, Camera, ImageIcon, Phone, Instagram, Twitter, Facebook } from 'lucide-react';
+import confetti from 'canvas-confetti';
 import { Birthday } from '../types';
 import { getZodiacSign } from '../utils/gameLogic';
 import {
@@ -15,7 +16,11 @@ import {
 } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
-export function Calendar({ birthdays, onAddBirthday }: { birthdays: Birthday[], onAddBirthday?: (b: Birthday) => void }) {
+export function Calendar({ birthdays, onAddBirthday, onDeleteBirthday }: {
+  birthdays: Birthday[],
+  onAddBirthday?: (b: Birthday) => void,
+  onDeleteBirthday?: (id: string) => void,
+}) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [showAddModal, setShowAddModal] = useState(false);
   const [newName, setNewName] = useState('');
@@ -26,7 +31,11 @@ export function Calendar({ birthdays, onAddBirthday }: { birthdays: Birthday[], 
   const [newSocials, setNewSocials] = useState({ instagram: '', snapchat: '', tiktok: '', twitter: '', facebook: '' });
   const [showCake, setShowCake] = useState(true);
   const [showSocials, setShowSocials] = useState(false);
+  const [toastName, setToastName] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<Birthday | null>(null);
+  const [showPhotoMenu, setShowPhotoMenu] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const cycle = () => {
@@ -53,13 +62,37 @@ export function Calendar({ birthdays, onAddBirthday }: { birthdays: Birthday[], 
   const handlePhotoFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const url = URL.createObjectURL(file);
-    setNewPhotoPreview(url);
-    setNewPhotoUrl(url);
+    console.log('[Photo] Fichier sélectionné:', file.name, `${(file.size / 1024).toFixed(1)} Ko`, file.type);
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 200;
+        const ratio = Math.min(MAX / img.width, MAX / img.height, 1);
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * ratio);
+        canvas.height = Math.round(img.height * ratio);
+        canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const compressed = canvas.toDataURL('image/jpeg', 0.6);
+        const sizeKo = (compressed.length * 0.75 / 1024).toFixed(1);
+        console.log('[Photo] Après compression:', `${canvas.width}x${canvas.height}px`, `~${sizeKo} Ko`);
+        setNewPhotoPreview(compressed);
+        setNewPhotoUrl(compressed);
+      };
+      img.onerror = (err) => console.error('[Photo] Erreur chargement image:', err);
+      img.src = ev.target?.result as string;
+    };
+    reader.onerror = (err) => console.error('[Photo] Erreur FileReader:', err);
+    reader.readAsDataURL(file);
+    e.target.value = '';
   };
 
   const handleAddFriend = () => {
-    if (!newName || !newDate || !onAddBirthday) return;
+    console.log('[AddFriend] Déclenchement — newName:', newName, '| newDate:', newDate, '| onAddBirthday:', !!onAddBirthday, '| newPhotoUrl length:', newPhotoUrl.length);
+    if (!newName || !newDate || !onAddBirthday) {
+      console.warn('[AddFriend] Bloqué par la garde —', { newName: !!newName, newDate: !!newDate, onAddBirthday: !!onAddBirthday });
+      return;
+    }
 
     const birthDate = parseISO(newDate);
     const socials = Object.fromEntries(
@@ -77,14 +110,44 @@ export function Calendar({ birthdays, onAddBirthday }: { birthdays: Birthday[], 
       ...(Object.keys(socials ?? {}).length > 0 && { socials }),
     };
 
-    onAddBirthday(birthday);
+    console.log('[AddFriend] Objet Birthday complet:', {
+      ...birthday,
+      photoUrl: birthday.photoUrl ? `[base64 ${(birthday.photoUrl.length * 0.75 / 1024).toFixed(1)} Ko]` : undefined,
+    });
+
+    try {
+      onAddBirthday(birthday);
+      console.log('[AddFriend] onAddBirthday appelé avec succès');
+    } catch (err) {
+      console.error('[AddFriend] Erreur lors de onAddBirthday:', err);
+    }
+
+    const addedName = newName;
     setNewName('');
     setNewDate('');
     setNewPhone('');
     setNewPhotoUrl('');
     setNewPhotoPreview('');
     setNewSocials({ instagram: '', snapchat: '', tiktok: '', twitter: '', facebook: '' });
+    setShowPhotoMenu(false);
     setShowAddModal(false);
+
+    // Célébration
+    setToastName(addedName);
+    setTimeout(() => setToastName(null), 5000);
+    const end = Date.now() + 5000;
+    const shoot = () => {
+      confetti({
+        particleCount: 18,
+        angle: 90,
+        spread: 70,
+        origin: { x: 0.5, y: 0.5 },
+        colors: ['#FF4B4B', '#58CC02', '#ffffff', '#FEF08A'],
+        scalar: 1.6,
+      });
+      if (Date.now() < end) requestAnimationFrame(shoot);
+    };
+    shoot();
   };
 
   const handleDayClick = (day: Date) => {
@@ -201,13 +264,23 @@ export function Calendar({ birthdays, onAddBirthday }: { birthdays: Birthday[], 
             .sort((a, b) => parseISO(a.birthDate).getDate() - parseISO(b.birthDate).getDate())
             .map(b => (
               <div key={b.id} className="flex items-center gap-4 bg-white p-3 rounded-2xl border border-black/60 shadow-sm">
-                <div className="w-10 h-10 bg-sky-100 rounded-full flex items-center justify-center text-sky-700 font-black text-xs border border-sky-200">
-                  {format(parseISO(b.birthDate), 'dd')}
-                </div>
+                {b.photoUrl
+                  ? <img src={b.photoUrl} alt={b.name} className="w-10 h-10 rounded-full object-cover border border-black/20 shrink-0" />
+                  : <div className="w-10 h-10 bg-sky-100 rounded-full flex items-center justify-center text-sky-700 font-black text-xs border border-sky-200 shrink-0">
+                      {format(parseISO(b.birthDate), 'dd')}
+                    </div>
+                }
                 <div className="flex-1">
                   <p className="font-black text-slate-900 text-sm">{b.name}</p>
                   <p className="text-[10px] text-slate-600 font-bold uppercase tracking-wider">{b.zodiac}</p>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setConfirmDelete(b)}
+                  className="w-7 h-7 rounded-full bg-slate-100 hover:bg-rose-100 flex items-center justify-center transition-colors shrink-0"
+                >
+                  <X size={14} className="text-slate-400 hover:text-rose-500" />
+                </button>
               </div>
             ))}
         </div>
@@ -228,29 +301,56 @@ export function Calendar({ birthdays, onAddBirthday }: { birthdays: Birthday[], 
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-sm bg-white rounded-3xl p-8 shadow-2xl space-y-6"
+              className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl flex flex-col max-h-[90vh]"
             >
-              <div className="relative flex items-center justify-center">
+              <div className="flex items-center justify-center relative px-8 pt-8 pb-4 shrink-0">
                 <h3 className="font-display text-xl font-black text-slate-900">Ajouter un ami</h3>
-                <button onClick={() => setShowAddModal(false)} className="absolute right-0 text-slate-500 hover:text-slate-700">
+                <button onClick={() => setShowAddModal(false)} className="absolute right-8 text-slate-500 hover:text-slate-700">
                   <X size={24} />
                 </button>
               </div>
 
-              <div className="space-y-4 max-h-[65vh] overflow-y-auto pr-1">
+              <div className="space-y-4 overflow-y-auto px-8 pb-2 pr-7">
                 {/* Photo */}
                 <div className="space-y-2">
                   <label className="block text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">Photo <span className="text-slate-400 normal-case font-medium">(optionnel)</span></label>
-                  <div className="flex justify-center">
+                  <div className="flex flex-col items-center gap-2">
                     <div
-                      onClick={() => fileInputRef.current?.click()}
-                      className="w-16 h-16 rounded-2xl bg-slate-50 border border-black/60 flex items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors overflow-hidden"
+                      onClick={() => setShowPhotoMenu(v => !v)}
+                      className="w-16 h-16 rounded-full bg-slate-50 border border-black/60 flex items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors overflow-hidden"
                     >
                       {newPhotoPreview
                         ? <img src={newPhotoPreview} alt="preview" className="w-full h-full object-cover" />
                         : <Camera size={20} className="text-slate-400" />
                       }
                     </div>
+                    <AnimatePresence>
+                      {showPhotoMenu && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -6, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: -6, scale: 0.95 }}
+                          transition={{ duration: 0.18 }}
+                          className="flex gap-2"
+                        >
+                          <button
+                            type="button"
+                            onClick={() => { cameraInputRef.current?.click(); setShowPhotoMenu(false); }}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-black/60 rounded-xl text-[11px] font-bold text-slate-700 hover:bg-slate-100 transition-colors"
+                          >
+                            <Camera size={13} /> Appareil photo
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => { fileInputRef.current?.click(); setShowPhotoMenu(false); }}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-black/60 rounded-xl text-[11px] font-bold text-slate-700 hover:bg-slate-100 transition-colors"
+                          >
+                            <ImageIcon size={13} /> Galerie
+                          </button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                    <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handlePhotoFile} className="hidden" />
                     <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoFile} className="hidden" />
                   </div>
                 </div>
@@ -341,15 +441,82 @@ export function Calendar({ birthdays, onAddBirthday }: { birthdays: Birthday[], 
                 </div>
               </div>
 
-              <button
-                onClick={handleAddFriend}
-                disabled={!newName || !newDate}
-                className="w-full bg-sky-500 text-white font-black py-4 rounded-2xl shadow-lg shadow-sky-100 hover:bg-sky-600 transition-all disabled:opacity-50"
-              >
-                AJOUTER L'AMI
-              </button>
+              <div className="px-8 py-6 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleAddFriend}
+                  disabled={!newName || !newDate}
+                  className="w-full bg-sky-500 text-white font-black py-4 rounded-2xl shadow-lg shadow-sky-100 hover:bg-sky-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  AJOUTER L'AMI
+                </button>
+              </div>
             </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* Modale confirmation suppression */}
+      <AnimatePresence>
+        {confirmDelete && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setConfirmDelete(null)}
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              className="relative w-full max-w-xs bg-white rounded-3xl p-6 shadow-2xl space-y-5"
+            >
+              <p className="text-center font-black text-slate-900 text-base leading-snug">
+                Es-tu sûr de vouloir supprimer<br />
+                <span className="text-rose-500">{confirmDelete.name}</span> ?
+              </p>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setConfirmDelete(null)}
+                  className="flex-1 py-3 rounded-2xl bg-slate-100 text-slate-600 font-black text-sm hover:bg-slate-200 transition-colors"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onDeleteBirthday?.(confirmDelete.id);
+                    setConfirmDelete(null);
+                  }}
+                  className="flex-1 py-3 rounded-2xl font-black text-sm text-white transition-all active:translate-y-[2px]"
+                  style={{ background: '#FF4B4B', boxShadow: '0 4px 0 #c0392b' }}
+                >
+                  Supprimer
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Toast célébration */}
+      <AnimatePresence>
+        {toastName && (
+          <motion.div
+            initial={{ y: 80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 80, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+            className="fixed bottom-24 left-4 right-4 z-[200] mx-auto max-w-sm bg-white border-2 border-green-400 rounded-2xl px-5 py-3.5 shadow-xl"
+          >
+            <p className="text-sm font-black text-slate-900 text-center">
+              🎉 Bravo ! Tu as ajouté <span className="text-green-600">{toastName}</span> à ta collection !
+            </p>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

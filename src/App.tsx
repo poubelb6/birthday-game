@@ -20,7 +20,7 @@ import { Logo } from './components/Logo';
 type Screen = 'dashboard' | 'scanner' | 'calendar' | 'collection' | 'profile';
 
 function AppContent() {
-  const { user, birthdays, challenges, loading, firebaseUser, setUser, addBirthday } = useAppState();
+  const { user, birthdays, challenges, loading, firebaseUser, setUser, addBirthday, deleteBirthday } = useAppState();
   const [activeScreen, setActiveScreen] = useState<Screen>('dashboard');
   const [showSplash, setShowSplash] = useState(true);
 
@@ -114,7 +114,7 @@ function AppContent() {
     switch (activeScreen) {
       case 'dashboard': return <Dashboard birthdays={birthdays} user={user} />;
       case 'scanner': return <Scanner onScan={addBirthday} existingBirthdays={birthdays} />;
-      case 'calendar': return <Calendar birthdays={birthdays} onAddBirthday={addBirthday} />;
+      case 'calendar': return <Calendar birthdays={birthdays} onAddBirthday={addBirthday} onDeleteBirthday={deleteBirthday} />;
       case 'collection': return <Collection user={user} />;
       case 'profile': return <Profile user={user} onUpdate={setUser} birthdays={birthdays} challenges={challenges} />;
       default: return <Dashboard birthdays={birthdays} user={user} />;
