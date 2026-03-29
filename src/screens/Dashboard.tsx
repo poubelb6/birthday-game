@@ -57,23 +57,23 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
             ))}
           </div>
 
-          <div className="bg-[#FEFFEE] rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-black/60 overflow-hidden relative">
-            <div className="bg-rose-500 p-4 pt-6 text-center border-b-4 border-rose-600/20">
-              <h4 className="text-white font-black uppercase tracking-widest text-sm">
+          <div className="bg-[#FEFFEE] rounded-[28px] shadow-[0_24px_60px_rgba(0,0,0,0.18),0_8px_20px_rgba(0,0,0,0.08)] border border-black/40 overflow-hidden relative">
+            <div className="bg-rose-500 px-3 py-2.5 text-center border-b-[0.5px] border-rose-600/30">
+              <h4 className="text-white font-black uppercase tracking-widest text-[13px]">
                 {format(today, 'MMMM yyyy', { locale: fr })}
               </h4>
             </div>
 
-            <div className="p-4 bg-[#FEFFEE]">
-              <div className="grid grid-cols-7 gap-1 mb-2">
+            <div className="p-3 bg-[#FEFFEE]">
+              <div className="grid grid-cols-7 gap-1 mb-1.5">
                 {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day, i) => (
-                  <div key={`${day}-${i}`} className={`text-center text-[11px] font-black py-1 ${i >= 5 ? 'text-rose-600' : 'text-slate-600'}`}>
+                  <div key={`${day}-${i}`} className={`text-center text-[13px] font-bold tracking-wide font-display py-0.5 ${i >= 5 ? 'text-rose-600' : 'text-slate-700'}`}>
                     {day}
                   </div>
                 ))}
               </div>
 
-              <div className="grid grid-cols-7 gap-2">
+              <div className="grid grid-cols-7 gap-1.5">
                 {Array.from({ length: (monthStart.getDay() + 6) % 7 }).map((_, i) => (
                   <div key={`empty-${i}`} />
                 ))}
@@ -90,12 +90,15 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
                       transition={hasBirthdays && !isToday && showCake ? { duration: 0.5, ease: 'easeInOut' } : {}}
                       className={`aspect-square rounded-full flex flex-col items-center justify-center font-black relative ${
                         isToday
-                          ? 'border-2 border-rose-500 text-rose-500'
+                          ? 'border-[0.5px] border-rose-500 text-rose-500'
                           : hasBirthdays
-                          ? 'border-2 border-green-400 text-green-600'
-                          : 'bg-white/60 text-slate-800'
+                          ? 'border-[0.5px] border-green-400 text-green-600'
+                          : 'bg-white text-slate-800 shadow-[0_2px_6px_rgba(0,0,0,0.10),0_1px_2px_rgba(0,0,0,0.05)] [outline:0.5px_solid_rgba(0,0,0,0.12)]'
                       }`}
                     >
+                      {!hasBirthdays && !isToday && (
+                        <div className="absolute inset-0 rounded-full pointer-events-none bg-gradient-to-b from-white/60 to-transparent" />
+                      )}
                       {hasBirthdays && !isToday ? (
                         <AnimatePresence mode="wait">
                           <motion.div
@@ -110,19 +113,19 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
                               <motion.span
                                 animate={{ y: [0, -2, 0] }}
                                 transition={{ duration: 1, repeat: Infinity }}
-                                className="text-[18px]"
+                                className="text-[16px]"
                               >
                                 🎉
                               </motion.span>
                             ) : (
-                              <span className="text-[11px] font-black text-green-700">
+                              <span className="text-[13px] font-black font-display text-green-700">
                                 {format(day, 'd')}
                               </span>
                             )}
                           </motion.div>
                         </AnimatePresence>
                       ) : (
-                        <span className="text-[11px] font-black text-slate-800">{format(day, 'd')}</span>
+                        <span className="text-[13px] font-black font-display text-slate-800">{format(day, 'd')}</span>
                       )}
                     </motion.div>
                   );
