@@ -1,15 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronLeft, ChevronRight, Plus, X, UserPlus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { Birthday } from '../types';
 import { getZodiacSign } from '../utils/gameLogic';
-import { 
-  format, 
-  startOfMonth, 
-  endOfMonth, 
-  eachDayOfInterval, 
-  isSameDay, 
-  addMonths, 
+import {
+  format,
+  startOfMonth,
+  endOfMonth,
+  eachDayOfInterval,
+  isSameDay,
+  addMonths,
   subMonths,
   parseISO
 } from 'date-fns';
@@ -20,7 +20,19 @@ export function Calendar({ birthdays, onAddBirthday }: { birthdays: Birthday[], 
   const [showAddModal, setShowAddModal] = useState(false);
   const [newName, setNewName] = useState('');
   const [newDate, setNewDate] = useState('');
+  const [showCake, setShowCake] = useState(true);
 
+  useEffect(() => {
+    const cycle = () => {
+      setShowCake(true);
+      setTimeout(() => setShowCake(false), 6000);
+    };
+    cycle();
+    const interval = setInterval(cycle, 8000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const today = new Date();
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
   const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
@@ -34,7 +46,7 @@ export function Calendar({ birthdays, onAddBirthday }: { birthdays: Birthday[], 
 
   const handleAddFriend = () => {
     if (!newName || !newDate || !onAddBirthday) return;
-    
+
     const birthDate = parseISO(newDate);
     const birthday: Birthday = {
       id: Math.random().toString(36).substr(2, 9),
@@ -43,7 +55,7 @@ export function Calendar({ birthdays, onAddBirthday }: { birthdays: Birthday[], 
       zodiac: getZodiacSign(birthDate),
       addedAt: new Date().toISOString(),
     };
-    
+
     onAddBirthday(birthday);
     setNewName('');
     setNewDate('');
@@ -62,13 +74,13 @@ export function Calendar({ birthdays, onAddBirthday }: { birthdays: Birthday[], 
           {format(currentMonth, 'MMMM yyyy', { locale: fr })}
         </h2>
         <div className="flex gap-2">
-          <button 
+          <button
             onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
             className="p-2 bg-white border border-black/60 rounded-xl text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
           >
             <ChevronLeft size={20} />
           </button>
-          <button 
+          <button
             onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
             className="p-2 bg-white border border-black/60 rounded-xl text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
           >
@@ -77,43 +89,82 @@ export function Calendar({ birthdays, onAddBirthday }: { birthdays: Birthday[], 
         </div>
       </div>
 
-      <div className="bg-[#FEFFEE] p-6 rounded-[32px] border border-black/60 shadow-sm">
-        <div className="grid grid-cols-7 gap-2">
-          {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day, i) => (
-            <div key={`${day}-${i}`} className={`text-center text-[11px] font-black py-2 ${i >= 5 ? 'text-rose-600' : 'text-slate-600'}`}>
-              {day}
-            </div>
-          ))}
-          {/* Cases vides pour aligner le premier jour du mois */}
-          {Array.from({ length: (monthStart.getDay() === 0 ? 6 : monthStart.getDay() - 1) }).map((_, i) => (
-            <div key={`empty-${i}`} />
-          ))}
-          {days.map(day => {
-            const dayBirthdays = getBirthdaysForDay(day);
-            const isToday = isSameDay(day, new Date());
-            const hasBirthdays = dayBirthdays.length > 0;
-            
-            return (
-              <motion.div 
-                key={day.toString()} 
-                onClick={() => handleDayClick(day)}
-                whileHover={{ scale: 1.15, zIndex: 10, rotate: [0, -5, 5, 0] }}
-                whileTap={{ scale: 0.95 }}
-                className={`aspect-square rounded-full flex flex-col items-center justify-center relative border transition-all cursor-pointer shadow-sm hover:ring-4 hover:ring-sky-400/30 active:ring-8 active:ring-sky-500/40 ${
-                  isToday ? 'bg-rose-500 border-rose-600 text-white shadow-[0_4px_12px_rgba(225,29,72,0.3)] -translate-y-1' : 
-                  hasBirthdays ? 'bg-sky-400 border-sky-500 text-white shadow-[0_4px_12px_rgba(14,165,233,0.3)]' : 
-                  'bg-white border-black/60 text-slate-900 hover:border-black/80 hover:shadow-md'
-                }`}
-              >
-                <div className="relative z-10 text-xs font-black">{format(day, 'd')}</div>
-                {/* Bubble Highlight */}
-                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 to-transparent pointer-events-none" />
-                {hasBirthdays && !isToday && (
-                  <div className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-amber-400 rounded-full border-2 border-white animate-bounce shadow-sm z-20" />
-                )}
-              </motion.div>
-            );
-          })}
+      <div className="bg-[#FEFFEE] rounded-[28px] shadow-[0_24px_60px_rgba(0,0,0,0.18),0_8px_20px_rgba(0,0,0,0.08)] border border-black/40 overflow-hidden relative">
+        <div className="bg-rose-500 px-3 py-2.5 text-center border-b-[0.5px] border-rose-600/30">
+          <h4 className="text-white font-black uppercase tracking-widest text-[13px]">
+            {format(currentMonth, 'MMMM yyyy', { locale: fr })}
+          </h4>
+        </div>
+
+        <div className="p-3 bg-[#FEFFEE]">
+          <div className="grid grid-cols-7 gap-1 mb-1.5">
+            {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day, i) => (
+              <div key={`${day}-${i}`} className={`text-center text-[13px] font-bold tracking-wide font-display py-0.5 ${i >= 5 ? 'text-rose-600' : 'text-slate-700'}`}>
+                {day}
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-7 gap-1.5">
+            {Array.from({ length: (monthStart.getDay() + 6) % 7 }).map((_, i) => (
+              <div key={`empty-${i}`} />
+            ))}
+            {days.map(day => {
+              const dayBirthdays = getBirthdaysForDay(day);
+              const hasBirthdays = dayBirthdays.length > 0;
+              const isToday = isSameDay(day, today);
+
+              return (
+                <motion.div
+                  key={day.toString()}
+                  onClick={() => handleDayClick(day)}
+                  whileHover={{ scale: 1.15, zIndex: 10 }}
+                  whileTap={{ scale: 0.95 }}
+                  animate={hasBirthdays && !isToday && showCake ? { scale: [1, 1.12, 1] } : { scale: 1 }}
+                  transition={hasBirthdays && !isToday && showCake ? { duration: 0.5, ease: 'easeInOut' } : {}}
+                  className={`aspect-square rounded-full flex flex-col items-center justify-center font-black relative cursor-pointer ${
+                    isToday
+                      ? 'border-[0.5px] border-rose-500 text-rose-500'
+                      : hasBirthdays
+                      ? 'border-[0.5px] border-green-400 text-green-600'
+                      : 'bg-white text-slate-800 shadow-[0_2px_6px_rgba(0,0,0,0.10),0_1px_2px_rgba(0,0,0,0.05)] [outline:0.5px_solid_rgba(0,0,0,0.12)]'
+                  }`}
+                >
+                  {!hasBirthdays && !isToday && (
+                    <div className="absolute inset-0 rounded-full pointer-events-none bg-gradient-to-b from-white/60 to-transparent" />
+                  )}
+                  {hasBirthdays && !isToday ? (
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={showCake ? 'cake' : 'date'}
+                        initial={{ opacity: 0, y: 3 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -3 }}
+                        transition={{ duration: 0.4 }}
+                        className="flex items-center justify-center"
+                      >
+                        {showCake ? (
+                          <motion.span
+                            animate={{ y: [0, -2, 0] }}
+                            transition={{ duration: 1, repeat: Infinity }}
+                            className="text-[16px]"
+                          >
+                            🎉
+                          </motion.span>
+                        ) : (
+                          <span className="text-[13px] font-black font-display text-green-700">
+                            {format(day, 'd')}
+                          </span>
+                        )}
+                      </motion.div>
+                    </AnimatePresence>
+                  ) : (
+                    <span className="text-[13px] font-black font-display text-slate-800">{format(day, 'd')}</span>
+                  )}
+                </motion.div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -141,14 +192,14 @@ export function Calendar({ birthdays, onAddBirthday }: { birthdays: Birthday[], 
       <AnimatePresence>
         {showAddModal && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowAddModal(false)}
               className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
             />
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -160,12 +211,12 @@ export function Calendar({ birthdays, onAddBirthday }: { birthdays: Birthday[], 
                   <X size={24} />
                 </button>
               </div>
-              
+
               <div className="space-y-4">
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Nom</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={newName}
                     onChange={e => setNewName(e.target.value)}
                     placeholder="Ex: Marie"
@@ -174,8 +225,8 @@ export function Calendar({ birthdays, onAddBirthday }: { birthdays: Birthday[], 
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Date de naissance</label>
-                  <input 
-                    type="date" 
+                  <input
+                    type="date"
                     value={newDate}
                     onChange={e => setNewDate(e.target.value)}
                     className="w-full bg-slate-50 border border-black/60 rounded-2xl p-4 text-slate-900 focus:outline-none focus:border-sky-500 transition-colors"
@@ -183,7 +234,7 @@ export function Calendar({ birthdays, onAddBirthday }: { birthdays: Birthday[], 
                 </div>
               </div>
 
-              <button 
+              <button
                 onClick={handleAddFriend}
                 disabled={!newName || !newDate}
                 className="w-full bg-sky-500 text-white font-black py-4 rounded-2xl shadow-lg shadow-sky-100 hover:bg-sky-600 transition-all disabled:opacity-50"
