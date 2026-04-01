@@ -1,83 +1,404 @@
-import { motion } from 'motion/react';
-import { Lock, Sparkles, Trophy } from 'lucide-react';
-import { UserProfile } from '../types';
-import { CARDS } from '../utils/gameLogic';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Trophy } from 'lucide-react';
+import { UserProfile, Birthday, CardRarity } from '../types';
+import { CARDS, checkUnlockedCards } from '../utils/gameLogic';
 
-export function Collection({ user }: { user: UserProfile }) {
+const RARITY_STYLES: Record<CardRarity, { border: string; footer: string; cornerColor: string }> = {
+  Commun:     { border: '#1a1a2e', footer: '#ffffff',  cornerColor: '#1a1a2e' },
+  Rare:       { border: '#1A6FC4', footer: '#EEF5FF',  cornerColor: '#1A6FC4' },
+  Épique:     { border: '#7B2FBE', footer: '#F5EEFF',  cornerColor: '#7B2FBE' },
+  Légendaire: { border: '#C8861A', footer: '#FFF8E8',  cornerColor: '#D4A017' },
+};
+
+const RARITY_LABEL_COLOR: Record<CardRarity, string> = {
+  Commun:     '#1a1a2e',
+  Rare:       '#1A6FC4',
+  Épique:     '#7B2FBE',
+  Légendaire: '#C8861A',
+};
+
+const FILTER_OPTIONS: (CardRarity | 'Tous')[] = ['Tous', 'Commun', 'Rare', 'Épique', 'Légendaire'];
+
+interface CollectionProps {
+  user: UserProfile;
+  birthdays: Birthday[];
+}
+
+export function Collection({ user, birthdays }: CollectionProps) {
+  const [filter, setFilter] = useState<CardRarity | 'Tous'>('Tous');
+  const [selectedCard, setSelectedCard] = useState<string | null>(null);
+
+  const unlockedIds   = checkUnlockedCards(birthdays, user);
+  const filteredCards = filter === 'Tous' ? CARDS : CARDS.filter(c => c.rarity === filter);
+  const selected      = CARDS.find(c => c.id === selectedCard);
+  const isSelectedUnlocked = selectedCard ? unlockedIds.includes(selectedCard) : false;
+  const isNew = (id: string) => (user.newCards ?? []).includes(id);
+
   return (
-    <div className="p-6 space-y-8">
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
+    <div className="p-4 space-y-5 pb-32" style={{ background: '#f8f9fa', minHeight: '100vh' }}>
+
+      {/* Header stats */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-br from-rose-400 via-sky-400 to-amber-400 p-8 rounded-3xl text-white relative overflow-hidden shadow-xl shadow-rose-100"
+        className="rounded-2xl p-5 flex items-center gap-4"
+        style={{ background: '#ffffff', border: '1px solid #e5e7eb' }}
       >
-        <div className="relative z-10 space-y-4">
-          <div className="flex items-center gap-2">
-            <Trophy size={20} className="text-white" />
-            <span className="text-xs font-black uppercase tracking-widest opacity-80">Ta Collection</span>
-          </div>
-          <div className="space-y-1">
-            <h2 className="text-4xl font-black tracking-tight">{user.collectedCards.length}/{CARDS.length}</h2>
-            <p className="text-sm font-medium opacity-80">Cartes débloquées</p>
-          </div>
-          <div className="w-full bg-white/20 h-2 rounded-full overflow-hidden">
-            <motion.div 
+        <div className="w-12 h-12 rounded-xl flex items-center justify-center"
+          style={{ background: '#FF4B4B22' }}>
+          <Trophy size={24} color="#FF4B4B" />
+        </div>
+        <div className="flex-1">
+          <p style={{
+            fontFamily: "'Press Start 2P', monospace",
+            fontSize: '6px', color: '#999',
+            letterSpacing: 1, marginBottom: 4,
+          }}>
+            TA COLLECTION
+          </p>
+          <p className="font-black text-2xl" style={{ color: '#1a1a2e' }}>
+            {unlockedIds.length}
+            <span className="text-sm" style={{ color: '#bbb' }}>/{CARDS.length}</span>
+          </p>
+          <div className="w-full h-1.5 rounded-full mt-2 overflow-hidden"
+            style={{ background: '#e5e7eb' }}>
+            <motion.div
               initial={{ width: 0 }}
-              animate={{ width: `${(user.collectedCards.length / CARDS.length) * 100}%` }}
-              className="bg-white h-full"
+              animate={{ width: `${(unlockedIds.length / CARDS.length) * 100}%` }}
+              transition={{ duration: 1, ease: 'easeOut' }}
+              className="h-full rounded-full"
+              style={{ background: '#FF4B4B' }}
             />
           </div>
         </div>
-        <Sparkles className="absolute top-4 right-4 text-white/20" size={80} />
       </motion.div>
 
-      <div className="grid grid-cols-2 gap-4">
-        {CARDS.map((card, i) => {
-          const isUnlocked = user.collectedCards.includes(card.id);
-          
+      {/* Filtres */}
+      <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+        {FILTER_OPTIONS.map(f => (
+          <button
+            key={f}
+            onClick={() => setFilter(f)}
+            className="shrink-0 transition-all"
+            style={{
+              fontFamily: "'Press Start 2P', monospace",
+              fontSize: '6px',
+              padding: '6px 12px',
+              borderRadius: 20,
+              color: filter === f ? '#fff' : '#555',
+              background: filter === f ? '#FF4B4B' : '#f3f4f6',
+              border: `1px solid ${filter === f ? '#FF4B4B' : '#e5e7eb'}`,
+            }}
+          >
+            {f}
+          </button>
+        ))}
+      </div>
+
+      {/* Grille */}
+      <div className="grid grid-cols-3 gap-3">
+        {filteredCards.map((card, i) => {
+          const unlocked = unlockedIds.includes(card.id);
+          const styles   = RARITY_STYLES[card.rarity];
+          const isEpic   = card.rarity === 'Épique';
+          const isLegend = card.rarity === 'Légendaire';
+
           return (
             <motion.div
               key={card.id}
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.85 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: i * 0.1 }}
-              whileHover={isUnlocked ? { scale: 1.05, rotate: 2 } : {}}
-              className={`relative aspect-[3/4] rounded-3xl overflow-hidden border transition-all ${
-                isUnlocked ? 'border-rose-200 shadow-xl shadow-rose-100' : 'border-black/60 grayscale opacity-60'
-              }`}
+              transition={{ delay: i * 0.03 }}
+              onClick={() => setSelectedCard(card.id)}
+              className="relative cursor-pointer"
+              style={{ aspectRatio: '0.69' }}
             >
-              <img src={card.image} alt={card.title} className="w-full h-full object-cover" />
-              
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent p-4 flex flex-col justify-end">
-                <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full w-fit mb-1 ${
-                  card.rarity === 'Commun' ? 'bg-slate-200 text-slate-800' :
-                  card.rarity === 'Rare' ? 'bg-rose-500 text-white' : 'bg-amber-500 text-white'
-                }`}>
-                  {card.rarity}
-                </span>
-                <h4 className="text-white font-black text-sm leading-tight">{card.title}</h4>
-              </div>
-
-              {!isUnlocked && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/60 backdrop-blur-[2px]">
-                  <Lock className="text-white mb-2" size={24} />
-                  <p className="text-[10px] text-white font-black uppercase tracking-wider text-center px-4 leading-relaxed">
-                    {card.unlockCondition}
-                  </p>
+              {/* Badge NEW */}
+              {unlocked && isNew(card.id) && (
+                <div
+                  className="absolute z-30 text-white"
+                  style={{
+                    top: -12, right: -10,
+                    background: '#FF4B4B',
+                    border: '2px solid #fff',
+                    fontFamily: "'Press Start 2P', monospace",
+                    fontSize: '7px',
+                    padding: '5px 8px',
+                    borderRadius: 20,
+                    transform: 'rotate(-12deg)',
+                    animation: 'badgePulse 1.6s ease-in-out infinite',
+                  }}>
+                  NEW!
                 </div>
               )}
 
-              {isUnlocked && (
-                <motion.div 
-                  animate={{ opacity: [0, 1, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent pointer-events-none"
-                />
-              )}
+              {/* Card */}
+              <div
+                className="w-full h-full flex flex-col overflow-hidden"
+                style={{
+                  borderRadius: 16,
+                  border: `3px solid ${styles.border}`,
+                  background: isLegend
+                    ? 'linear-gradient(160deg, #fffdf5 0%, #fff8e8 50%, #fffdf5 100%)'
+                    : '#ffffff',
+                  animation: isEpic   ? 'epicPulse 2.2s ease-in-out infinite'
+                           : isLegend ? 'legendPulse 3s ease-in-out infinite' : 'none',
+                }}
+              >
+                {/* Inner border */}
+                <div style={{
+                  position: 'absolute', inset: 7, borderRadius: 7,
+                  border: `1px solid ${styles.border}`,
+                  opacity: 0.15, pointerEvents: 'none', zIndex: 1,
+                }} />
+
+                {/* Shimmer — Légendaire */}
+                {isLegend && unlocked && (
+                  <div style={{
+                    position: 'absolute', inset: 0, overflow: 'hidden',
+                    borderRadius: 14, zIndex: 10, pointerEvents: 'none',
+                  }}>
+                    <div style={{
+                      position: 'absolute',
+                      top: '-80%', left: '-70%',
+                      width: '40%', height: '260%',
+                      background: 'linear-gradient(105deg, transparent 30%, rgba(255,215,0,0.45) 48%, rgba(255,255,255,0.6) 50%, rgba(255,215,0,0.45) 52%, transparent 70%)',
+                      animation: 'shimmer 2.8s ease-in-out infinite',
+                    }} />
+                  </div>
+                )}
+
+                {/* Twinkling stars — Légendaire */}
+                {isLegend && unlocked && (
+                  <div style={{ position: 'absolute', inset: 0, zIndex: 3, pointerEvents: 'none' }}>
+                    {[
+                      { top: '12%', left: '10%',  d: '1.8s', delay: '0s'   },
+                      { top: '8%',  right: '12%', d: '2.2s', delay: '0.4s' },
+                      { top: '18%', left: '50%',  d: '1.5s', delay: '0.8s' },
+                      { bottom: '20%', left: '8%',   d: '2s',   delay: '0.2s' },
+                      { bottom: '18%', right: '10%', d: '1.7s', delay: '0.6s' },
+                    ].map((s, j) => (
+                      <div key={j} style={{
+                        position: 'absolute', width: 3, height: 3,
+                        borderRadius: '50%', background: '#D4A017',
+                        animation: `twinkle ${s.d} ease-in-out ${s.delay} infinite`,
+                        ...s,
+                      }} />
+                    ))}
+                  </div>
+                )}
+
+                {/* Corner brackets — Épique */}
+                {isEpic && unlocked && ['tl','tr','bl','br'].map(pos => (
+                  <div key={pos} style={{
+                    position: 'absolute', width: 18, height: 18, zIndex: 20,
+                    top:    pos.includes('t') ? 4 : 'auto',
+                    bottom: pos.includes('b') ? 4 : 'auto',
+                    left:   pos.includes('l') ? 4 : 'auto',
+                    right:  pos.includes('r') ? 4 : 'auto',
+                  }}>
+                    <div style={{ position: 'absolute', width: '100%', height: 2, background: '#7B2FBE', borderRadius: 1, opacity: 0.6, top: 0, left: 0 }} />
+                    <div style={{ position: 'absolute', width: 2, height: '100%', background: '#7B2FBE', borderRadius: 1, opacity: 0.6, top: 0, left: pos.includes('r') ? 'auto' : 0, right: pos.includes('r') ? 0 : 'auto' }} />
+                  </div>
+                ))}
+
+                {/* Corner brackets — Légendaire */}
+                {isLegend && unlocked && ['tl','tr','bl','br'].map(pos => (
+                  <div key={pos} style={{
+                    position: 'absolute', width: 20, height: 20, zIndex: 20,
+                    top:    pos.includes('t') ? 5 : 'auto',
+                    bottom: pos.includes('b') ? 5 : 'auto',
+                    left:   pos.includes('l') ? 5 : 'auto',
+                    right:  pos.includes('r') ? 5 : 'auto',
+                  }}>
+                    <div style={{ position: 'absolute', width: '100%', height: 2.5, background: '#D4A017', top: 0, left: 0 }} />
+                    <div style={{ position: 'absolute', width: 2.5, height: '100%', background: '#D4A017', top: 0, left: pos.includes('r') ? 'auto' : 0, right: pos.includes('r') ? 0 : 'auto' }} />
+                  </div>
+                ))}
+
+                {/* Emoji zone */}
+                <div style={{
+                  flex: 1, display: 'flex',
+                  alignItems: 'center', justifyContent: 'center',
+                  background: '#F2EFE7', position: 'relative',
+                }}>
+                  <span style={{
+                    fontSize: 36, display: 'inline-block',
+                    animation: `floatEmoji 4.5s ease-in-out ${i * 0.3}s infinite`,
+                    filter: !unlocked ? 'grayscale(1) opacity(0.5)' : 'none',
+                  }}>
+                    {card.emoji}
+                  </span>
+                  {!unlocked && (
+                    <div style={{
+                      position: 'absolute', inset: 0,
+                      background: 'rgba(200,200,200,0.52)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <span style={{ fontSize: 18 }}>🔒</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Separator */}
+                <div style={{ height: 1, background: `${styles.border}33`, flexShrink: 0 }} />
+
+                {/* Footer */}
+                <div style={{
+                  background: styles.footer,
+                  padding: '6px 4px 8px',
+                  textAlign: 'center', flexShrink: 0,
+                }}>
+                  <p style={{
+                    fontFamily: "'Press Start 2P', monospace",
+                    fontSize: '4px', color: '#1a1a2e', lineHeight: 1.8,
+                  }}>
+                    {card.title}
+                  </p>
+                  <p style={{
+                    fontFamily: "'Press Start 2P', monospace",
+                    fontSize: '5px', color: '#58CC02',
+                  }}>
+                    +{card.xpReward} XP
+                  </p>
+                </div>
+              </div>
             </motion.div>
           );
         })}
       </div>
+
+      {/* Modal detail */}
+      <AnimatePresence>
+        {selectedCard && selected && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedCard(null)}
+            style={{
+              position: 'fixed', inset: 0, zIndex: 50,
+              display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center',
+              gap: 16, background: 'rgba(0,0,0,0.6)',
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.5, opacity: 0 }}
+              transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+              onClick={e => e.stopPropagation()}
+              style={{
+                width: 200, borderRadius: 24,
+                border: `3px solid ${RARITY_STYLES[selected.rarity].border}`,
+                background: selected.rarity === 'Légendaire'
+                  ? 'linear-gradient(160deg, #fffdf5 0%, #fff8e8 50%, #fffdf5 100%)'
+                  : '#ffffff',
+                overflow: 'hidden',
+                display: 'flex', flexDirection: 'column',
+              }}
+            >
+              {/* Emoji zone */}
+              <div style={{
+                height: 160, background: '#F2EFE7',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                position: 'relative',
+              }}>
+                <span style={{
+                  fontSize: 72, display: 'inline-block',
+                  animation: 'floatEmoji 4.5s ease-in-out infinite',
+                  filter: !isSelectedUnlocked ? 'grayscale(1) opacity(0.5)' : 'none',
+                }}>
+                  {selected.emoji}
+                </span>
+                {!isSelectedUnlocked && (
+                  <div style={{
+                    position: 'absolute', inset: 0,
+                    background: 'rgba(200,200,200,0.52)',
+                    display: 'flex', flexDirection: 'column',
+                    alignItems: 'center', justifyContent: 'center', gap: 6,
+                  }}>
+                    <span style={{ fontSize: 32 }}>🔒</span>
+                  </div>
+                )}
+              </div>
+
+              <div style={{ height: 1, background: `${RARITY_STYLES[selected.rarity].border}33` }} />
+
+              {/* Footer modal */}
+              <div style={{
+                background: RARITY_STYLES[selected.rarity].footer,
+                padding: '14px 12px 18px', textAlign: 'center',
+              }}>
+                <p style={{
+                  fontFamily: "'Press Start 2P', monospace",
+                  fontSize: '6px', color: RARITY_LABEL_COLOR[selected.rarity],
+                  marginBottom: 6,
+                }}>
+                  {selected.rarity}
+                </p>
+                <p style={{
+                  fontFamily: "'Press Start 2P', monospace",
+                  fontSize: '8px', color: '#1a1a2e', lineHeight: 1.8, marginBottom: 4,
+                }}>
+                  {selected.title}
+                </p>
+                <p style={{
+                  fontFamily: "'Press Start 2P', monospace",
+                  fontSize: '9px', color: '#58CC02', marginBottom: 10,
+                }}>
+                  +{selected.xpReward} XP
+                </p>
+                <p style={{ fontSize: 10, color: '#666', lineHeight: 1.6 }}>
+                  {isSelectedUnlocked
+                    ? `✅ ${selected.description}`
+                    : `🎯 ${selected.unlockCondition}`}
+                </p>
+              </div>
+            </motion.div>
+
+            <button
+              onClick={() => setSelectedCard(null)}
+              style={{
+                fontFamily: "'Press Start 2P', monospace",
+                fontSize: '7px', color: 'rgba(255,255,255,0.6)',
+                background: 'none', border: 'none', cursor: 'pointer',
+              }}>
+              ✕ FERMER
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* CSS Animations */}
+      <style>{`
+        @keyframes floatEmoji {
+          0%,100% { transform: translateY(0px); }
+          50%      { transform: translateY(-8px); }
+        }
+        @keyframes epicPulse {
+          0%,100% { box-shadow: 0 0 0 2px #7B2FBE33, 0 2px 16px rgba(123,47,190,0.2); }
+          50%     { box-shadow: 0 0 0 5px #7B2FBE18, 0 4px 24px rgba(123,47,190,0.35); }
+        }
+        @keyframes legendPulse {
+          0%,100% { box-shadow: 0 0 0 1px #ffd70055, 0 4px 20px rgba(200,134,26,0.25); }
+          50%     { box-shadow: 0 0 0 3px #ffd70033, 0 6px 28px rgba(200,134,26,0.4), 0 0 50px rgba(255,215,0,0.18); }
+        }
+        @keyframes badgePulse {
+          0%,100% { transform: rotate(-12deg) scale(1); }
+          50%     { transform: rotate(-12deg) scale(1.15); }
+        }
+        @keyframes shimmer {
+          0%   { left: -70%; }
+          100% { left: 130%; }
+        }
+        @keyframes twinkle {
+          0%,100% { opacity: 0.2; transform: scale(0.8); }
+          50%     { opacity: 1;   transform: scale(1.4); }
+        }
+      `}</style>
     </div>
   );
 }

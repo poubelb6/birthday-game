@@ -1,0 +1,160 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Outfit:wght@400;600&display=swap');
+* { box-sizing: border-box; margin: 0; padding: 0; }
+.wrap { font-family: 'Outfit', sans-serif; padding: 1.2rem 0.5rem; }
+.row { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+.col { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.label { font-family: 'Press Start 2P', monospace; font-size: 5.5px; color: var(--color-text-secondary); text-align: center; letter-spacing: 0.5px; }
+
+.card {
+  width: 110px; height: 150px;
+  border-radius: 13px;
+  border: 3px solid #1a1a2e;
+  background: #fff;
+  display: flex; flex-direction: column; align-items: center;
+  position: relative; overflow: hidden;
+  cursor: pointer; transition: transform 0.2s;
+}
+.card:hover { transform: translateY(-4px); }
+.card::before {
+  content: ''; position: absolute; inset: 7px;
+  border-radius: 7px; border: 1px solid currentColor;
+  opacity: 0.15; pointer-events: none; z-index: 1;
+}
+.card-emoji { font-size: 44px; margin-top: 20px; line-height: 1; position: relative; z-index: 2; }
+.card-sep { width: calc(100% - 16px); height: 1px; background: #1a1a2e; opacity: 0.15; margin-top: auto; position: relative; z-index: 2; }
+.card-footer { width: 100%; padding: 7px 8px 10px; text-align: center; position: relative; z-index: 2; }
+.card-name { font-family: 'Press Start 2P', monospace; font-size: 5px; color: #1a1a2e; line-height: 1.8; margin-bottom: 3px; }
+.card-xp { font-family: 'Press Start 2P', monospace; font-size: 5.5px; color: #58CC02; }
+
+/* COMMUN */
+.common { border-color: #1a1a2e; color: #1a1a2e; }
+.common .card-footer { background: #fff; }
+
+/* RARE — bleu */
+.rare { border-color: #1A6FC4; color: #1A6FC4; box-shadow: 0 0 0 1px #1A6FC433, 0 2px 12px rgba(26,111,196,0.18); }
+.rare::before { border-color: #1A6FC4; opacity: 0.25; }
+.rare .card-sep { background: #1A6FC4; opacity: 0.2; }
+.rare .card-footer { background: #EEF5FF; }
+
+/* ÉPIQUE — violet pulse + coins */
+.epic { border-color: #7B2FBE; color: #7B2FBE; animation: epicPulse 2.2s ease-in-out infinite; }
+.epic::before { border-color: #7B2FBE; opacity: 0.25; }
+.epic .card-sep { background: #7B2FBE; opacity: 0.2; }
+.epic .card-footer { background: #F5EEFF; }
+@keyframes epicPulse {
+  0%,100% { box-shadow: 0 0 0 2px #7B2FBE33, 0 2px 16px rgba(123,47,190,0.2); }
+  50%      { box-shadow: 0 0 0 5px #7B2FBE18, 0 4px 24px rgba(123,47,190,0.35); }
+}
+.epic-corner { position: absolute; width: 18px; height: 18px; z-index: 3; pointer-events: none; }
+.epic-corner::before, .epic-corner::after { content: ''; position: absolute; background: #7B2FBE; border-radius: 1px; opacity: 0.6; }
+.epic-corner::before { width: 100%; height: 2px; top: 0; left: 0; }
+.epic-corner::after  { width: 2px; height: 100%; top: 0; left: 0; }
+.tl { top: 4px; left: 4px; }
+.tr { top: 4px; right: 4px; transform: scaleX(-1); }
+.bl { bottom: 4px; left: 4px; transform: scaleY(-1); }
+.br { bottom: 4px; right: 4px; transform: scale(-1); }
+
+/* LÉGENDAIRE */
+.legendary { border-color: #C8861A; color: #C8861A; background: linear-gradient(160deg, #fffdf5 0%, #fff8e8 50%, #fffdf5 100%); animation: legendPulse 3s ease-in-out infinite; }
+.legendary::before { border-color: #C8861A; opacity: 0.3; }
+.legendary .card-sep { background: #C8861A; opacity: 0.25; }
+.legendary .card-footer { background: #FFF8E8; }
+@keyframes legendPulse {
+  0%,100% { box-shadow: 0 0 0 1px #ffd70055, 0 4px 20px rgba(200,134,26,0.25); }
+  50%      { box-shadow: 0 0 0 3px #ffd70033, 0 6px 28px rgba(200,134,26,0.4), 0 0 50px rgba(255,215,0,0.18); }
+}
+.legend-shim { position: absolute; inset: 0; pointer-events: none; overflow: hidden; border-radius: 11px; z-index: 3; }
+.legend-shim::after {
+  content: ''; position: absolute; top: -80%; left: -70%; width: 40%; height: 260%;
+  background: linear-gradient(105deg, transparent 30%, rgba(255,215,0,0.45) 48%, rgba(255,255,255,0.6) 50%, rgba(255,215,0,0.45) 52%, transparent 70%);
+  animation: shim 2.8s ease-in-out infinite;
+}
+@keyframes shim { 0% { left: -70%; } 100% { left: 130%; } }
+.gold-corner { position: absolute; width: 20px; height: 20px; z-index: 4; pointer-events: none; }
+.gold-corner::before, .gold-corner::after { content: ''; position: absolute; background: #D4A017; border-radius: 1px; }
+.gold-corner::before { width: 100%; height: 2.5px; top: 0; left: 0; }
+.gold-corner::after  { width: 2.5px; height: 100%; top: 0; left: 0; }
+.gtl { top: 5px; left: 5px; }
+.gtr { top: 5px; right: 5px; transform: scaleX(-1); }
+.gbl { bottom: 5px; left: 5px; transform: scaleY(-1); }
+.gbr { bottom: 5px; right: 5px; transform: scale(-1); }
+.stars { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+.star { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: #D4A017; animation: twinkle var(--d) ease-in-out infinite var(--delay); }
+@keyframes twinkle { 0%,100% { opacity: 0.2; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.4); } }
+</style>
+
+<div class="wrap">
+  <div class="row">
+
+    <!-- COMMUN -->
+    <div class="col">
+      <div class="card common">
+        <div class="card-emoji">👋</div>
+        <div class="card-sep"></div>
+        <div class="card-footer">
+          <div class="card-name">Le Nouveau Venu</div>
+          <div class="card-xp">+50 XP</div>
+        </div>
+      </div>
+      <div class="label">⚪ COMMUN</div>
+    </div>
+
+    <!-- RARE -->
+    <div class="col">
+      <div class="card rare">
+        <div class="card-emoji">🦋</div>
+        <div class="card-sep"></div>
+        <div class="card-footer">
+          <div class="card-name">Social Butterfly</div>
+          <div class="card-xp">+150 XP</div>
+        </div>
+      </div>
+      <div class="label">🔵 RARE</div>
+    </div>
+
+    <!-- ÉPIQUE -->
+    <div class="col">
+      <div class="card epic">
+        <div class="epic-corner tl"></div>
+        <div class="epic-corner tr"></div>
+        <div class="epic-corner bl"></div>
+        <div class="epic-corner br"></div>
+        <div class="card-emoji">🔮</div>
+        <div class="card-sep"></div>
+        <div class="card-footer">
+          <div class="card-name">Zodiaque Complet</div>
+          <div class="card-xp">+400 XP</div>
+        </div>
+      </div>
+      <div class="label">🟣 ÉPIQUE</div>
+    </div>
+
+    <!-- LÉGENDAIRE -->
+    <div class="col">
+      <div class="card legendary">
+        <div class="legend-shim"></div>
+        <div class="stars">
+          <div class="star" style="top:12%;left:10%;--d:1.8s;--delay:0s;"></div>
+          <div class="star" style="top:8%;right:12%;--d:2.2s;--delay:0.4s;"></div>
+          <div class="star" style="top:18%;left:50%;--d:1.5s;--delay:0.8s;"></div>
+          <div class="star" style="bottom:20%;left:8%;--d:2s;--delay:0.2s;"></div>
+          <div class="star" style="bottom:18%;right:10%;--d:1.7s;--delay:0.6s;"></div>
+        </div>
+        <div class="gold-corner gtl"></div>
+        <div class="gold-corner gtr"></div>
+        <div class="gold-corner gbl"></div>
+        <div class="gold-corner gbr"></div>
+        <div class="card-emoji">🌌</div>
+        <div class="card-sep"></div>
+        <div class="card-footer">
+          <div class="card-name">Univers Complet</div>
+          <div class="card-xp">+1000 XP</div>
+        </div>
+      </div>
+      <div class="label">🌟 LÉGENDAIRE</div>
+    </div>
+
+  </div>
+</div>

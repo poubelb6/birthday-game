@@ -3,7 +3,17 @@ export type ZodiacSign =
   | 'Lion' | 'Vierge' | 'Balance' | 'Scorpion' 
   | 'Sagittaire' | 'Capricorne' | 'Verseau' | 'Poissons';
 
-export type CardRarity = 'Commun' | 'Rare' | 'Épique';
+export type CardRarity = 'Commun' | 'Rare' | 'Épique' | 'Légendaire';
+
+export interface Card {
+  id: string;
+  title: string;
+  emoji: string;
+  description: string;
+  rarity: CardRarity;
+  unlockCondition: string;
+  xpReward: number;
+}
 
 export interface UserProfile {
   id: string;
@@ -21,7 +31,9 @@ export interface UserProfile {
   zodiac: ZodiacSign;
   xp: number;
   level: number;
-  collectedCards: string[]; // IDs of cards
+  collectedCards: string[];
+  newCards?: string[];
+  scansCount?: number;
 }
 
 export interface Birthday {
@@ -39,15 +51,6 @@ export interface Birthday {
   };
   zodiac: ZodiacSign;
   addedAt: string;
-}
-
-export interface Card {
-  id: string;
-  title: string;
-  description: string;
-  rarity: CardRarity;
-  image: string;
-  unlockCondition: string;
 }
 
 export interface Challenge {

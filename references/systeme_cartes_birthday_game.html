@@ -1,0 +1,90 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-sans); }
+.wrap { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+.section { display: flex; flex-direction: column; gap: 8px; }
+.section-title { font-size: 13px; font-weight: 500; color: var(--color-text-secondary); padding: 6px 10px; background: var(--color-background-secondary); border-radius: 8px; }
+.card-row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; border: 0.5px solid var(--color-border-tertiary); background: var(--color-background-primary); }
+.badge { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+.commun { background: #f1f5f9; color: #475569; }
+.rare { background: #fef9c3; color: #854d0e; }
+.epique { background: #fce7f3; color: #9d174d; }
+.legendaire { background: #fef3c7; color: #92400e; }
+.card-name { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+.card-cond { font-size: 11px; color: var(--color-text-secondary); }
+.xp { font-size: 11px; font-weight: 500; color: #FF4B4B; white-space: nowrap; }
+</style>
+<div class="wrap">
+
+  <div class="section">
+    <div class="section-title">⚪ Commun — Facile</div>
+    <div class="card-row"><span class="badge commun">Commun</span><div><div class="card-name">👋 Le Nouveau Venu</div><div class="card-cond">Ajouter son 1er ami</div></div><span class="xp">+50 XP</span></div>
+    <div class="card-row"><span class="badge commun">Commun</span><div><div class="card-name">📅 Premier Rendez-vous</div><div class="card-cond">Ouvrir le calendrier pour la 1ère fois</div></div><span class="xp">+50 XP</span></div>
+    <div class="card-row"><span class="badge commun">Commun</span><div><div class="card-name">📸 Sourire !</div><div class="card-cond">Ajouter une photo à un ami</div></div><span class="xp">+50 XP</span></div>
+    <div class="card-row"><span class="badge commun">Commun</span><div><div class="card-name">🔗 Connecté</div><div class="card-cond">Ajouter un réseau social à son profil</div></div><span class="xp">+50 XP</span></div>
+    <div class="card-row"><span class="badge commun">Commun</span><div><div class="card-name">🎁 La Wishlist</div><div class="card-cond">Créer sa wishlist</div></div><span class="xp">+50 XP</span></div>
+    <div class="card-row"><span class="badge commun">Commun</span><div><div class="card-name">📱 QR Pioneer</div><div class="card-cond">Scanner son 1er QR code</div></div><span class="xp">+75 XP</span></div>
+    <div class="card-row"><span class="badge commun">Commun</span><div><div class="card-name">🤝 Duo</div><div class="card-cond">Avoir 2 amis</div></div><span class="xp">+75 XP</span></div>
+    <div class="card-row"><span class="badge commun">Commun</span><div><div class="card-name">👨‍👩‍👧 Petit Groupe</div><div class="card-cond">Avoir 5 amis</div></div><span class="xp">+100 XP</span></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🟡 Rare — Intermédiaire</div>
+    <div class="card-row"><span class="badge rare">Rare</span><div><div class="card-name">🦋 Social Butterfly</div><div class="card-cond">Scanner 5 QR codes</div></div><span class="xp">+150 XP</span></div>
+    <div class="card-row"><span class="badge rare">Rare</span><div><div class="card-name">🗓️ Janvier ♑</div><div class="card-cond">1 ami né en Janvier</div></div><span class="xp">+150 XP</span></div>
+    <div class="card-row"><span class="badge rare">Rare</span><div><div class="card-name">🗓️ Février ♒</div><div class="card-cond">1 ami né en Février</div></div><span class="xp">+150 XP</span></div>
+    <div class="card-row"><span class="badge rare">Rare</span><div><div class="card-name">🗓️ Mars ♈</div><div class="card-cond">1 ami né en Mars</div></div><span class="xp">+150 XP</span></div>
+    <div class="card-row"><span class="badge rare">Rare</span><div><div class="card-name">🗓️ Avril ♉</div><div class="card-cond">1 ami né en Avril</div></div><span class="xp">+150 XP</span></div>
+    <div class="card-row"><span class="badge rare">Rare</span><div><div class="card-name">🗓️ Mai ♊</div><div class="card-cond">1 ami né en Mai</div></div><span class="xp">+150 XP</span></div>
+    <div class="card-row"><span class="badge rare">Rare</span><div><div class="card-name">🗓️ Juin ♋</div><div class="card-cond">1 ami né en Juin</div></div><span class="xp">+150 XP</span></div>
+    <div class="card-row"><span class="badge rare">Rare</span><div><div class="card-name">🗓️ Juillet ♌</div><div class="card-cond">1 ami né en Juillet</div></div><span class="xp">+150 XP</span></div>
+    <div class="card-row"><span class="badge rare">Rare</span><div><div class="card-name">🗓️ Août ♍</div><div class="card-cond">1 ami né en Août</div></div><span class="xp">+150 XP</span></div>
+    <div class="card-row"><span class="badge rare">Rare</span><div><div class="card-name">🗓️ Septembre ♎</div><div class="card-cond">1 ami né en Septembre</div></div><span class="xp">+150 XP</span></div>
+    <div class="card-row"><span class="badge rare">Rare</span><div><div class="card-name">🗓️ Octobre ♏</div><div class="card-cond">1 ami né en Octobre</div></div><span class="xp">+150 XP</span></div>
+    <div class="card-row"><span class="badge rare">Rare</span><div><div class="card-name">🗓️ Novembre ♐</div><div class="card-cond">1 ami né en Novembre</div></div><span class="xp">+150 XP</span></div>
+    <div class="card-row"><span class="badge rare">Rare</span><div><div class="card-name">🗓️ Décembre ♑</div><div class="card-cond">1 ami né en Décembre</div></div><span class="xp">+150 XP</span></div>
+    <div class="card-row"><span class="badge rare">Rare</span><div><div class="card-name">♈ Bélier</div><div class="card-cond">3 amis Bélier</div></div><span class="xp">+200 XP</span></div>
+    <div class="card-row"><span class="badge rare">Rare</span><div><div class="card-name">♉ Taureau</div><div class="card-cond">3 amis Taureau</div></div><span class="xp">+200 XP</span></div>
+    <div class="card-row"><span class="badge rare">Rare</span><div><div class="card-name">♊ Gémeaux</div><div class="card-cond">3 amis Gémeaux</div></div><span class="xp">+200 XP</span></div>
+    <div class="card-row"><span class="badge rare">Rare</span><div><div class="card-name">♋ Cancer</div><div class="card-cond">3 amis Cancer</div></div><span class="xp">+200 XP</span></div>
+    <div class="card-row"><span class="badge rare">Rare</span><div><div class="card-name">♌ Lion</div><div class="card-cond">3 amis Lion</div></div><span class="xp">+200 XP</span></div>
+    <div class="card-row"><span class="badge rare">Rare</span><div><div class="card-name">♍ Vierge</div><div class="card-cond">3 amis Vierge</div></div><span class="xp">+200 XP</span></div>
+    <div class="card-row"><span class="badge rare">Rare</span><div><div class="card-name">♎ Balance</div><div class="card-cond">3 amis Balance</div></div><span class="xp">+200 XP</span></div>
+    <div class="card-row"><span class="badge rare">Rare</span><div><div class="card-name">♏ Scorpion</div><div class="card-cond">3 amis Scorpion</div></div><span class="xp">+200 XP</span></div>
+    <div class="card-row"><span class="badge rare">Rare</span><div><div class="card-name">♐ Sagittaire</div><div class="card-cond">3 amis Sagittaire</div></div><span class="xp">+200 XP</span></div>
+    <div class="card-row"><span class="badge rare">Rare</span><div><div class="card-name">♑ Capricorne</div><div class="card-cond">3 amis Capricorne</div></div><span class="xp">+200 XP</span></div>
+    <div class="card-row"><span class="badge rare">Rare</span><div><div class="card-name">♒ Verseau</div><div class="card-cond">3 amis Verseau</div></div><span class="xp">+200 XP</span></div>
+    <div class="card-row"><span class="badge rare">Rare</span><div><div class="card-name">♓ Poissons</div><div class="card-cond">3 amis Poissons</div></div><span class="xp">+200 XP</span></div>
+    <div class="card-row"><span class="badge rare">Rare</span><div><div class="card-name">🌸 Semaine 1</div><div class="card-cond">1 ami dans chaque semaine de Janvier</div></div><span class="xp">+250 XP</span></div>
+    <div class="card-row"><span class="badge rare">Rare</span><div><div class="card-name">☀️ Semaine Estivale</div><div class="card-cond">1 ami dans chaque semaine de Juillet</div></div><span class="xp">+250 XP</span></div>
+    <div class="card-row"><span class="badge rare">Rare</span><div><div class="card-name">🍂 Semaine d'Automne</div><div class="card-cond">1 ami dans chaque semaine d'Octobre</div></div><span class="xp">+250 XP</span></div>
+    <div class="card-row"><span class="badge rare">Rare</span><div><div class="card-name">❄️ Semaine Hivernale</div><div class="card-cond">1 ami dans chaque semaine de Décembre</div></div><span class="xp">+250 XP</span></div>
+    <div class="card-row"><span class="badge rare">Rare</span><div><div class="card-name">🎯 Maître du Scan</div><div class="card-cond">Scanner 10 QR codes</div></div><span class="xp">+250 XP</span></div>
+    <div class="card-row"><span class="badge rare">Rare</span><div><div class="card-name">🏘️ La Bande</div><div class="card-cond">Avoir 10 amis</div></div><span class="xp">+250 XP</span></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🟣 Épique — Difficile</div>
+    <div class="card-row"><span class="badge epique">Épique</span><div><div class="card-name">🗓️ Maître du Temps</div><div class="card-cond">1 ami par mois sur 6 mois consécutifs</div></div><span class="xp">+400 XP</span></div>
+    <div class="card-row"><span class="badge epique">Épique</span><div><div class="card-name">🌍 Toutes Saisons</div><div class="card-cond">1 ami né en hiver, printemps, été, automne</div></div><span class="xp">+400 XP</span></div>
+    <div class="card-row"><span class="badge epique">Épique</span><div><div class="card-name">🔮 Zodiaque Complet</div><div class="card-cond">1 ami de chaque signe astrologique</div></div><span class="xp">+500 XP</span></div>
+    <div class="card-row"><span class="badge epique">Épique</span><div><div class="card-name">📡 Super Scanner</div><div class="card-cond">Scanner 25 QR codes</div></div><span class="xp">+400 XP</span></div>
+    <div class="card-row"><span class="badge epique">Épique</span><div><div class="card-name">👑 Chef de Tribu</div><div class="card-cond">Avoir 25 amis</div></div><span class="xp">+400 XP</span></div>
+    <div class="card-row"><span class="badge epique">Épique</span><div><div class="card-name">🌙 Nuit d'Été</div><div class="card-cond">1 ami dans chaque semaine de Juin, Juillet et Août</div></div><span class="xp">+450 XP</span></div>
+    <div class="card-row"><span class="badge epique">Épique</span><div><div class="card-name">❄️ Blizzard</div><div class="card-cond">1 ami dans chaque semaine de Déc, Jan et Fév</div></div><span class="xp">+450 XP</span></div>
+    <div class="card-row"><span class="badge epique">Épique</span><div><div class="card-name">🎭 12 Mois</div><div class="card-cond">1 ami né dans chacun des 12 mois</div></div><span class="xp">+500 XP</span></div>
+    <div class="card-row"><span class="badge epique">Épique</span><div><div class="card-name">🏆 Niveau 5</div><div class="card-cond">Atteindre le niveau 5</div></div><span class="xp">+500 XP</span></div>
+    <div class="card-row"><span class="badge epique">Épique</span><div><div class="card-name">💫 50 Amis</div><div class="card-cond">Avoir 50 amis</div></div><span class="xp">+500 XP</span></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🌟 Légendaire — Extrême</div>
+    <div class="card-row"><span class="badge legendaire">Légendaire</span><div><div class="card-name">📅 Calendrier Parfait</div><div class="card-cond">1 ami dans chaque semaine de l'année</div></div><span class="xp">+1000 XP</span></div>
+    <div class="card-row"><span class="badge legendaire">Légendaire</span><div><div class="card-name">🎂 365 Jours</div><div class="card-cond">1 ami pour chaque jour de l'année</div></div><span class="xp">+2000 XP</span></div>
+    <div class="card-row"><span class="badge legendaire">Légendaire</span><div><div class="card-name">🌌 Univers Complet</div><div class="card-cond">Débloquer toutes les cartes Épiques</div></div><span class="xp">+1500 XP</span></div>
+    <div class="card-row"><span class="badge legendaire">Légendaire</span><div><div class="card-name">👁️ L'Omniscient</div><div class="card-cond">Avoir 100 amis</div></div><span class="xp">+1000 XP</span></div>
+    <div class="card-row"><span class="badge legendaire">Légendaire</span><div><div class="card-name">⚡ Niveau 10</div><div class="card-cond">Atteindre le niveau 10</div></div><span class="xp">+1000 XP</span></div>
+    <div class="card-row"><span class="badge legendaire">Légendaire</span><div><div class="card-name">🔱 Le Collectionneur</div><div class="card-cond">Débloquer 50 cartes</div></div><span class="xp">+2000 XP</span></div>
+  </div>
+
+</div>

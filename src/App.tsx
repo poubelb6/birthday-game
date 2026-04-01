@@ -115,7 +115,7 @@ function AppContent() {
       case 'dashboard': return <Dashboard birthdays={birthdays} user={user} />;
       case 'scanner': return <Scanner onScan={addBirthday} existingBirthdays={birthdays} />;
       case 'calendar': return <Calendar birthdays={birthdays} onAddBirthday={addBirthday} onDeleteBirthday={deleteBirthday} />;
-      case 'collection': return <Collection user={user} />;
+      case 'collection': return <Collection user={user} birthdays={birthdays} />;
       case 'profile': return <Profile user={user} onUpdate={setUser} birthdays={birthdays} challenges={challenges} />;
       default: return <Dashboard birthdays={birthdays} user={user} />;
     }
