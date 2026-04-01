@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Share2, Settings, Instagram, Gift, ChevronRight, Sparkles, Users, Trophy, ExternalLink, Copy, Twitter, Facebook, Save, X, Smartphone } from 'lucide-react';
+import { Share2, Settings, Instagram, Gift, ChevronRight, Sparkles, Users, Trophy, ExternalLink, Copy, Twitter, Facebook, Save, X, Smartphone, LogOut } from 'lucide-react';
+import { signOut } from 'firebase/auth';
+import { auth } from '../firebase';
 import { UserProfile } from '../types';
 import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -414,6 +416,30 @@ const getZodiacEmoji = (zodiac: string) => {
             )}
           </AnimatePresence>
         </motion.section>
+
+        {/* Sign out */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="pb-4"
+        >
+          <motion.button
+            onClick={() => signOut(auth)}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
+            className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl font-bold"
+            style={{
+              color: '#FF4B4B',
+              border: '2px solid #FF4B4B',
+              background: 'transparent',
+            }}
+          >
+            <LogOut size={20} />
+            Se déconnecter
+          </motion.button>
+        </motion.div>
+
       </div>
     </div>
   );

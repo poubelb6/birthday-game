@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Trophy } from 'lucide-react';
 import { UserProfile, Birthday, CardRarity } from '../types';
@@ -18,7 +18,15 @@ const RARITY_LABEL_COLOR: Record<CardRarity, string> = {
   Légendaire: '#C8861A',
 };
 
+const RARITIES: CardRarity[] = ['Commun', 'Rare', 'Épique', 'Légendaire'];
 const FILTER_OPTIONS: (CardRarity | 'Tous')[] = ['Tous', 'Commun', 'Rare', 'Épique', 'Légendaire'];
+
+const RARITY_EMOJI: Record<CardRarity, string> = {
+  Commun:     '⚪',
+  Rare:       '🔵',
+  Épique:     '🟣',
+  Légendaire: '🌟',
+};
 
 interface CollectionProps {
   user: UserProfile;
@@ -28,15 +36,25 @@ interface CollectionProps {
 export function Collection({ user, birthdays }: CollectionProps) {
   const [filter, setFilter] = useState<CardRarity | 'Tous'>('Tous');
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
+  const sectionRefs = useRef<Partial<Record<CardRarity, HTMLDivElement>>>({});
+  const topRef      = useRef<HTMLDivElement>(null);
 
-  const unlockedIds   = checkUnlockedCards(birthdays, user);
-  const filteredCards = filter === 'Tous' ? CARDS : CARDS.filter(c => c.rarity === filter);
-  const selected      = CARDS.find(c => c.id === selectedCard);
+  const unlockedIds = checkUnlockedCards(birthdays, user);
+  const selected    = CARDS.find(c => c.id === selectedCard);
   const isSelectedUnlocked = selectedCard ? unlockedIds.includes(selectedCard) : false;
   const isNew = (id: string) => (user.newCards ?? []).includes(id);
 
+  const handleFilter = (f: CardRarity | 'Tous') => {
+    setFilter(f);
+    if (f === 'Tous') {
+      topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      sectionRefs.current[f]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
-    <div className="p-4 space-y-5 pb-32" style={{ background: '#f8f9fa', minHeight: '100vh' }}>
+    <div ref={topRef} className="p-4 space-y-5 pb-32" style={{ background: '#f8f9fa', minHeight: '100vh' }}>
 
       {/* Header stats */}
       <motion.div
@@ -79,7 +97,7 @@ export function Collection({ user, birthdays }: CollectionProps) {
         {FILTER_OPTIONS.map(f => (
           <button
             key={f}
-            onClick={() => setFilter(f)}
+            onClick={() => handleFilter(f)}
             className="shrink-0 transition-all"
             style={{
               fontFamily: "'Press Start 2P', monospace",
@@ -96,24 +114,47 @@ export function Collection({ user, birthdays }: CollectionProps) {
         ))}
       </div>
 
-      {/* Grille */}
-      <div className="grid grid-cols-3 gap-3">
-        {filteredCards.map((card, i) => {
-          const unlocked = unlockedIds.includes(card.id);
-          const styles   = RARITY_STYLES[card.rarity];
-          const isEpic   = card.rarity === 'Épique';
-          const isLegend = card.rarity === 'Légendaire';
+      {/* Sections par rareté */}
+      {RARITIES.map(rarity => {
+        const rarityCards   = CARDS.filter(c => c.rarity === rarity);
+        const rarityUnlocked = rarityCards.filter(c => unlockedIds.includes(c.id)).length;
+        const color          = RARITY_LABEL_COLOR[rarity];
 
-          return (
-            <motion.div
-              key={card.id}
-              initial={{ opacity: 0, scale: 0.85 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: i * 0.03 }}
-              onClick={() => setSelectedCard(card.id)}
-              className="relative cursor-pointer"
-              style={{ aspectRatio: '0.69' }}
-            >
+        return (
+          <div key={rarity} ref={el => { if (el) sectionRefs.current[rarity] = el; }} className="space-y-3">
+
+            {/* Section header */}
+            <div className="space-y-1">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ height: 2, flex: 1, background: color, opacity: 0.3, borderRadius: 2 }} />
+                <span style={{ fontSize: 18, fontWeight: 'bold', color }}>
+                  {RARITY_EMOJI[rarity]} {rarity}
+                </span>
+                <div style={{ height: 2, flex: 1, background: color, opacity: 0.3, borderRadius: 2 }} />
+              </div>
+              <p style={{ textAlign: 'center', fontSize: 10, color: '#999' }}>
+                {rarityCards.length} cartes • {rarityUnlocked} débloquée{rarityUnlocked !== 1 ? 's' : ''}
+              </p>
+            </div>
+
+            {/* Cards grid */}
+            <div className="grid grid-cols-3 gap-3">
+              {rarityCards.map((card, i) => {
+                const unlocked = unlockedIds.includes(card.id);
+                const styles   = RARITY_STYLES[card.rarity];
+                const isEpic   = card.rarity === 'Épique';
+                const isLegend = card.rarity === 'Légendaire';
+
+                return (
+                  <motion.div
+                    key={card.id}
+                    initial={{ opacity: 0, scale: 0.85 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: i * 0.03 }}
+                    onClick={() => setSelectedCard(card.id)}
+                    className="relative cursor-pointer"
+                    style={{ aspectRatio: '0.69' }}
+                  >
               {/* Badge NEW */}
               {unlocked && isNew(card.id) && (
                 <div
@@ -265,9 +306,12 @@ export function Collection({ user, birthdays }: CollectionProps) {
                 </div>
               </div>
             </motion.div>
-          );
-        })}
-      </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
 
       {/* Modal detail */}
       <AnimatePresence>
