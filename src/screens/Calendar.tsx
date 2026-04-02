@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronLeft, ChevronRight, ChevronDown, X, Camera, ImageIcon, Phone, Instagram, Twitter, Facebook } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronDown, X, Camera, ImageIcon, Phone, Instagram, Twitter, Facebook, Plus, Trash2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { Birthday } from '../types';
 import { getZodiacSign } from '../utils/gameLogic';
@@ -16,10 +16,11 @@ import {
 } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
-export function Calendar({ birthdays, onAddBirthday, onDeleteBirthday }: {
+export function Calendar({ birthdays, onAddBirthday, onDeleteBirthday, onFirstVisit }: {
   birthdays: Birthday[],
   onAddBirthday?: (b: Birthday) => void,
   onDeleteBirthday?: (id: string) => void,
+  onFirstVisit?: () => void,
 }) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [showAddModal, setShowAddModal] = useState(false);
@@ -31,11 +32,18 @@ export function Calendar({ birthdays, onAddBirthday, onDeleteBirthday }: {
   const [newSocials, setNewSocials] = useState({ instagram: '', snapchat: '', tiktok: '', twitter: '', facebook: '' });
   const [showCake, setShowCake] = useState(true);
   const [showSocials, setShowSocials] = useState(false);
+  const [showWishlist, setShowWishlist] = useState(false);
+  const [newWishlist, setNewWishlist] = useState<string[]>([]);
+  const [newWishInput, setNewWishInput] = useState('');
   const [toastName, setToastName] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Birthday | null>(null);
   const [showPhotoMenu, setShowPhotoMenu] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    onFirstVisit?.();
+  }, []);
 
   useEffect(() => {
     const cycle = () => {
@@ -108,6 +116,7 @@ export function Calendar({ birthdays, onAddBirthday, onDeleteBirthday }: {
       ...(newPhotoUrl && { photoUrl: newPhotoUrl }),
       ...(newPhone && { phone: newPhone }),
       ...(Object.keys(socials ?? {}).length > 0 && { socials }),
+      ...(newWishlist.length > 0 && { wishlist: newWishlist }),
     };
 
     console.log('[AddFriend] Objet Birthday complet:', {
@@ -129,6 +138,9 @@ export function Calendar({ birthdays, onAddBirthday, onDeleteBirthday }: {
     setNewPhotoUrl('');
     setNewPhotoPreview('');
     setNewSocials({ instagram: '', snapchat: '', tiktok: '', twitter: '', facebook: '' });
+    setNewWishlist([]);
+    setNewWishInput('');
+    setShowWishlist(false);
     setShowPhotoMenu(false);
     setShowAddModal(false);
 
@@ -426,6 +438,85 @@ export function Calendar({ birthdays, onAddBirthday, onDeleteBirthday }: {
                               />
                             </div>
                           ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Wishlist — accordéon */}
+                <div className="border border-black/60 rounded-2xl overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setShowWishlist(v => !v)}
+                    className="w-full flex items-center justify-between px-4 py-3 bg-slate-50 hover:bg-slate-100 transition-colors"
+                  >
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
+                      🎁 Wishlist <span className="text-slate-400 normal-case font-medium">(optionnel)</span>
+                      {newWishlist.length > 0 && (
+                        <span className="bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full text-[9px] font-black">
+                          {newWishlist.length}
+                        </span>
+                      )}
+                    </span>
+                    <motion.span animate={{ rotate: showWishlist ? 180 : 0 }} transition={{ duration: 0.25 }}>
+                      <ChevronDown size={16} className="text-slate-400" />
+                    </motion.span>
+                  </button>
+                  <AnimatePresence initial={false}>
+                    {showWishlist && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.28, ease: 'easeInOut' }}
+                        className="overflow-hidden"
+                      >
+                        <div className="space-y-3 p-3 bg-white">
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              value={newWishInput}
+                              onChange={e => setNewWishInput(e.target.value)}
+                              onKeyDown={e => {
+                                if (e.key === 'Enter' && newWishInput.trim()) {
+                                  setNewWishlist(w => [...w, newWishInput.trim()]);
+                                  setNewWishInput('');
+                                }
+                              }}
+                              placeholder="Ex: Roman, parfum, jeu vidéo..."
+                              className="flex-1 bg-slate-50 border border-black/60 rounded-2xl px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-amber-400 transition-colors"
+                            />
+                            <button
+                              type="button"
+                              disabled={!newWishInput.trim()}
+                              onClick={() => {
+                                if (!newWishInput.trim()) return;
+                                setNewWishlist(w => [...w, newWishInput.trim()]);
+                                setNewWishInput('');
+                              }}
+                              className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 disabled:opacity-40 transition-opacity"
+                              style={{ background: '#FF4B4B' }}
+                            >
+                              <Plus size={18} className="text-white" strokeWidth={3} />
+                            </button>
+                          </div>
+                          {newWishlist.length > 0 && (
+                            <ul className="space-y-1.5">
+                              {newWishlist.map((wish, i) => (
+                                <li key={i} className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+                                  <span className="text-sm text-slate-800 flex-1">🎁 {wish}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => setNewWishlist(w => w.filter((_, j) => j !== i))}
+                                    className="text-slate-400 hover:text-rose-500 transition-colors"
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
                         </div>
                       </motion.div>
                     )}

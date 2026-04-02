@@ -1,9 +1,11 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useEffect } from 'react';
-import { Star, Calendar as CalendarIcon } from 'lucide-react';
+import { Star, Calendar as CalendarIcon, X, Trophy } from 'lucide-react';
 import { Birthday, UserProfile } from '../types';
 import { format, differenceInDays, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, startOfDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../firebase';
 
 export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: UserProfile | null }) {
   const today = new Date();
@@ -12,6 +14,9 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
   const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
   const [showCake, setShowCake] = useState(true);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [leaderboard, setLeaderboard] = useState<UserProfile[]>([]);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(false);
 
     useEffect(() => {
       const cycle = () => {
@@ -22,6 +27,26 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
       const interval = setInterval(cycle, 8000);
       return () => clearInterval(interval);
     }, []);
+
+  const openLeaderboard = async () => {
+    setShowLeaderboard(true);
+    if (leaderboard.length > 0) return;
+    setLeaderboardLoading(true);
+    try {
+      const friendNames = new Set(birthdays.map(b => b.name.toLowerCase()));
+      const friendIds = new Set(birthdays.map(b => b.id));
+      const snapshot = await getDocs(collection(db, 'users'));
+      const matched = snapshot.docs
+        .map(d => d.data() as UserProfile)
+        .filter(u => friendNames.has(u.name.toLowerCase()) || friendIds.has(u.id))
+        .sort((a, b) => b.xp - a.xp);
+      setLeaderboard(matched);
+    } catch (e) {
+      console.error('Leaderboard error:', e);
+    } finally {
+      setLeaderboardLoading(false);
+    }
+  };
 
   const todayStart = startOfDay(today);
   const upcoming = birthdays
@@ -283,11 +308,14 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
       <div className="grid grid-cols-2 gap-4">
         <motion.div
           whileHover={{ y: -4 }}
-          className="bg-rose-300 p-4 rounded-3xl text-white space-y-0.5 shadow-lg shadow-rose-100"
+          whileTap={{ scale: 0.97 }}
+          onClick={openLeaderboard}
+          className="bg-rose-300 p-4 rounded-3xl text-white space-y-0.5 shadow-lg shadow-rose-100 cursor-pointer"
           style={{ boxShadow: '0 4px 0 #e57373' }}
         >
           <p className="text-[11px] font-black uppercase tracking-widest text-rose-900/80 text-center">Total Amis</p>
           <p className="text-2xl font-black text-center">{birthdays.length}</p>
+          <p className="text-[9px] font-bold text-rose-900/60 uppercase tracking-widest text-center">Voir classement</p>
         </motion.div>
         <motion.div
           whileHover={{ y: -4 }}
@@ -298,6 +326,113 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
           <p className="text-2xl font-black text-center">{user?.collectedCards.length ?? 0}</p>
         </motion.div>
       </div>
+
+      {/* Leaderboard panel */}
+      <AnimatePresence>
+        {showLeaderboard && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowLeaderboard(false)}
+              className="fixed inset-0 z-[100] bg-slate-900/50 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 16 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 340 }}
+              className="fixed inset-x-4 top-1/2 -translate-y-1/2 z-[101] max-w-md mx-auto bg-white rounded-3xl border border-slate-100 shadow-2xl overflow-hidden"
+              style={{ maxHeight: '75vh' }}
+            >
+              {/* Header — même style que les titres de section */}
+              <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-slate-100">
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2">
+                    <Trophy size={18} style={{ color: '#FF4B4B' }} />
+                    <h2 className="font-display text-lg font-black text-slate-900">Classement Amis</h2>
+                  </div>
+                  <span className="text-xs font-bold text-rose-400 uppercase tracking-wider ml-7">Amis sur l'app</span>
+                </div>
+                <button
+                  onClick={() => setShowLeaderboard(false)}
+                  className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center"
+                >
+                  <X size={16} className="text-slate-500" />
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="overflow-y-auto px-5 py-4 space-y-3" style={{ maxHeight: 'calc(75vh - 90px)' }}>
+                {leaderboardLoading ? (
+                  <div className="flex flex-col items-center justify-center py-12 gap-3">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                      className="w-8 h-8 rounded-full border-2 border-slate-200 border-t-rose-500"
+                    />
+                    <p className="text-sm font-bold text-slate-400">Chargement...</p>
+                  </div>
+                ) : leaderboard.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12 gap-3 text-center">
+                    <span className="text-4xl">🎂</span>
+                    <p className="font-bold text-slate-500 text-sm">Aucun ami n'a encore de compte sur l'app.</p>
+                    <p className="text-xs text-slate-400">Invite tes amis à rejoindre Birthday Game !</p>
+                  </div>
+                ) : (
+                  leaderboard.map((friend, i) => {
+                    const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : null;
+                    return (
+                      <motion.div
+                        key={friend.id}
+                        initial={{ opacity: 0, x: -16 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.06 }}
+                        className="flex items-center gap-3 p-3 rounded-2xl border"
+                        style={{
+                          borderColor: i === 0 ? '#FFD700' : i === 1 ? '#C0C0C0' : i === 2 ? '#CD7F32' : '#f1f5f9',
+                          background: i < 3 ? 'rgba(255,75,75,0.04)' : 'white',
+                        }}
+                      >
+                        {/* Rank */}
+                        <div className="w-7 text-center shrink-0">
+                          {medal
+                            ? <span className="text-xl">{medal}</span>
+                            : <span className="text-xs font-black text-slate-400">#{i + 1}</span>
+                          }
+                        </div>
+
+                        {/* Avatar */}
+                        {friend.photoUrl
+                          ? <img src={friend.photoUrl} alt={friend.name} className="w-11 h-11 rounded-xl object-cover shrink-0 border border-black/10" />
+                          : <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-black text-lg shrink-0" style={{ background: '#FF4B4B' }}>
+                              {friend.name.charAt(0).toUpperCase()}
+                            </div>
+                        }
+
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-black text-slate-900 text-sm truncate">{friend.name}</p>
+                          <p className="text-[11px] font-bold text-slate-400">Niveau {friend.level}</p>
+                        </div>
+
+                        {/* XP */}
+                        <div className="text-right shrink-0">
+                          <p className="font-black text-xs" style={{ color: '#FF4B4B', fontFamily: "'Press Start 2P', monospace" }}>
+                            {friend.xp}
+                          </p>
+                          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">XP</p>
+                        </div>
+                      </motion.div>
+                    );
+                  })
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -178,6 +178,31 @@ export function useAppState() {
     }
   };
 
+  const incrementScansCount = async () => {
+    if (!firebaseUser || !user) return;
+    const newCount = (user.scansCount ?? 0) + 1;
+    const newCards = [...user.collectedCards];
+    if (newCount >= 1  && !newCards.includes('c6'))  newCards.push('c6');
+    if (newCount >= 5  && !newCards.includes('r1'))  newCards.push('r1');
+    if (newCount >= 10 && !newCards.includes('r30')) newCards.push('r30');
+    if (newCount >= 25 && !newCards.includes('e4'))  newCards.push('e4');
+    try {
+      await updateDoc(doc(db, 'users', firebaseUser.uid), { scansCount: newCount, collectedCards: newCards });
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${firebaseUser.uid}`);
+    }
+  };
+
+  const unlockCard = async (cardId: string) => {
+    if (!firebaseUser || !user) return;
+    if (user.collectedCards.includes(cardId)) return;
+    try {
+      await updateDoc(doc(db, 'users', firebaseUser.uid), { collectedCards: [...user.collectedCards, cardId] });
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${firebaseUser.uid}`);
+    }
+  };
+
   const deleteBirthday = async (birthdayId: string) => {
     if (!firebaseUser) return;
     const path = `users/${firebaseUser.uid}/birthdays/${birthdayId}`;
@@ -188,5 +213,5 @@ export function useAppState() {
     }
   };
 
-  return { user, birthdays, challenges, loading, firebaseUser, setUser, addBirthday, deleteBirthday };
+  return { user, birthdays, challenges, loading, firebaseUser, setUser, addBirthday, deleteBirthday, incrementScansCount, unlockCard };
 }

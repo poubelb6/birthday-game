@@ -51,6 +51,7 @@ export interface Birthday {
   };
   zodiac: ZodiacSign;
   addedAt: string;
+  wishlist?: string[];
 }
 
 export interface Challenge {

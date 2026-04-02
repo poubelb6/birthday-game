@@ -19,7 +19,7 @@ import { Logo } from './components/Logo';
 type Screen = 'dashboard' | 'scanner' | 'calendar' | 'collection' | 'profile';
 
 function AppContent() {
-  const { user, birthdays, challenges, loading, firebaseUser, setUser, addBirthday, deleteBirthday } = useAppState();
+  const { user, birthdays, challenges, loading, firebaseUser, setUser, addBirthday, deleteBirthday, incrementScansCount, unlockCard } = useAppState();
   const [activeScreen, setActiveScreen] = useState<Screen>('dashboard');
   const [showSplash, setShowSplash] = useState(true);
 
@@ -94,18 +94,15 @@ function AppContent() {
           <div className="w-full mt-2">
             <motion.button
               onClick={handleLogin}
-              animate={{ scale: [1, 1.02, 1] }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              whileHover={{ backgroundColor: '#ffe8e8' }}
+              whileHover={{ backgroundColor: '#f8f8f8' }}
               whileTap={{ scale: 0.98 }}
               className="w-full flex items-center justify-center gap-3"
               style={{
-                background: '#ffe8e8',
-                border: '1px solid #ffb3b3',
-                outline: '1px solid #FF4B4B22',
+                background: '#ffffff',
+                border: '1px solid #dadce0',
                 borderRadius: '9999px',
                 padding: '12px 24px',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
                 fontWeight: 500,
                 fontSize: '15px',
                 color: '#3c4043',
@@ -133,8 +130,8 @@ function AppContent() {
   const renderScreen = () => {
     switch (activeScreen) {
       case 'dashboard': return <Dashboard birthdays={birthdays} user={user} />;
-      case 'scanner': return <Scanner onScan={addBirthday} existingBirthdays={birthdays} />;
-      case 'calendar': return <Calendar birthdays={birthdays} onAddBirthday={addBirthday} onDeleteBirthday={deleteBirthday} />;
+      case 'scanner': return <Scanner onScan={addBirthday} onScanSuccess={incrementScansCount} existingBirthdays={birthdays} />;
+      case 'calendar': return <Calendar birthdays={birthdays} onAddBirthday={addBirthday} onDeleteBirthday={deleteBirthday} onFirstVisit={() => unlockCard('c2')} />;
       case 'collection': return <Collection user={user} birthdays={birthdays} />;
       case 'profile': return <Profile user={user} onUpdate={setUser} birthdays={birthdays} challenges={challenges} />;
       default: return <Dashboard birthdays={birthdays} user={user} />;
@@ -167,7 +164,7 @@ function AppContent() {
         </button>
       </header>
 
-      <main className="flex-1 overflow-y-auto pb-24">
+      <main className={activeScreen === 'scanner' ? 'flex-1 overflow-hidden flex flex-col pb-24' : 'flex-1 overflow-y-auto pb-24'}>
         <AnimatePresence mode="wait">
           <motion.div
             key={activeScreen}
@@ -175,7 +172,7 @@ function AppContent() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="h-full"
+            className={activeScreen === 'scanner' ? 'flex-1 flex flex-col' : 'h-full'}
           >
             {renderScreen()}
           </motion.div>
