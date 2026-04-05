@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import {
   QrCode,
   Bell,
+  X,
 } from 'lucide-react';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from './firebase';
@@ -15,6 +16,28 @@ import { Collection } from './screens/Collection';
 import { Profile } from './screens/Profile';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Logo } from './components/Logo';
+import confetti from 'canvas-confetti';
+import { Birthday } from './types';
+
+// Distributed evenly across the full scrollable height in 4 rows × 3 columns
+const GIGI_PARTICLES = [
+  // Row 1 — top (0–20%)
+  { x: '2%',  y: '2%',  size: 72, dur: 7.0, delay: 0.0 },
+  { x: '38%', y: '4%',  size: 80, dur: 8.5, delay: 1.4 },
+  { x: '76%', y: '1%',  size: 68, dur: 7.5, delay: 0.7 },
+  // Row 2 — upper-mid (25–45%)
+  { x: '14%', y: '28%', size: 76, dur: 8.0, delay: 2.1 },
+  { x: '56%', y: '30%', size: 84, dur: 7.2, delay: 0.4 },
+  { x: '86%', y: '26%', size: 70, dur: 9.0, delay: 1.8 },
+  // Row 3 — lower-mid (50–70%)
+  { x: '4%',  y: '54%', size: 78, dur: 7.8, delay: 1.1 },
+  { x: '44%', y: '56%', size: 86, dur: 8.3, delay: 0.2 },
+  { x: '80%', y: '52%', size: 72, dur: 7.0, delay: 2.5 },
+  // Row 4 — bottom (75–95%)
+  { x: '20%', y: '78%', size: 80, dur: 8.8, delay: 0.9 },
+  { x: '60%', y: '80%', size: 74, dur: 7.4, delay: 1.6 },
+  { x: '88%', y: '76%', size: 82, dur: 8.0, delay: 0.5 },
+];
 
 type Screen = 'dashboard' | 'scanner' | 'calendar' | 'collection' | 'profile';
 
@@ -22,6 +45,55 @@ function AppContent() {
   const { user, birthdays, challenges, loading, firebaseUser, setUser, addBirthday, deleteBirthday, incrementScansCount, unlockCard } = useAppState();
   const [activeScreen, setActiveScreen] = useState<Screen>('dashboard');
   const [showSplash, setShowSplash] = useState(true);
+  const [pendingDeepLink, setPendingDeepLink] = useState<string | null>(null);
+  const [celebrationFriend, setCelebrationFriend] = useState<Birthday | null>(null);
+  const [gigiBg, setGigiBg] = useState(() => localStorage.getItem('gigiBg') === 'true');
+
+  // Listen for easter egg toggle from Profile
+  useEffect(() => {
+    const handler = (e: Event) => setGigiBg((e as CustomEvent<boolean>).detail);
+    window.addEventListener('gigiBgChange', handler);
+    return () => window.removeEventListener('gigiBgChange', handler);
+  }, []);
+
+  // Read deep link from URL on first load
+  useEffect(() => {
+    if (window.location.pathname === '/add-friend') {
+      const params = new URLSearchParams(window.location.search);
+      const data = params.get('data');
+      if (data) setPendingDeepLink(data);
+      window.history.replaceState({}, '', '/');
+    }
+  }, []);
+
+  // Process deep link once user is authenticated and loaded
+  useEffect(() => {
+    if (!pendingDeepLink || !user || !firebaseUser || loading) return;
+    try {
+      const profile = JSON.parse(decodeURIComponent(escape(atob(pendingDeepLink))));
+      if (!profile.id || !profile.name || !profile.birthDate) return;
+      const alreadyExists = birthdays.some(b => b.id === profile.id || b.name.toLowerCase() === profile.name.toLowerCase());
+      if (!alreadyExists) {
+        const birthday: Birthday = {
+          id:        profile.id,
+          name:      profile.name,
+          birthDate: profile.birthDate,
+          zodiac:    profile.zodiac,
+          addedAt:   new Date().toISOString(),
+          ...(profile.photoUrl && { photoUrl: profile.photoUrl }),
+          ...(profile.socials && { socials: profile.socials }),
+        };
+        addBirthday(birthday);
+        setCelebrationFriend(birthday);
+        const colors = ['#FF4B4B', '#FFD700', '#ffffff', '#FEF08A'];
+        confetti({ particleCount: 80, angle: 90, spread: 160, colors, scalar: 1.4, startVelocity: 38, ticks: 280, origin: { x: 0.5, y: 0 } });
+        setTimeout(() => confetti({ particleCount: 50, angle: 90, spread: 160, colors, scalar: 1.2, startVelocity: 28, ticks: 250, origin: { x: 0.5, y: 0 } }), 400);
+      }
+    } catch (e) {
+      console.error('Deep link decode error:', e);
+    }
+    setPendingDeepLink(null);
+  }, [pendingDeepLink, user, firebaseUser, loading]);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowSplash(false), 2500);
@@ -140,6 +212,39 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-slate-100/80 flex flex-col max-w-md mx-auto shadow-2xl overflow-hidden relative">
+
+      {/* Easter egg — gigi background */}
+      <AnimatePresence>
+        {gigiBg && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute left-0 right-0 bottom-0 pointer-events-none overflow-hidden"
+            style={{ zIndex: 0, top: 80 }}
+          >
+            {GIGI_PARTICLES.map((p, i) => (
+              <motion.img
+                key={i}
+                src="/gigi.png"
+                alt=""
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: p.dur, delay: p.delay, repeat: Infinity, ease: 'easeInOut' }}
+                style={{
+                  position: 'absolute',
+                  left: p.x,
+                  top: p.y,
+                  width: p.size,
+                  height: p.size,
+                  objectFit: 'contain',
+                  opacity: 0.18,
+                  borderRadius: 16,
+                }}
+              />
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
       <header className="bg-white px-6 pt-12 pb-4 flex justify-between items-center border-b-2 border-slate-900 shadow-sm">
         <div className="flex items-center gap-3">
           <Logo size={32} />
@@ -178,6 +283,81 @@ function AppContent() {
           </motion.div>
         </AnimatePresence>
       </main>
+
+      {/* Deep-link celebration modal */}
+      <AnimatePresence>
+        {celebrationFriend && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center p-6"
+          >
+            <motion.div
+              className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+              onClick={() => setCelebrationFriend(null)}
+            />
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.8, opacity: 0, y: 20 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+              className="relative w-full max-w-sm bg-white rounded-3xl px-6 py-8 shadow-2xl flex flex-col items-center gap-4 text-center"
+              style={{ border: '2px solid #FF4B4B', boxShadow: '0 6px 0 #CC2E2E, 0 16px 50px rgba(255,75,75,0.2)' }}
+            >
+              <button
+                onClick={() => setCelebrationFriend(null)}
+                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center"
+              >
+                <X size={15} className="text-slate-500" />
+              </button>
+
+              <motion.span
+                animate={{ y: [0, -6, 0] }}
+                transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
+                className="text-5xl"
+              >
+                🎉
+              </motion.span>
+
+              {celebrationFriend.photoUrl && (
+                <img
+                  src={celebrationFriend.photoUrl}
+                  alt={celebrationFriend.name}
+                  className="w-20 h-20 rounded-2xl object-cover border-2 border-rose-200 shadow-md"
+                />
+              )}
+
+              <div className="space-y-1">
+                <p className="text-xl font-black text-slate-900">
+                  <span style={{ color: '#FF4B4B' }}>{celebrationFriend.name}</span>
+                  <br />a été ajouté à tes amis !
+                </p>
+                <p className="text-sm text-slate-500 font-medium">{celebrationFriend.zodiac}</p>
+              </div>
+
+              <div
+                className="flex items-center gap-2 px-5 py-2.5 rounded-2xl"
+                style={{ background: 'rgba(255,75,75,0.08)', border: '1px solid rgba(255,75,75,0.2)' }}
+              >
+                <span className="text-lg">⭐</span>
+                <span className="font-black text-base" style={{ color: '#FF4B4B', fontFamily: "'Press Start 2P', monospace", fontSize: 13 }}>
+                  +20 XP
+                </span>
+              </div>
+
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setCelebrationFriend(null)}
+                className="w-full py-4 rounded-2xl font-black text-white text-sm mt-1"
+                style={{ background: '#FF4B4B', boxShadow: '0 4px 0 #CC2E2E' }}
+              >
+                SUPER ! 🎂
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/80 backdrop-blur-2xl border-t-2 border-slate-900 px-6 py-4 flex justify-between items-center z-50 rounded-t-[2.5rem] shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.05)]">
         <NavButton active={activeScreen === 'dashboard'} onClick={() => setActiveScreen('dashboard')} icon="🏠" label="Home" />

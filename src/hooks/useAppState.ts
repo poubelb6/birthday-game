@@ -97,17 +97,30 @@ export function useAppState() {
     // User Profile Listener
     const unsubUser = onSnapshot(userDocRef, (docSnap) => {
       if (docSnap.exists()) {
-        setUserProfile(docSnap.data() as UserProfile);
+        const data = docSnap.data();
+        // Normalize fields that may be missing in older accounts
+        setUserProfile({
+          ...data,
+          wishlist: Array.isArray(data.wishlist) ? data.wishlist : [],
+          socials:  data.socials  ?? {},
+          collectedCards: Array.isArray(data.collectedCards) ? data.collectedCards : [],
+        } as UserProfile);
       } else {
         setUserProfile(null);
       }
       setLoading(false);
-    }, (error) => handleFirestoreError(error, OperationType.GET, `users/${firebaseUser.uid}`));
+    }, (error) => {
+      // Log only — never throw from onSnapshot callbacks (would escape React and trigger ErrorBoundary)
+      console.error('[Firestore] user snapshot error:', error.code, error.message);
+      setLoading(false);
+    });
 
     // Birthdays Listener
     const unsubBirthdays = onSnapshot(query(birthdaysRef, orderBy('addedAt', 'desc')), (snapshot) => {
       setBirthdays(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Birthday)));
-    }, (error) => handleFirestoreError(error, OperationType.LIST, `users/${firebaseUser.uid}/birthdays`));
+    }, (error) => {
+      console.error('[Firestore] birthdays snapshot error:', error.code, error.message);
+    });
 
     // Challenges Listener
     const unsubChallenges = onSnapshot(challengesRef, (snapshot) => {
@@ -127,7 +140,9 @@ export function useAppState() {
       } else {
         setChallenges(snapshot.docs.map(d => d.data() as Challenge));
       }
-    }, (error) => handleFirestoreError(error, OperationType.LIST, `users/${firebaseUser.uid}/challenges`));
+    }, (error) => {
+      console.error('[Firestore] challenges snapshot error:', error.code, error.message);
+    });
 
     return () => {
       unsubUser();

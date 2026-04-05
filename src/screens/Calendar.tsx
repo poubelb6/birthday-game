@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronLeft, ChevronRight, ChevronDown, X, Camera, ImageIcon, Phone, Instagram, Twitter, Facebook, Plus, Trash2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { auth, storage } from '../firebase';
 import { Birthday } from '../types';
 import { getZodiacSign } from '../utils/gameLogic';
 import {
@@ -38,6 +40,7 @@ export function Calendar({ birthdays, onAddBirthday, onDeleteBirthday, onFirstVi
   const [toastName, setToastName] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Birthday | null>(null);
   const [showPhotoMenu, setShowPhotoMenu] = useState(false);
+  const [photoUploading, setPhotoUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
@@ -70,27 +73,43 @@ export function Calendar({ birthdays, onAddBirthday, onDeleteBirthday, onFirstVi
   const handlePhotoFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    console.log('[Photo] Fichier sélectionné:', file.name, `${(file.size / 1024).toFixed(1)} Ko`, file.type);
+    setPhotoUploading(true);
     const reader = new FileReader();
     reader.onload = (ev) => {
       const img = new Image();
       img.onload = () => {
-        const MAX = 200;
+        const MAX = 600;
         const ratio = Math.min(MAX / img.width, MAX / img.height, 1);
         const canvas = document.createElement('canvas');
         canvas.width = Math.round(img.width * ratio);
         canvas.height = Math.round(img.height * ratio);
         canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
-        const compressed = canvas.toDataURL('image/jpeg', 0.6);
-        const sizeKo = (compressed.length * 0.75 / 1024).toFixed(1);
-        console.log('[Photo] Après compression:', `${canvas.width}x${canvas.height}px`, `~${sizeKo} Ko`);
-        setNewPhotoPreview(compressed);
-        setNewPhotoUrl(compressed);
+        // Show preview immediately using blob URL
+        canvas.toBlob(async (blob) => {
+          if (!blob) { setPhotoUploading(false); return; }
+          const preview = URL.createObjectURL(blob);
+          setNewPhotoPreview(preview);
+          try {
+            const uid = auth.currentUser?.uid;
+            if (!uid) throw new Error('Non connecté');
+            const filename = `${Date.now()}_${Math.random().toString(36).substr(2, 6)}.jpg`;
+            const storageRef = ref(storage, `users/${uid}/friends/${filename}`);
+            await uploadBytes(storageRef, blob, { contentType: 'image/jpeg' });
+            const downloadUrl = await getDownloadURL(storageRef);
+            setNewPhotoUrl(downloadUrl);
+          } catch (err) {
+            console.error('[Photo] Upload failed:', err instanceof Error ? err.message : err);
+            setNewPhotoPreview('');
+            setNewPhotoUrl('');
+          } finally {
+            setPhotoUploading(false);
+          }
+        }, 'image/jpeg', 0.8);
       };
-      img.onerror = (err) => console.error('[Photo] Erreur chargement image:', err);
+      img.onerror = () => setPhotoUploading(false);
       img.src = ev.target?.result as string;
     };
-    reader.onerror = (err) => console.error('[Photo] Erreur FileReader:', err);
+    reader.onerror = () => setPhotoUploading(false);
     reader.readAsDataURL(file);
     e.target.value = '';
   };
@@ -528,7 +547,7 @@ export function Calendar({ birthdays, onAddBirthday, onDeleteBirthday, onFirstVi
                 <button
                   type="button"
                   onClick={handleAddFriend}
-                  disabled={!newName || !newDate}
+                  disabled={!newName || !newDate || photoUploading}
                   className="w-full bg-sky-500 text-white font-black py-4 rounded-2xl shadow-lg shadow-sky-100 hover:bg-sky-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   AJOUTER L'AMI

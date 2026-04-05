@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Share2, Settings, Instagram, Gift, ChevronRight, Sparkles, Users, Trophy, ExternalLink, Copy, Twitter, Facebook, Save, X, Smartphone, LogOut, Ghost } from 'lucide-react';
+import { Share2, Settings, Instagram, Gift, ChevronRight, Sparkles, Users, Trophy, ExternalLink, Copy, Twitter, Facebook, Save, X, Smartphone, LogOut, Ghost, Camera } from 'lucide-react';
 import { signOut } from 'firebase/auth';
-import { auth } from '../firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { auth, storage } from '../firebase';
 import { UserProfile } from '../types';
 import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -13,9 +14,16 @@ export function Profile({ user, onUpdate, birthdays = [], challenges = [] }: { u
   const [socials, setSocials] = useState(user.socials);
   const [saving, setSaving] = useState(false);
   const [isEditingWishlist, setIsEditingWishlist] = useState(false);
-  const [wishlistText, setWishlistText] = useState(user.wishlist.join(', '));
+  const [wishlistText, setWishlistText] = useState((user.wishlist ?? []).join(', '));
   const [copied, setCopied] = useState(false);
   const [showShareOptions, setShowShareOptions] = useState(false);
+  const [photoUploading, setPhotoUploading] = useState(false);
+  const [photoUploadError, setPhotoUploadError] = useState<string | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const [showBgModal, setShowBgModal] = useState(false);
+  const [bgPassword, setBgPassword] = useState('');
+  const [bgStatus, setBgStatus] = useState<'success' | 'error' | null>(null);
+  const [gigiBgActive, setGigiBgActive] = useState(() => localStorage.getItem('gigiBg') === 'true');
 
   const toggleEdit = () => {
     if (!isEditingSocials) {
@@ -29,9 +37,21 @@ export function Profile({ user, onUpdate, birthdays = [], challenges = [] }: { u
     name:     user.name,
     birthDate: user.birthDate,
     zodiac:   user.zodiac,
-    photoUrl: user.photoUrl ?? null,
+    // Exclude base64 photos — QR codes have ~1500 char max; Storage URLs are short
+    ...(user.photoUrl && !user.photoUrl.startsWith('data:') && { photoUrl: user.photoUrl }),
     socials:  user.socials,
   });
+
+  // Shareable deep-link URL — exclude base64 photos (too long for a URL)
+  const shareablePayload = {
+    id:        user.id,
+    name:      user.name,
+    birthDate: user.birthDate,
+    zodiac:    user.zodiac,
+    socials:   user.socials,
+    ...(user.photoUrl && !user.photoUrl.startsWith('data:') && { photoUrl: user.photoUrl }),
+  };
+  const shareUrl = `https://birthday-game-green.vercel.app/add-friend?data=${btoa(unescape(encodeURIComponent(JSON.stringify(shareablePayload))))}`;
 
   const completedChallenges = challenges.filter((c: any) => c.progress >= c.target).length;
   const stats = [
@@ -40,11 +60,18 @@ export function Profile({ user, onUpdate, birthdays = [], challenges = [] }: { u
     { label: 'Cartes', value: String(user.collectedCards.length), icon: Sparkles, color: 'text-rose-500', bg: 'bg-rose-50' },
   ];
 
-  const shareText = `🎂 Mon profil Birthday Game !\nNom : ${user.name}\nNé(e) le : ${format(parseISO(user.birthDate), 'd MMMM yyyy', { locale: fr })}\n\nScanne mon QR code sur l'app pour m'ajouter à ta collection ! 🎁`;
+  const shareText = `🎂 Ajoute-moi sur Birthday Game !\n👤 ${user.name} · né(e) le ${format(parseISO(user.birthDate), 'd MMMM yyyy', { locale: fr })}\n\n🔗 ${shareUrl}`;
 
   const handleCopyQr = () => {
     navigator.clipboard.writeText(profileData);
     setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(shareUrl);
+    setCopied(true);
+    setShowShareOptions(false);
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -57,7 +84,7 @@ export function Profile({ user, onUpdate, birthdays = [], challenges = [] }: { u
     setShowShareOptions(false);
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'Birthday Game', text: shareText });
+        await navigator.share({ title: 'Birthday Game', text: shareText, url: shareUrl });
       } catch {
         // user cancelled
       }
@@ -69,8 +96,12 @@ export function Profile({ user, onUpdate, birthdays = [], challenges = [] }: { u
 
   const handleSaveWishlist = async () => {
     const newWishlist = wishlistText.split(',').map((s: string) => s.trim()).filter(Boolean);
-    await onUpdate({ ...user, wishlist: newWishlist });
-    setIsEditingWishlist(false);
+    try {
+      await onUpdate({ ...user, wishlist: newWishlist });
+      setIsEditingWishlist(false);
+    } catch (e) {
+      console.error('Failed to save wishlist:', e);
+    }
   };
 
   const handleSaveSocials = async () => {
@@ -84,6 +115,87 @@ export function Profile({ user, onUpdate, birthdays = [], challenges = [] }: { u
       setSaving(false);
     }
   };
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPhotoUploading(true);
+    setPhotoUploadError(null);
+
+    const reader = new FileReader();
+
+    reader.onerror = () => {
+      setPhotoUploadError('Impossible de lire la photo, réessayez');
+      setPhotoUploading(false);
+    };
+
+    reader.onload = (ev) => {
+      const img = new Image();
+
+      img.onerror = () => {
+        setPhotoUploadError('Format de photo non supporté');
+        setPhotoUploading(false);
+      };
+
+      img.onload = async () => {
+        // Compress to max 600px, quality 0.8
+        const maxPx = 600;
+        const ratio = Math.min(maxPx / img.width, maxPx / img.height, 1);
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * ratio);
+        canvas.height = Math.round(img.height * ratio);
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          setPhotoUploadError('Erreur de compression, réessayez');
+          setPhotoUploading(false);
+          return;
+        }
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        canvas.toBlob(async (blob) => {
+          if (!blob) {
+            setPhotoUploadError('Erreur de compression, réessayez');
+            setPhotoUploading(false);
+            return;
+          }
+          try {
+            const uid = auth.currentUser?.uid;
+            if (!uid) throw new Error('Non connecté');
+            const storageRef = ref(storage, `users/${uid}/profile.jpg`);
+            await uploadBytes(storageRef, blob, { contentType: 'image/jpeg' });
+            const downloadUrl = await getDownloadURL(storageRef);
+            await onUpdate({ ...user, photoUrl: downloadUrl });
+          } catch (err) {
+            console.error('[Photo] Upload failed:', err instanceof Error ? err.message : err);
+            setPhotoUploadError('Échec de l\'envoi, réessayez');
+          } finally {
+            setPhotoUploading(false);
+          }
+        }, 'image/jpeg', 0.8);
+      };
+
+      img.src = ev.target?.result as string;
+    };
+
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleBgPassword = () => {
+    if (bgPassword.toLowerCase() === 'gigi') {
+      const next = !gigiBgActive;
+      localStorage.setItem('gigiBg', String(next));
+      setGigiBgActive(next);
+      window.dispatchEvent(new CustomEvent('gigiBgChange', { detail: next }));
+      setBgStatus('success');
+      setBgPassword('');
+      setTimeout(() => { setBgStatus(null); setShowBgModal(false); }, 1800);
+    } else {
+      setBgStatus('error');
+      setBgPassword('');
+      setTimeout(() => setBgStatus(null), 1500);
+    }
+  };
+
 const getZodiacEmoji = (zodiac: string) => {
   const emojis: Record<string, string> = {
     'Bélier': '♈', 'Taureau': '♉', 'Gémeaux': '♊',
@@ -124,12 +236,38 @@ const getZodiacEmoji = (zodiac: string) => {
         >
           <div className="flex flex-col items-center text-center -mt-16">
             <div className="relative">
-              <div className="w-28 h-28 bg-white p-2 rounded-[2rem] shadow-xl">
-                <div className="w-full h-full bg-rose-400 rounded-[1.5rem] flex items-center justify-center text-white text-4xl font-black shadow-inner">
-                  {user.name.charAt(0)}
+              <button
+                type="button"
+                onClick={() => photoInputRef.current?.click()}
+                className="w-28 h-28 bg-white p-2 rounded-[2rem] shadow-xl overflow-hidden relative group"
+              >
+                {user.photoUrl ? (
+                  <img
+                    src={user.photoUrl}
+                    alt={user.name}
+                    className="w-full h-full object-cover rounded-[1.5rem]"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-rose-400 rounded-[1.5rem] flex items-center justify-center text-white text-4xl font-black shadow-inner">
+                    {user.name.charAt(0)}
+                  </div>
+                )}
+                {/* Hover overlay */}
+                <div className="absolute inset-2 rounded-[1.5rem] bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  {photoUploading
+                    ? <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }} className="w-6 h-6 rounded-full border-2 border-white/40 border-t-white" />
+                    : <Camera size={22} className="text-white" />
+                  }
                 </div>
-              </div>
-              <motion.div 
+              </button>
+              <input
+                ref={photoInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoUpload}
+                className="hidden"
+              />
+              <motion.div
                 animate={{ rotate: [0, 15, -15, 0] }}
                 transition={{ duration: 3, repeat: Infinity }}
                 className="absolute bottom-1 right-1 bg-sky-400 p-2 rounded-xl text-white shadow-lg border-4 border-white"
@@ -137,6 +275,20 @@ const getZodiacEmoji = (zodiac: string) => {
                 <Sparkles size={16} />
               </motion.div>
             </div>
+
+            <AnimatePresence>
+              {photoUploadError && (
+                <motion.p
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className="text-xs font-bold text-rose-500 text-center max-w-[220px] leading-snug"
+                  onAnimationComplete={() => setTimeout(() => setPhotoUploadError(null), 3000)}
+                >
+                  {photoUploadError}
+                </motion.p>
+              )}
+            </AnimatePresence>
             
             <div className="mt-4 space-y-1">
               <h2 className="text-2xl font-black text-slate-900">{user.name}</h2>
@@ -247,6 +399,18 @@ const getZodiacEmoji = (zodiac: string) => {
                         </div>
                         <span className="font-bold text-sm text-slate-800">Instagram</span>
                       </button>
+
+                      <div className="h-px bg-slate-100 mx-3" />
+
+                      <button
+                        onClick={handleCopyLink}
+                        className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-slate-50 transition-colors"
+                      >
+                        <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
+                          <Copy size={16} className="text-slate-600" />
+                        </div>
+                        <span className="font-bold text-sm text-slate-800">Copier le lien</span>
+                      </button>
                     </motion.div>
                   </>
                 )}
@@ -267,7 +431,7 @@ const getZodiacEmoji = (zodiac: string) => {
               <Gift size={18} className="text-rose-500" />
               <h3 className="text-lg font-black text-slate-900">Ma Wishlist</h3>
             </div>
-            <button onClick={() => { setWishlistText(user.wishlist.join(', ')); setIsEditingWishlist(!isEditingWishlist); }} className="text-xs font-black text-sky-500 uppercase tracking-widest">
+            <button onClick={() => { setWishlistText((user.wishlist ?? []).join(', ')); setIsEditingWishlist(!isEditingWishlist); }} className="text-xs font-black text-sky-500 uppercase tracking-widest">
               {isEditingWishlist ? 'Annuler' : 'Modifier'}
             </button>
           </div>
@@ -286,7 +450,7 @@ const getZodiacEmoji = (zodiac: string) => {
             </div>
           ) : (
           <div className="flex flex-wrap gap-2">
-            {user.wishlist.map((item, i) => (
+            {(user.wishlist ?? []).map((item, i) => (
               <motion.span 
                 key={i} 
                 whileHover={{ scale: 1.05 }}
@@ -486,6 +650,24 @@ const getZodiacEmoji = (zodiac: string) => {
                   </div>
                   <ChevronRight size={18} className="text-white/20 group-hover:text-white transition-colors" />
                 </button>
+
+                <button
+                  onClick={() => { setBgPassword(''); setBgStatus(null); setShowBgModal(true); }}
+                  className="w-full bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex items-center justify-between group hover:border-rose-200 transition-colors"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-sm border border-slate-100">
+                      🎨
+                    </div>
+                    <div className="text-left">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Personnalisation</p>
+                      <p className="font-bold text-slate-900">
+                        Fond d'écran {gigiBgActive && <span className="text-[10px] font-black text-emerald-500 ml-1">● ACTIF</span>}
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronRight size={18} className="text-slate-300 group-hover:text-rose-400 transition-colors" />
+                </button>
               </motion.div>
             )}
           </AnimatePresence>
@@ -515,6 +697,72 @@ const getZodiacEmoji = (zodiac: string) => {
         </motion.div>
 
       </div>
+
+      {/* Easter egg — Fond d'écran modal */}
+      <AnimatePresence>
+        {showBgModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[300] flex items-center justify-center p-6"
+          >
+            <motion.div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={() => setShowBgModal(false)} />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 16 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 16 }}
+              transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+              className="relative w-full max-w-xs bg-white rounded-3xl p-6 shadow-2xl space-y-4"
+              style={{ border: '2px solid #FF4B4B', boxShadow: '0 6px 0 #CC2E2E' }}
+            >
+              <button onClick={() => setShowBgModal(false)} className="absolute top-4 right-4 w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center">
+                <X size={14} className="text-slate-500" />
+              </button>
+
+              <div className="text-center space-y-1">
+                <p className="text-3xl">🎨</p>
+                <h3 className="font-black text-slate-900 text-base">
+                  {gigiBgActive ? 'Désactiver le fond ?' : 'Activer le fond d\'écran'}
+                </h3>
+                <p className="text-xs text-slate-400 font-medium">Entre le mot de passe secret</p>
+              </div>
+
+              <AnimatePresence mode="wait">
+                {bgStatus === 'success' ? (
+                  <motion.p key="ok" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center text-sm font-black text-emerald-500">
+                    {gigiBgActive ? '🎉 Fond d\'écran activé !' : '✅ Fond d\'écran désactivé'}
+                  </motion.p>
+                ) : bgStatus === 'error' ? (
+                  <motion.p key="err" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center text-sm font-black text-rose-500">
+                    ❌ Mot de passe incorrect
+                  </motion.p>
+                ) : (
+                  <motion.div key="input" className="space-y-3">
+                    <input
+                      type="password"
+                      value={bgPassword}
+                      onChange={e => setBgPassword(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && handleBgPassword()}
+                      placeholder="Mot de passe..."
+                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-slate-900 font-bold text-center focus:outline-none focus:border-rose-400 transition-colors"
+                      autoFocus
+                    />
+                    <button
+                      onClick={handleBgPassword}
+                      disabled={!bgPassword}
+                      className="w-full py-3 rounded-2xl font-black text-white text-sm disabled:opacity-40 transition-opacity"
+                      style={{ background: '#FF4B4B', boxShadow: '0 3px 0 #CC2E2E' }}
+                    >
+                      VALIDER
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
