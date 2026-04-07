@@ -166,27 +166,33 @@ export function useAppState() {
     try {
       await addDoc(collection(db, path), birthday);
       
-      // Update XP and Level
-      const newXp = user.xp + 20;
-      const newLevel = Math.floor(Math.sqrt(newXp / 100)) + 1;
-      
-      // Update challenges
+      // Base XP for adding a birthday
+      let newXp = user.xp + 20;
+
+      // Update ch1 (Premier Ami) and grant reward if it just completed
       const ch1Ref = doc(db, 'users', firebaseUser.uid, 'challenges', 'ch1');
       const ch1Snap = await getDoc(ch1Ref);
       if (ch1Snap.exists()) {
         const ch1 = ch1Snap.data() as Challenge;
-        await updateDoc(ch1Ref, { progress: Math.min(ch1.target, ch1.progress + 1) });
+        const wasComplete = ch1.progress >= ch1.target;
+        const newProgress = Math.min(ch1.target, ch1.progress + 1);
+        await updateDoc(ch1Ref, { progress: newProgress });
+        if (!wasComplete && newProgress >= ch1.target) {
+          newXp += ch1.rewardXp;
+        }
       }
+
+      const newLevel = Math.floor(Math.sqrt(newXp / 100)) + 1;
 
       // Check for card unlocks
       const newCards = [...user.collectedCards];
       if (birthdays.length + 1 === 1 && !newCards.includes('c1')) newCards.push('c1');
       if (birthdays.length + 1 === 10 && !newCards.includes('c3')) newCards.push('c3');
 
-      await updateDoc(doc(db, 'users', firebaseUser.uid), { 
-        xp: newXp, 
-        level: newLevel, 
-        collectedCards: newCards 
+      await updateDoc(doc(db, 'users', firebaseUser.uid), {
+        xp: newXp,
+        level: newLevel,
+        collectedCards: newCards,
       });
     } catch (e) {
       handleFirestoreError(e, OperationType.WRITE, path);
@@ -201,8 +207,36 @@ export function useAppState() {
     if (newCount >= 5  && !newCards.includes('r1'))  newCards.push('r1');
     if (newCount >= 10 && !newCards.includes('r30')) newCards.push('r30');
     if (newCount >= 25 && !newCards.includes('e4'))  newCards.push('e4');
+
+    // Update ch2 (Scanne 3 profils) and grant reward if it just completed
+    let bonusXp = 0;
     try {
-      await updateDoc(doc(db, 'users', firebaseUser.uid), { scansCount: newCount, collectedCards: newCards });
+      const ch2Ref = doc(db, 'users', firebaseUser.uid, 'challenges', 'ch2');
+      const ch2Snap = await getDoc(ch2Ref);
+      if (ch2Snap.exists()) {
+        const ch2 = ch2Snap.data() as Challenge;
+        const wasComplete = ch2.progress >= ch2.target;
+        const newProgress = Math.min(ch2.target, ch2.progress + 1);
+        await updateDoc(ch2Ref, { progress: newProgress });
+        if (!wasComplete && newProgress >= ch2.target) {
+          bonusXp = ch2.rewardXp;
+          if (ch2.rewardCardId && !newCards.includes(ch2.rewardCardId)) {
+            newCards.push(ch2.rewardCardId);
+          }
+        }
+      }
+    } catch (e) {
+      console.error('[Challenge] ch2 update error:', e);
+    }
+
+    try {
+      const userUpdate: Record<string, unknown> = { scansCount: newCount, collectedCards: newCards };
+      if (bonusXp > 0) {
+        const newXp = user.xp + bonusXp;
+        userUpdate.xp = newXp;
+        userUpdate.level = Math.floor(Math.sqrt(newXp / 100)) + 1;
+      }
+      await updateDoc(doc(db, 'users', firebaseUser.uid), userUpdate);
     } catch (e) {
       handleFirestoreError(e, OperationType.UPDATE, `users/${firebaseUser.uid}`);
     }

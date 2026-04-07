@@ -4,7 +4,7 @@ import { Star, Calendar as CalendarIcon, X, Trophy } from 'lucide-react';
 import { Birthday, UserProfile } from '../types';
 import { format, differenceInDays, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, startOfDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 
 export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: UserProfile | null }) {
@@ -33,14 +33,8 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
     if (leaderboard.length > 0) return;
     setLeaderboardLoading(true);
     try {
-      const friendNames = new Set(birthdays.map(b => b.name.toLowerCase()));
-      const friendIds = new Set(birthdays.map(b => b.id));
-      const snapshot = await getDocs(collection(db, 'users'));
-      const matched = snapshot.docs
-        .map(d => d.data() as UserProfile)
-        .filter(u => friendNames.has(u.name.toLowerCase()) || friendIds.has(u.id))
-        .sort((a, b) => b.xp - a.xp);
-      setLeaderboard(matched);
+      const snapshot = await getDocs(query(collection(db, 'users'), orderBy('xp', 'desc')));
+      setLeaderboard(snapshot.docs.map(d => d.data() as UserProfile));
     } catch (e) {
       console.error('Leaderboard error:', e);
     } finally {
@@ -353,7 +347,7 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
                     <Trophy size={18} style={{ color: '#FF4B4B' }} />
                     <h2 className="font-display text-lg font-black text-slate-900">Classement Amis</h2>
                   </div>
-                  <span className="text-xs font-bold text-rose-400 uppercase tracking-wider ml-7">Amis sur l'app</span>
+                  <span className="text-xs font-bold text-rose-400 uppercase tracking-wider ml-7">Classement global</span>
                 </div>
                 <button
                   onClick={() => setShowLeaderboard(false)}
@@ -377,7 +371,7 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
                 ) : leaderboard.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-12 gap-3 text-center">
                     <span className="text-4xl">🎂</span>
-                    <p className="font-bold text-slate-500 text-sm">Aucun ami n'a encore de compte sur l'app.</p>
+                    <p className="font-bold text-slate-500 text-sm">Aucun joueur trouvé.</p>
                     <p className="text-xs text-slate-400">Invite tes amis à rejoindre Birthday Game !</p>
                   </div>
                 ) : (
