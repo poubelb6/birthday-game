@@ -411,7 +411,7 @@ function AppContent() {
           <NavButton active={activeScreen === 'calendar'} onClick={() => setActiveScreen('calendar')} icon="📅" label="Calendrier" ariaLabel="Calendrier des anniversaires" />
         </div>
         <div className="flex-1 flex justify-center relative">
-          <div className="absolute -top-10">
+          <div className="absolute -top-16">
             <motion.button
               aria-label="Scanner un QR code"
               whileHover={{ scale: 1.15, rotate: 5 }}
