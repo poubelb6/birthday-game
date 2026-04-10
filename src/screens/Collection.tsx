@@ -70,14 +70,14 @@ export function Collection({ user, birthdays }: CollectionProps) {
         <div className="flex-1">
           <p style={{
             fontFamily: "'Press Start 2P', monospace",
-            fontSize: '6px', color: '#999',
+            fontSize: '11px', color: '#64748b',
             letterSpacing: 1, marginBottom: 4,
           }}>
             TA COLLECTION
           </p>
           <p className="font-black text-2xl" style={{ color: '#1a1a2e' }}>
             {unlockedIds.length}
-            <span className="text-sm" style={{ color: '#bbb' }}>/{CARDS.length}</span>
+            <span className="text-sm" style={{ color: '#94a3b8' }}>/{CARDS.length}</span>
           </p>
           <div className="w-full h-1.5 rounded-full mt-2 overflow-hidden"
             style={{ background: '#e5e7eb' }}>
@@ -101,7 +101,7 @@ export function Collection({ user, birthdays }: CollectionProps) {
             className="shrink-0 transition-all"
             style={{
               fontFamily: "'Press Start 2P', monospace",
-              fontSize: '6px',
+              fontSize: '11px',
               padding: '6px 12px',
               borderRadius: 20,
               color: filter === f ? '#fff' : '#555',
@@ -132,7 +132,7 @@ export function Collection({ user, birthdays }: CollectionProps) {
                 </span>
                 <div style={{ height: 2, flex: 1, background: color, opacity: 0.3, borderRadius: 2 }} />
               </div>
-              <p style={{ textAlign: 'center', fontSize: 10, color: '#999' }}>
+              <p style={{ textAlign: 'center', fontSize: 12, color: '#64748b' }}>
                 {rarityCards.length} cartes • {rarityUnlocked} débloquée{rarityUnlocked !== 1 ? 's' : ''}
               </p>
             </div>
@@ -164,7 +164,7 @@ export function Collection({ user, birthdays }: CollectionProps) {
                     background: '#FF4B4B',
                     border: '2px solid #fff',
                     fontFamily: "'Press Start 2P', monospace",
-                    fontSize: '7px',
+                    fontSize: '11px',
                     padding: '5px 8px',
                     borderRadius: 20,
                     transform: 'rotate(-12deg)',
@@ -293,13 +293,13 @@ export function Collection({ user, birthdays }: CollectionProps) {
                 }}>
                   <p style={{
                     fontFamily: "'Press Start 2P', monospace",
-                    fontSize: '4px', color: '#1a1a2e', lineHeight: 1.8,
+                    fontSize: '11px', color: '#1a1a2e', lineHeight: 1.8,
                   }}>
                     {card.title}
                   </p>
                   <p style={{
                     fontFamily: "'Press Start 2P', monospace",
-                    fontSize: '5px', color: '#58CC02',
+                    fontSize: '11px', color: '#58CC02',
                   }}>
                     +{card.xpReward} XP
                   </p>
@@ -378,24 +378,24 @@ export function Collection({ user, birthdays }: CollectionProps) {
               }}>
                 <p style={{
                   fontFamily: "'Press Start 2P', monospace",
-                  fontSize: '6px', color: RARITY_LABEL_COLOR[selected.rarity],
+                  fontSize: '11px', color: RARITY_LABEL_COLOR[selected.rarity],
                   marginBottom: 6,
                 }}>
                   {selected.rarity}
                 </p>
                 <p style={{
                   fontFamily: "'Press Start 2P', monospace",
-                  fontSize: '8px', color: '#1a1a2e', lineHeight: 1.8, marginBottom: 4,
+                  fontSize: '11px', color: '#1a1a2e', lineHeight: 1.8, marginBottom: 4,
                 }}>
                   {selected.title}
                 </p>
                 <p style={{
                   fontFamily: "'Press Start 2P', monospace",
-                  fontSize: '9px', color: '#58CC02', marginBottom: 10,
+                  fontSize: '12px', color: '#58CC02', marginBottom: 10,
                 }}>
                   +{selected.xpReward} XP
                 </p>
-                <p style={{ fontSize: 10, color: '#666', lineHeight: 1.6 }}>
+                <p style={{ fontSize: 12, color: '#475569', lineHeight: 1.6 }}>
                   {isSelectedUnlocked
                     ? `✅ ${selected.description}`
                     : `🎯 ${selected.unlockCondition}`}
@@ -407,7 +407,7 @@ export function Collection({ user, birthdays }: CollectionProps) {
               onClick={() => setSelectedCard(null)}
               style={{
                 fontFamily: "'Press Start 2P', monospace",
-                fontSize: '7px', color: 'rgba(255,255,255,0.6)',
+                fontSize: '11px', color: 'rgba(255,255,255,0.75)',
                 background: 'none', border: 'none', cursor: 'pointer',
               }}>
               ✕ FERMER

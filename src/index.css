@@ -2,19 +2,27 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Outfit", sans-serif;
-  --color-primary: #f472b6; /* rose-400 */
-  --color-secondary: #fbbf24; /* amber-400 */
-  --color-accent: #38bdf8; /* sky-400 */
-  --color-blue: #60a5fa; /* blue-400 */
-  --color-success: #34d399; /* emerald-400 */
-  --color-background: #f1f5f9; /* slate-100 for better contrast with white cards */
+  --color-primary: #FF4B4B;  /* Rouge Birthday Game */
+  --color-primary-dark: #CC2E2E;
+  --color-success: #58CC02;  /* Vert gamification */
+  --color-success-dark: #46A302;
+  --color-gold: #D4A017;
+  --color-background: #f1f5f9;
   --color-surface: #ffffff;
-  
-  --radius-xl: 1.5rem;
-  --radius-2xl: 2rem;
-  --radius-3xl: 2.5rem;
+
+  /* Texte WCAG AA */
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-muted: #64748b;
+
+  /* Border radius système */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-xxl: 24px;
 }
 
 body {

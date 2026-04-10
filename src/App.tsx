@@ -42,7 +42,7 @@ const GIGI_PARTICLES = [
 type Screen = 'dashboard' | 'scanner' | 'calendar' | 'collection' | 'profile';
 
 function AppContent() {
-  const { user, birthdays, challenges, loading, firebaseUser, setUser, addBirthday, deleteBirthday, incrementScansCount, unlockCard } = useAppState();
+  const { user, birthdays, challenges, loading, firebaseUser, setUser, addBirthday, updateBirthday, deleteBirthday, incrementScansCount, unlockCard } = useAppState();
   const [activeScreen, setActiveScreen] = useState<Screen>('dashboard');
   const [showSplash, setShowSplash] = useState(true);
   const [pendingDeepLink, setPendingDeepLink] = useState<string | null>(null);
@@ -109,9 +109,10 @@ function AppContent() {
     }
   };
 
-  if (loading || showSplash) {
+  // Splash screen (2.5s) — logo animé
+  if (showSplash) {
     return (
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="min-h-screen flex flex-col items-center justify-center gap-6"
@@ -127,7 +128,7 @@ function AppContent() {
           <h1 className="text-4xl font-black text-slate-900 uppercase tracking-tight">
             Birthday Game
           </h1>
-          <motion.div 
+          <motion.div
             className="h-1.5 bg-red-500 rounded-full mt-1"
             animate={{ width: [0, 48, 0] }}
             initial={{ width: 0 }}
@@ -135,6 +136,46 @@ function AppContent() {
           />
         </motion.div>
       </motion.div>
+    );
+  }
+
+  // Skeleton screen — Firebase charge les données après le splash
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-100 flex flex-col max-w-md mx-auto shadow-2xl overflow-hidden">
+        {/* Header skeleton */}
+        <div className="bg-white px-6 pt-12 pb-4 flex justify-between items-center border-b-2 border-slate-900">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-slate-200 animate-pulse" />
+            <div className="space-y-1.5">
+              <div className="w-32 h-4 rounded-md bg-slate-200 animate-pulse" />
+              <div className="w-20 h-2.5 rounded-md bg-slate-100 animate-pulse" />
+            </div>
+          </div>
+          <div className="w-10 h-10 rounded-full bg-slate-200 animate-pulse" />
+        </div>
+
+        {/* Contenu skeleton */}
+        <div className="flex-1 p-4 space-y-4">
+          {/* Calendrier skeleton */}
+          <div className="w-full h-64 rounded-2xl bg-white animate-pulse border border-slate-100 shadow-sm" />
+          {/* Carte anniversaire skeleton */}
+          <div className="w-full h-20 rounded-2xl bg-white animate-pulse border border-slate-100 shadow-sm" />
+          <div className="w-full h-20 rounded-2xl bg-white animate-pulse border border-slate-100 shadow-sm" />
+          {/* Bar chart skeleton */}
+          <div className="w-full h-36 rounded-2xl bg-white animate-pulse border border-slate-100 shadow-sm" />
+        </div>
+
+        {/* Nav skeleton */}
+        <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t-2 border-slate-900 px-6 py-4 flex justify-between items-center rounded-t-[2.5rem]">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="flex flex-col items-center gap-1.5">
+              <div className="w-10 h-10 rounded-xl bg-slate-200 animate-pulse" />
+              <div className="w-10 h-2 rounded bg-slate-100 animate-pulse" />
+            </div>
+          ))}
+        </div>
+      </div>
     );
   }
 
@@ -201,9 +242,9 @@ function AppContent() {
 
   const renderScreen = () => {
     switch (activeScreen) {
-      case 'dashboard': return <Dashboard birthdays={birthdays} user={user} />;
+      case 'dashboard': return <Dashboard birthdays={birthdays} user={user} onUpdateBirthday={updateBirthday} onDeleteBirthday={deleteBirthday} />;
       case 'scanner': return <Scanner onScan={addBirthday} onScanSuccess={incrementScansCount} existingBirthdays={birthdays} />;
-      case 'calendar': return <Calendar birthdays={birthdays} onAddBirthday={addBirthday} onDeleteBirthday={deleteBirthday} onFirstVisit={() => unlockCard('c2')} />;
+      case 'calendar': return <Calendar birthdays={birthdays} onAddBirthday={addBirthday} onUpdateBirthday={updateBirthday} onDeleteBirthday={deleteBirthday} onFirstVisit={() => unlockCard('c2')} />;
       case 'collection': return <Collection user={user} birthdays={birthdays} />;
       case 'profile': return <Profile user={user} onUpdate={setUser} birthdays={birthdays} challenges={challenges} />;
       default: return <Dashboard birthdays={birthdays} user={user} />;
@@ -253,8 +294,8 @@ function AppContent() {
               {activeScreen === 'dashboard' ? 'Birthday Game' : 
                activeScreen.charAt(0).toUpperCase() + activeScreen.slice(1)}
             </h1>
-            <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: '#FF4B4B' }}>
-              Niveau {user.level} • {user.xp} XP
+            <p className="text-[12px] font-black uppercase tracking-widest" style={{ color: '#FF4B4B', fontFamily: "'Press Start 2P', monospace" }}>
+              Niv.{user.level} • {user.xp} XP
             </p>
           </div>
         </div>
@@ -359,11 +400,15 @@ function AppContent() {
         )}
       </AnimatePresence>
 
-      <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/80 backdrop-blur-2xl border-t-2 border-slate-900 px-6 py-4 flex justify-between items-center z-50 rounded-t-[2.5rem] shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.05)]">
-        <NavButton active={activeScreen === 'dashboard'} onClick={() => setActiveScreen('dashboard')} icon="🏠" label="Home" />
-        <NavButton active={activeScreen === 'calendar'} onClick={() => setActiveScreen('calendar')} icon="📅" label="Calendar" />
+      <nav
+        aria-label="Navigation principale"
+        className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/80 backdrop-blur-2xl border-t-2 border-slate-900 px-6 py-4 flex justify-between items-center z-50 rounded-t-[2.5rem] shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.05)]"
+      >
+        <NavButton active={activeScreen === 'dashboard'} onClick={() => setActiveScreen('dashboard')} icon="🏠" label="Accueil" ariaLabel="Accueil" />
+        <NavButton active={activeScreen === 'calendar'} onClick={() => setActiveScreen('calendar')} icon="📅" label="Calendrier" ariaLabel="Calendrier des anniversaires" />
         <div className="relative -top-10">
-          <motion.button 
+          <motion.button
+            aria-label="Scanner un QR code"
             whileHover={{ scale: 1.15, rotate: 5 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setActiveScreen('scanner')}
@@ -373,8 +418,8 @@ function AppContent() {
             <QrCode size={32} strokeWidth={2.5} className="relative z-10" />
           </motion.button>
         </div>
-        <NavButton active={activeScreen === 'collection'} onClick={() => setActiveScreen('collection')} icon="🃏" label="Cards" />
-        <NavButton active={activeScreen === 'profile'} onClick={() => setActiveScreen('profile')} icon="👤" label="Profile" />
+        <NavButton active={activeScreen === 'collection'} onClick={() => setActiveScreen('collection')} icon="🃏" label="Cartes" ariaLabel="Ma collection de cartes" />
+        <NavButton active={activeScreen === 'profile'} onClick={() => setActiveScreen('profile')} icon="👤" label="Profil" ariaLabel="Mon profil" />
       </nav>
     </div>
   );
@@ -388,10 +433,12 @@ export default function App() {
   );
 }
 
-function NavButton({ active, onClick, icon, label }: { active: boolean, onClick: () => void, icon: string, label: string }) {
+function NavButton({ active, onClick, icon, label, ariaLabel }: { active: boolean, onClick: () => void, icon: string, label: string, ariaLabel: string }) {
   return (
-    <button 
+    <button
       onClick={onClick}
+      aria-label={ariaLabel}
+      aria-current={active ? 'page' : undefined}
       className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${active ? 'scale-110' : 'opacity-40 hover:opacity-70'}`}
     >
       <motion.div

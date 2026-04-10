@@ -50,8 +50,32 @@ export function Onboarding({ onComplete }: { onComplete: (user: UserProfile) => 
     }
   };
 
+  const TOTAL_STEPS = 3;
+  const stepLabels = ['Ton profil', 'Tes réseaux', 'Ta wishlist'];
+
   return (
     <div className="min-h-screen bg-rose-400 flex flex-col max-w-md mx-auto text-white p-8">
+
+      {/* Barre de progression */}
+      <div className="pt-10 pb-6 space-y-2">
+        <div className="flex justify-between items-center">
+          <span className="text-white/70 text-xs font-bold uppercase tracking-widest">
+            {stepLabels[step - 1]}
+          </span>
+          <span className="text-white/70 text-xs font-bold uppercase tracking-widest">
+            {step}/{TOTAL_STEPS}
+          </span>
+        </div>
+        <div className="w-full h-1.5 bg-white/20 rounded-full overflow-hidden">
+          <motion.div
+            className="h-full bg-white rounded-full"
+            initial={{ width: `${((step - 1) / TOTAL_STEPS) * 100}%` }}
+            animate={{ width: `${(step / TOTAL_STEPS) * 100}%` }}
+            transition={{ duration: 0.4, ease: 'easeInOut' }}
+          />
+        </div>
+      </div>
+
       <div className="flex-1 flex flex-col justify-center">
         <motion.div
           key={step}

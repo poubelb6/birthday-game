@@ -1,13 +1,21 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useEffect } from 'react';
-import { Star, Calendar as CalendarIcon, X, Trophy } from 'lucide-react';
+import { Star, Calendar as CalendarIcon, X, Trophy, Users, Search } from 'lucide-react';
 import { Birthday, UserProfile } from '../types';
 import { format, differenceInDays, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, startOfDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, where, documentId } from 'firebase/firestore';
 import { db } from '../firebase';
+import { FriendEditModal } from '../components/FriendEditModal';
+import { FriendProfileModal } from '../components/FriendProfileModal';
+import { checkUnlockedCards } from '../utils/gameLogic';
 
-export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: UserProfile | null }) {
+export function Dashboard({ birthdays, user, onUpdateBirthday, onDeleteBirthday }: {
+  birthdays: Birthday[],
+  user: UserProfile | null,
+  onUpdateBirthday?: (id: string, updates: Partial<Birthday>) => Promise<void>,
+  onDeleteBirthday?: (id: string) => void,
+}) {
   const today = new Date();
   const monthStart = startOfMonth(today);
   const monthEnd = endOfMonth(today);
@@ -17,6 +25,12 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [leaderboard, setLeaderboard] = useState<UserProfile[]>([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
+  const [selectedFriend, setSelectedFriend] = useState<Birthday | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<Birthday | null>(null);
+  const [showFriendsModal, setShowFriendsModal] = useState(false);
+  const [viewingFriend, setViewingFriend] = useState<Birthday | null>(null);
+  const [friendSearch, setFriendSearch] = useState('');
+  const [friendsWithAccount, setFriendsWithAccount] = useState<Set<string>>(new Set());
 
     useEffect(() => {
       const cycle = () => {
@@ -27,6 +41,21 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
       const interval = setInterval(cycle, 8000);
       return () => clearInterval(interval);
     }, []);
+
+  useEffect(() => {
+    if (birthdays.length === 0) { setFriendsWithAccount(new Set()); return; }
+    const ids = birthdays.map(b => b.id).filter(Boolean);
+    // Firestore `in` is limited to 30 per query — batch if needed
+    const batches: string[][] = [];
+    for (let i = 0; i < ids.length; i += 30) batches.push(ids.slice(i, i + 30));
+    Promise.all(
+      batches.map(batch =>
+        getDocs(query(collection(db, 'users'), where(documentId(), 'in', batch)))
+      )
+    ).then(snapshots => {
+      setFriendsWithAccount(new Set(snapshots.flatMap(s => s.docs.map(d => d.id))));
+    }).catch(() => {});
+  }, [birthdays.length]);
 
   const openLeaderboard = async () => {
     setShowLeaderboard(true);
@@ -171,6 +200,7 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.1 }}
                 whileHover={{ x: 4 }}
+                onClick={() => setSelectedFriend(b)}
                 className="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-4 group cursor-pointer hover:border-rose-200 transition-colors"
               >
                 <div className="w-14 h-14 bg-slate-100 rounded-2xl overflow-hidden flex-shrink-0">
@@ -178,7 +208,7 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
                 </div>
                 <div className="flex-1">
                   <h4 className="font-bold text-slate-900">{b.name}</h4>
-                  <p className="text-xs text-slate-500 font-medium">
+                  <p className="text-xs text-slate-600 font-medium">
                     {format(parseISO(b.birthDate), 'd MMMM', { locale: fr })} • {b.zodiac}
                   </p>
                 </div>
@@ -208,12 +238,153 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
               <Star className="text-slate-300" size={32} />
             </div>
             <div className="space-y-1">
-              <p className="font-bold text-slate-400">Aucun anniversaire</p>
-              <p className="text-xs text-slate-400">Scanne un QR code pour commencer ta collection !</p>
+              <p className="font-bold text-slate-600">Aucun anniversaire</p>
+              <p className="text-xs text-slate-500">Scanne un QR code pour commencer ta collection !</p>
             </div>
           </div>
         )}
       </section>
+
+      {/* ── Voir mes amis — compact pill ─────────────────────── */}
+      <div className="flex justify-center">
+        <motion.button
+          type="button"
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.96 }}
+          onClick={() => { setShowFriendsModal(true); setFriendSearch(''); }}
+          className="flex items-center gap-2.5 px-5 py-2.5 bg-white rounded-full border border-slate-200 shadow-sm"
+        >
+          <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: '#FF4B4B' }}>
+            <Users size={12} className="text-white" />
+          </div>
+          <span className="text-sm font-black text-slate-800">Voir mes amis</span>
+          <span className="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+            {birthdays.length}
+          </span>
+        </motion.button>
+      </div>
+
+      {/* ── Friends list modal ───────────────────────────────── */}
+      <AnimatePresence>
+        {showFriendsModal && (
+          <div className="fixed inset-0 z-[150] flex items-center justify-center p-6">
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setShowFriendsModal(false)}
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl flex flex-col max-h-[90vh]"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-center relative px-8 pt-8 pb-4 shrink-0">
+                <div className="text-center">
+                  <h3 className="font-display text-xl font-black text-slate-900">Mes amis</h3>
+                  <p className="text-xs font-bold text-rose-400 uppercase tracking-widest mt-0.5">
+                    {birthdays.length} contact{birthdays.length !== 1 ? 's' : ''}
+                    {friendsWithAccount.size > 0 && ` · ${friendsWithAccount.size} sur l'appli`}
+                  </p>
+                </div>
+                <button onClick={() => setShowFriendsModal(false)} className="absolute right-8 text-slate-500 hover:text-slate-700">
+                  <X size={24} />
+                </button>
+              </div>
+
+              {/* Search */}
+              <div className="px-8 pb-3 shrink-0">
+                <div className="flex items-center gap-2 bg-slate-50 border border-black/60 rounded-2xl px-4 py-2.5">
+                  <Search size={14} className="text-slate-400 shrink-0" />
+                  <input
+                    type="text"
+                    value={friendSearch}
+                    onChange={e => setFriendSearch(e.target.value)}
+                    placeholder="Rechercher un ami..."
+                    className="flex-1 bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* List */}
+              <div className="overflow-y-auto px-8 pb-8 space-y-2">
+                {birthdays.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12 gap-3 text-center">
+                    <span className="text-4xl">👥</span>
+                    <p className="font-bold text-slate-400 text-sm">Aucun ami pour l'instant</p>
+                    <p className="text-xs text-slate-400">Scanne un QR code pour commencer !</p>
+                  </div>
+                ) : (() => {
+                  const filtered = [...birthdays]
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .filter(b => b.name.toLowerCase().includes(friendSearch.toLowerCase()));
+                  if (filtered.length === 0) return (
+                    <div className="flex flex-col items-center justify-center py-10 gap-2 text-center">
+                      <span className="text-3xl">🔍</span>
+                      <p className="font-bold text-slate-400 text-sm">Aucun résultat</p>
+                    </div>
+                  );
+                  return filtered.map((b, i) => {
+                    const hasAccount = friendsWithAccount.has(b.id);
+                    const socialIcons: Record<string, string> = { instagram: '📸', snapchat: '👻', tiktok: '🎵', twitter: '🐦', facebook: '👤' };
+                    const filledSocials = b.socials ? Object.entries(b.socials).filter(([, v]) => v) : [];
+                    return (
+                      <motion.div
+                        key={b.id}
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.03 }}
+                        onClick={() => { setViewingFriend(b); setShowFriendsModal(false); }}
+                        className="flex items-center gap-3 p-3 bg-slate-50 border border-black/60 rounded-2xl cursor-pointer hover:border-sky-400 transition-colors active:scale-[0.98]"
+                      >
+                        <div className="relative shrink-0">
+                          <img
+                            src={b.photoUrl || `https://picsum.photos/seed/${b.id}/80/80`}
+                            alt={b.name}
+                            className="w-11 h-11 rounded-xl object-cover border border-black/10"
+                          />
+                          {hasAccount && (
+                            <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-emerald-400 rounded-full border-2 border-white flex items-center justify-center">
+                              <span className="text-[7px]">✓</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <p className="font-black text-slate-900 text-sm truncate">{b.name}</p>
+                            {hasAccount && <span className="text-[8px] font-black text-emerald-600 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded-full shrink-0">🎮</span>}
+                          </div>
+                          <p className="text-[11px] text-slate-600 font-medium">
+                            {format(parseISO(b.birthDate), 'd MMM', { locale: fr })} · {b.zodiac}
+                          </p>
+                          {filledSocials.length > 0 && (
+                            <div className="flex gap-1 mt-0.5">
+                              {filledSocials.map(([key]) => (
+                                <span key={key} className="text-[11px]">{socialIcons[key]}</span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <span className="text-slate-400 text-lg shrink-0">›</span>
+                      </motion.div>
+                    );
+                  });
+                })()}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Friend profile modal ─────────────────────────────── */}
+      <FriendProfileModal
+        friend={viewingFriend}
+        hasAccount={viewingFriend ? friendsWithAccount.has(viewingFriend.id) : false}
+        onClose={() => setViewingFriend(null)}
+        onEdit={() => { setSelectedFriend(viewingFriend); setViewingFriend(null); }}
+      />
 
       <section className="space-y-4">
         <div className="flex flex-col items-center justify-center text-center">
@@ -309,7 +480,7 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
         >
           <p className="text-[11px] font-black uppercase tracking-widest text-rose-900/80 text-center">Total Amis</p>
           <p className="text-2xl font-black text-center">{birthdays.length}</p>
-          <p className="text-[9px] font-bold text-rose-900/60 uppercase tracking-widest text-center">Voir classement</p>
+          <p className="text-[11px] font-bold text-rose-900/60 uppercase tracking-widest text-center">Voir classement</p>
         </motion.div>
         <motion.div
           whileHover={{ y: -4 }}
@@ -408,7 +579,7 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
                         {/* Info */}
                         <div className="flex-1 min-w-0">
                           <p className="font-black text-slate-900 text-sm truncate">{friend.name}</p>
-                          <p className="text-[11px] font-bold text-slate-400">Niveau {friend.level}</p>
+                          <p className="text-[11px] font-bold text-slate-600">Niveau {friend.level}</p>
                         </div>
 
                         {/* XP */}
@@ -425,6 +596,56 @@ export function Dashboard({ birthdays, user }: { birthdays: Birthday[], user: Us
               </div>
             </motion.div>
           </>
+        )}
+      </AnimatePresence>
+
+      {/* Edit friend modal */}
+      <FriendEditModal
+        friend={selectedFriend}
+        onClose={() => setSelectedFriend(null)}
+        onSave={onUpdateBirthday ?? (async () => {})}
+        onDelete={(b) => { setConfirmDelete(b); setSelectedFriend(null); }}
+      />
+
+      {/* Confirm delete */}
+      <AnimatePresence>
+        {confirmDelete && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setConfirmDelete(null)}
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              className="relative w-full max-w-xs bg-white rounded-3xl p-6 shadow-2xl space-y-5"
+            >
+              <p className="text-center font-black text-slate-900 text-base leading-snug">
+                Es-tu sûr de vouloir supprimer<br />
+                <span className="text-rose-500">{confirmDelete.name}</span> ?
+              </p>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setConfirmDelete(null)}
+                  className="flex-1 py-3 rounded-2xl bg-slate-100 text-slate-600 font-black text-sm"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { onDeleteBirthday?.(confirmDelete.id); setConfirmDelete(null); }}
+                  className="flex-1 py-3 rounded-2xl font-black text-sm text-white"
+                  style={{ background: '#FF4B4B', boxShadow: '0 4px 0 #c0392b' }}
+                >
+                  Supprimer
+                </button>
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </div>
