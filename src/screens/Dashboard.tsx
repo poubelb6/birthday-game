@@ -6,8 +6,7 @@ import { format, differenceInDays, parseISO, startOfMonth, endOfMonth, eachDayOf
 import { fr } from 'date-fns/locale';
 import { collection, getDocs, query, orderBy, where, documentId } from 'firebase/firestore';
 import { db } from '../firebase';
-import { FriendEditModal } from '../components/FriendEditModal';
-import { FriendProfileModal } from '../components/FriendProfileModal';
+import { FriendPanel } from '../components/FriendPanel';
 import { checkUnlockedCards } from '../utils/gameLogic';
 
 export function Dashboard({ birthdays, user, onUpdateBirthday, onDeleteBirthday }: {
@@ -25,7 +24,7 @@ export function Dashboard({ birthdays, user, onUpdateBirthday, onDeleteBirthday 
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [leaderboard, setLeaderboard] = useState<UserProfile[]>([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
-  const [selectedFriend, setSelectedFriend] = useState<Birthday | null>(null);
+
   const [confirmDelete, setConfirmDelete] = useState<Birthday | null>(null);
   const [showFriendsModal, setShowFriendsModal] = useState(false);
   const [viewingFriend, setViewingFriend] = useState<Birthday | null>(null);
@@ -104,7 +103,7 @@ export function Dashboard({ birthdays, user, onUpdateBirthday, onDeleteBirthday 
         {nextBirthday ? (
           <motion.div
             whileTap={{ scale: 0.98 }}
-            onClick={() => setSelectedFriend(nextBirthday)}
+            onClick={() => setViewingFriend(nextBirthday)}
             className="relative overflow-hidden rounded-3xl cursor-pointer"
             style={{
               background: nextBirthday.daysUntil <= 7
@@ -440,7 +439,7 @@ export function Dashboard({ birthdays, user, onUpdateBirthday, onDeleteBirthday 
                         initial={{ opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.03 }}
-                        onClick={() => { setViewingFriend(b); setShowFriendsModal(false); }}
+                        onClick={() => { setShowFriendsModal(false); setTimeout(() => setViewingFriend(b), 80); }}
                         className="flex items-center gap-3 p-3 bg-slate-50 border border-black/60 rounded-2xl cursor-pointer hover:border-sky-400 transition-colors active:scale-[0.98]"
                       >
                         <div className="relative shrink-0">
@@ -482,12 +481,13 @@ export function Dashboard({ birthdays, user, onUpdateBirthday, onDeleteBirthday 
         )}
       </AnimatePresence>
 
-      {/* ── Friend profile modal ─────────────────────────────── */}
-      <FriendProfileModal
+      {/* ── Friend panel (profil + édition inline) ──────────── */}
+      <FriendPanel
         friend={viewingFriend}
         hasAccount={viewingFriend ? friendsWithAccount.has(viewingFriend.id) : false}
         onClose={() => setViewingFriend(null)}
-        onEdit={() => { setSelectedFriend(viewingFriend); setViewingFriend(null); }}
+        onSave={onUpdateBirthday ?? (async () => {})}
+        onDelete={(b) => { setViewingFriend(null); setConfirmDelete(b); }}
       />
 
       <section className="space-y-4">
@@ -702,14 +702,6 @@ export function Dashboard({ birthdays, user, onUpdateBirthday, onDeleteBirthday 
           </>
         )}
       </AnimatePresence>
-
-      {/* Edit friend modal */}
-      <FriendEditModal
-        friend={selectedFriend}
-        onClose={() => setSelectedFriend(null)}
-        onSave={onUpdateBirthday ?? (async () => {})}
-        onDelete={(b) => { setConfirmDelete(b); setSelectedFriend(null); }}
-      />
 
       {/* Confirm delete */}
       <AnimatePresence>
