@@ -402,24 +402,34 @@ function AppContent() {
 
       <nav
         aria-label="Navigation principale"
-        className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/80 backdrop-blur-2xl border-t-2 border-slate-900 px-6 py-4 flex justify-between items-center z-50 rounded-t-[2.5rem] shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.05)]"
+        className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/80 backdrop-blur-2xl border-t-2 border-slate-900 px-2 py-4 flex items-center z-50 rounded-t-[2.5rem] shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.05)]"
       >
-        <NavButton active={activeScreen === 'dashboard'} onClick={() => setActiveScreen('dashboard')} icon="🏠" label="Accueil" ariaLabel="Accueil" />
-        <NavButton active={activeScreen === 'calendar'} onClick={() => setActiveScreen('calendar')} icon="📅" label="Calendrier" ariaLabel="Calendrier des anniversaires" />
-        <div className="relative -top-10">
-          <motion.button
-            aria-label="Scanner un QR code"
-            whileHover={{ scale: 1.15, rotate: 5 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => setActiveScreen('scanner')}
-            className="w-16 h-16 rounded-2xl flex items-center justify-center text-white relative overflow-hidden"
-            style={{ background: '#FF4B4B' }}
-          >
-            <QrCode size={32} strokeWidth={2.5} className="relative z-10" />
-          </motion.button>
+        <div className="flex-1 flex justify-center">
+          <NavButton active={activeScreen === 'dashboard'} onClick={() => setActiveScreen('dashboard')} icon="🏠" label="Accueil" ariaLabel="Accueil" />
         </div>
-        <NavButton active={activeScreen === 'collection'} onClick={() => setActiveScreen('collection')} icon="🃏" label="Cartes" ariaLabel="Ma collection de cartes" />
-        <NavButton active={activeScreen === 'profile'} onClick={() => setActiveScreen('profile')} icon="👤" label="Profil" ariaLabel="Mon profil" />
+        <div className="flex-1 flex justify-center">
+          <NavButton active={activeScreen === 'calendar'} onClick={() => setActiveScreen('calendar')} icon="📅" label="Calendrier" ariaLabel="Calendrier des anniversaires" />
+        </div>
+        <div className="flex-1 flex justify-center relative">
+          <div className="absolute -top-10">
+            <motion.button
+              aria-label="Scanner un QR code"
+              whileHover={{ scale: 1.15, rotate: 5 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setActiveScreen('scanner')}
+              className="w-16 h-16 rounded-2xl flex items-center justify-center text-white"
+              style={{ background: '#FF4B4B' }}
+            >
+              <QrCode size={32} strokeWidth={2.5} />
+            </motion.button>
+          </div>
+        </div>
+        <div className="flex-1 flex justify-center">
+          <NavButton active={activeScreen === 'collection'} onClick={() => setActiveScreen('collection')} icon="🃏" label="Cartes" ariaLabel="Ma collection de cartes" />
+        </div>
+        <div className="flex-1 flex justify-center">
+          <NavButton active={activeScreen === 'profile'} onClick={() => setActiveScreen('profile')} icon="👤" label="Profil" ariaLabel="Mon profil" />
+        </div>
       </nav>
     </div>
   );
