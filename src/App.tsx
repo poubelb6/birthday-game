@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   QrCode,
-  Bell,
+  Plus,
   X,
 } from 'lucide-react';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
@@ -46,6 +46,7 @@ function AppContent() {
   const [activeScreen, setActiveScreen] = useState<Screen>('dashboard');
   const [showSplash, setShowSplash] = useState(true);
   const [pendingDeepLink, setPendingDeepLink] = useState<string | null>(null);
+  const [triggerAddFriend, setTriggerAddFriend] = useState(false);
   const [celebrationFriend, setCelebrationFriend] = useState<Birthday | null>(null);
   const [gigiBg, setGigiBg] = useState(() => localStorage.getItem('gigiBg') === 'true');
 
@@ -244,7 +245,7 @@ function AppContent() {
     switch (activeScreen) {
       case 'dashboard': return <Dashboard birthdays={birthdays} user={user} onUpdateBirthday={updateBirthday} onDeleteBirthday={deleteBirthday} />;
       case 'scanner': return <Scanner onScan={addBirthday} onScanSuccess={incrementScansCount} existingBirthdays={birthdays} />;
-      case 'calendar': return <Calendar birthdays={birthdays} onAddBirthday={addBirthday} onUpdateBirthday={updateBirthday} onDeleteBirthday={deleteBirthday} onFirstVisit={() => unlockCard('c2')} />;
+      case 'calendar': return <Calendar birthdays={birthdays} onAddBirthday={addBirthday} onUpdateBirthday={updateBirthday} onDeleteBirthday={deleteBirthday} onFirstVisit={() => unlockCard('c2')} openAddModal={triggerAddFriend} onAddModalOpened={() => setTriggerAddFriend(false)} />;
       case 'collection': return <Collection user={user} birthdays={birthdays} />;
       case 'profile': return <Profile user={user} onUpdate={setUser} birthdays={birthdays} challenges={challenges} />;
       default: return <Dashboard birthdays={birthdays} user={user} />;
@@ -299,15 +300,16 @@ function AppContent() {
             </p>
           </div>
         </div>
-        <button className="p-2 rounded-full relative group border-2 border-slate-900" style={{ background: '#FEFCE8' }}>
-          <Bell size={20} style={{ color: '#A16207' }} className="group-hover:rotate-12 transition-transform" />
-          <motion.span 
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="absolute top-1 right-1 w-2 h-2 rounded-full border-2 border-white shadow-sm"
-            style={{ background: '#FF4B4B' }}
-          />
-        </button>
+        <motion.button
+          onClick={() => setActiveScreen('scanner')}
+          aria-label="Scanner un QR code"
+          whileHover={{ scale: 1.15, rotate: 5 }}
+          whileTap={{ scale: 0.9 }}
+          className="w-12 h-12 rounded-2xl flex items-center justify-center text-white"
+          style={{ background: '#FF4B4B' }}
+        >
+          <QrCode size={24} strokeWidth={2.5} />
+        </motion.button>
       </header>
 
       <main className={activeScreen === 'scanner' ? 'flex-1 overflow-hidden flex flex-col pb-24' : 'flex-1 overflow-y-auto pb-24'}>
@@ -410,19 +412,17 @@ function AppContent() {
         <div className="flex-1 flex justify-center">
           <NavButton active={activeScreen === 'calendar'} onClick={() => setActiveScreen('calendar')} icon="📅" label="Calendrier" ariaLabel="Calendrier des anniversaires" />
         </div>
-        <div className="flex-1 flex justify-center relative">
-          <div className="absolute -top-16">
-            <motion.button
-              aria-label="Scanner un QR code"
-              whileHover={{ scale: 1.15, rotate: 5 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => setActiveScreen('scanner')}
-              className="w-16 h-16 rounded-2xl flex items-center justify-center text-white"
-              style={{ background: '#FF4B4B' }}
-            >
-              <QrCode size={32} strokeWidth={2.5} />
-            </motion.button>
-          </div>
+        <div className="flex-1 flex justify-center">
+          <motion.button
+            aria-label="Ajouter un ami"
+            whileHover={{ scale: 1.15, rotate: 5 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => { setActiveScreen('calendar'); setTriggerAddFriend(true); }}
+            className="w-14 h-14 rounded-2xl flex items-center justify-center text-white"
+            style={{ background: '#FF4B4B' }}
+          >
+            <Plus size={28} strokeWidth={2.5} />
+          </motion.button>
         </div>
         <div className="flex-1 flex justify-center">
           <NavButton active={activeScreen === 'collection'} onClick={() => setActiveScreen('collection')} icon="🃏" label="Cartes" ariaLabel="Ma collection de cartes" />

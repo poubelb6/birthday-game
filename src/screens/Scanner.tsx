@@ -41,6 +41,15 @@ const SOCIAL_LABELS: Record<string, string> = {
   facebook:  '👤 Facebook',
 };
 
+const SOCIAL_URL: Record<string, (u: string) => string> = {
+  instagram: u => `https://instagram.com/${u.replace(/^@/, '')}`,
+  twitter:   u => `https://x.com/${u.replace(/^@/, '')}`,
+  facebook:  u => `https://facebook.com/${u.replace(/^@/, '')}`,
+  snapchat:  u => `https://snapchat.com/add/${u.replace(/^@/, '')}`,
+  tiktok:    u => `https://tiktok.com/@${u.replace(/^@/, '')}`,
+  linkedin:  u => `https://linkedin.com/in/${u.replace(/^@/, '')}`,
+};
+
 // Particles spread across the dark overlay area, outside the scan square
 const PARTICLES: { x: string; y: string; size: number; duration: number; delay: number; rise: number; color: string; glow: string }[] = [
   // Red — top area
@@ -357,14 +366,27 @@ export function Scanner({ onScan, onScanSuccess, existingBirthdays = [] }: {
               {/* Socials */}
               {activeSocials.length > 0 && (
                 <div className="flex flex-wrap gap-2">
-                  {activeSocials.map(([key, val]) => (
-                    <span
-                      key={key}
-                      className="text-xs font-bold px-3 py-1.5 rounded-full bg-slate-100 text-slate-600"
-                    >
-                      {SOCIAL_LABELS[key] ?? key} {val}
-                    </span>
-                  ))}
+                  {activeSocials.map(([key, val]) => {
+                    const url = SOCIAL_URL[key]?.(val as string);
+                    return url ? (
+                      <a
+                        key={key}
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs font-bold px-3 py-1.5 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
+                      >
+                        {SOCIAL_LABELS[key] ?? key} {val}
+                      </a>
+                    ) : (
+                      <span
+                        key={key}
+                        className="text-xs font-bold px-3 py-1.5 rounded-full bg-slate-100 text-slate-600"
+                      >
+                        {SOCIAL_LABELS[key] ?? key} {val}
+                      </span>
+                    );
+                  })}
                 </div>
               )}
 

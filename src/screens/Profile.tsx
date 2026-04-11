@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Share2, Settings, Instagram, Gift, ChevronRight, Sparkles, Users, Trophy, ExternalLink, Copy, Twitter, Facebook, Save, X, Smartphone, LogOut, Ghost, Camera } from 'lucide-react';
+import { Share2, Settings, Instagram, Gift, ChevronRight, Sparkles, Users, Trophy, ExternalLink, Copy, Twitter, Facebook, Save, X, Smartphone, LogOut, Ghost, Camera, Plus, Trash2 } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { auth, storage } from '../firebase';
@@ -9,12 +9,22 @@ import { UserProfile } from '../types';
 import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
+const SOCIAL_URL: Record<string, (u: string) => string> = {
+  instagram: u => `https://instagram.com/${u.replace(/^@/, '')}`,
+  twitter:   u => `https://x.com/${u.replace(/^@/, '')}`,
+  facebook:  u => `https://facebook.com/${u.replace(/^@/, '')}`,
+  snapchat:  u => `https://snapchat.com/add/${u.replace(/^@/, '')}`,
+  tiktok:    u => `https://tiktok.com/@${u.replace(/^@/, '')}`,
+  linkedin:  u => `https://linkedin.com/in/${u.replace(/^@/, '')}`,
+};
+
 export function Profile({ user, onUpdate, birthdays = [], challenges = [] }: { user: UserProfile, onUpdate: (user: UserProfile) => Promise<void>, birthdays?: any[], challenges?: any[] }) {
   const [isEditingSocials, setIsEditingSocials] = useState(false);
   const [socials, setSocials] = useState(user.socials);
   const [saving, setSaving] = useState(false);
   const [isEditingWishlist, setIsEditingWishlist] = useState(false);
-  const [wishlistText, setWishlistText] = useState((user.wishlist ?? []).join(', '));
+  const [wishlistItems, setWishlistItems] = useState<string[]>(user.wishlist ?? []);
+  const [wishInput, setWishInput] = useState('');
   const [copied, setCopied] = useState(false);
   const [showShareOptions, setShowShareOptions] = useState(false);
   const [photoUploading, setPhotoUploading] = useState(false);
@@ -95,9 +105,8 @@ export function Profile({ user, onUpdate, birthdays = [], challenges = [] }: { u
   };
 
   const handleSaveWishlist = async () => {
-    const newWishlist = wishlistText.split(',').map((s: string) => s.trim()).filter(Boolean);
     try {
-      await onUpdate({ ...user, wishlist: newWishlist });
+      await onUpdate({ ...user, wishlist: wishlistItems });
       setIsEditingWishlist(false);
     } catch (e) {
       console.error('Failed to save wishlist:', e);
@@ -431,36 +440,86 @@ const getZodiacEmoji = (zodiac: string) => {
               <Gift size={18} className="text-rose-500" />
               <h3 className="text-lg font-black text-slate-900">Ma Wishlist</h3>
             </div>
-            <button onClick={() => { setWishlistText((user.wishlist ?? []).join(', ')); setIsEditingWishlist(!isEditingWishlist); }} className="text-xs font-black text-sky-500 uppercase tracking-widest">
+            <button
+              onClick={() => { setWishlistItems(user.wishlist ?? []); setWishInput(''); setIsEditingWishlist(!isEditingWishlist); }}
+              className="text-xs font-black text-sky-500 uppercase tracking-widest"
+            >
               {isEditingWishlist ? 'Annuler' : 'Modifier'}
             </button>
           </div>
+
           {isEditingWishlist ? (
             <div className="space-y-3">
-              <textarea
-                value={wishlistText}
-                onChange={e => setWishlistText(e.target.value)}
-                placeholder="Lego, Chocolat, Voyage..."
-                className="w-full bg-slate-50 border border-black/60 rounded-2xl p-4 text-slate-900 focus:outline-none focus:border-rose-400 transition-colors h-24 resize-none"
-              />
-              <button onClick={handleSaveWishlist} className="w-full bg-rose-500 text-white font-bold py-3 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-rose-100 hover:bg-rose-600 transition-colors">
+              {/* Input + bouton ajout */}
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={wishInput}
+                  onChange={e => setWishInput(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && wishInput.trim()) {
+                      setWishlistItems(w => [...w, wishInput.trim()]);
+                      setWishInput('');
+                    }
+                  }}
+                  placeholder="Ex: Lego, Chocolat, Voyage..."
+                  className="flex-1 bg-slate-50 border border-black/60 rounded-2xl px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-rose-400 transition-colors"
+                />
+                <button
+                  type="button"
+                  disabled={!wishInput.trim()}
+                  onClick={() => {
+                    if (!wishInput.trim()) return;
+                    setWishlistItems(w => [...w, wishInput.trim()]);
+                    setWishInput('');
+                  }}
+                  className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 disabled:opacity-40 transition-opacity"
+                  style={{ background: '#FF4B4B' }}
+                >
+                  <Plus size={18} className="text-white" strokeWidth={3} />
+                </button>
+              </div>
+
+              {/* Tags éditables */}
+              {wishlistItems.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {wishlistItems.map((item, i) => (
+                    <span key={i} className="bg-white border border-slate-100 px-4 py-2.5 rounded-2xl text-sm font-bold text-slate-600 shadow-sm flex items-center gap-2">
+                      <span className="text-base leading-none">🎁</span>
+                      {item}
+                      <button
+                        type="button"
+                        onClick={() => setWishlistItems(w => w.filter((_, j) => j !== i))}
+                        className="text-slate-300 hover:text-rose-500 transition-colors ml-1"
+                      >
+                        <X size={13} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              <button
+                onClick={handleSaveWishlist}
+                className="w-full bg-rose-500 text-white font-bold py-3 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-rose-100 hover:bg-rose-600 transition-colors"
+              >
                 <Save size={18} />
                 ENREGISTRER
               </button>
             </div>
           ) : (
-          <div className="flex flex-wrap gap-2">
-            {(user.wishlist ?? []).map((item, i) => (
-              <motion.span 
-                key={i} 
-                whileHover={{ scale: 1.05 }}
-                className="bg-white border border-slate-100 px-5 py-3 rounded-2xl text-sm font-bold text-slate-600 shadow-sm flex items-center gap-2"
-              >
-                <div className="w-1.5 h-1.5 bg-rose-400 rounded-full" />
-                {item}
-              </motion.span>
-            ))}
-          </div>
+            <div className="flex flex-wrap gap-2">
+              {(user.wishlist ?? []).map((item, i) => (
+                <motion.span
+                  key={i}
+                  whileHover={{ scale: 1.05 }}
+                  className="bg-white border border-slate-100 px-5 py-3 rounded-2xl text-sm font-bold text-slate-600 shadow-sm flex items-center gap-2"
+                >
+                  <span className="text-base leading-none">🎁</span>
+                  {item}
+                </motion.span>
+              ))}
+            </div>
           )}
         </motion.section>
 
@@ -564,7 +623,7 @@ const getZodiacEmoji = (zodiac: string) => {
                 className="space-y-2"
               >
                 {user.socials.instagram && (
-                  <button className="w-full bg-white p-5 rounded-[2rem] border border-slate-50 shadow-sm flex items-center justify-between group hover:border-rose-200 transition-colors">
+                  <a href={SOCIAL_URL.instagram(user.socials.instagram)} target="_blank" rel="noopener noreferrer" className="w-full bg-white p-5 rounded-[2rem] border border-slate-50 shadow-sm flex items-center justify-between group hover:border-rose-200 transition-colors">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-gradient-to-tr from-amber-400 via-rose-500 to-purple-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-rose-100">
                         <Instagram size={24} />
@@ -575,11 +634,11 @@ const getZodiacEmoji = (zodiac: string) => {
                       </div>
                     </div>
                     <ExternalLink size={18} className="text-slate-300 group-hover:text-rose-400 transition-colors" />
-                  </button>
+                  </a>
                 )}
 
                 {user.socials.twitter && (
-                  <button className="w-full bg-white p-5 rounded-[2rem] border border-slate-50 shadow-sm flex items-center justify-between group hover:border-sky-200 transition-colors">
+                  <a href={SOCIAL_URL.twitter(user.socials.twitter)} target="_blank" rel="noopener noreferrer" className="w-full bg-white p-5 rounded-[2rem] border border-slate-50 shadow-sm flex items-center justify-between group hover:border-sky-200 transition-colors">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-sky-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-sky-100">
                         <Twitter size={24} />
@@ -590,11 +649,11 @@ const getZodiacEmoji = (zodiac: string) => {
                       </div>
                     </div>
                     <ExternalLink size={18} className="text-slate-300 group-hover:text-sky-400 transition-colors" />
-                  </button>
+                  </a>
                 )}
 
                 {user.socials.facebook && (
-                  <button className="w-full bg-white p-5 rounded-[2rem] border border-slate-50 shadow-sm flex items-center justify-between group hover:border-blue-200 transition-colors">
+                  <a href={SOCIAL_URL.facebook(user.socials.facebook)} target="_blank" rel="noopener noreferrer" className="w-full bg-white p-5 rounded-[2rem] border border-slate-50 shadow-sm flex items-center justify-between group hover:border-blue-200 transition-colors">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-100">
                         <Facebook size={24} />
@@ -605,11 +664,11 @@ const getZodiacEmoji = (zodiac: string) => {
                       </div>
                     </div>
                     <ExternalLink size={18} className="text-slate-300 group-hover:text-blue-400 transition-colors" />
-                  </button>
+                  </a>
                 )}
 
                 {user.socials.snapchat && (
-                  <button className="w-full bg-white p-5 rounded-[2rem] border border-slate-50 shadow-sm flex items-center justify-between group hover:border-amber-200 transition-colors">
+                  <a href={SOCIAL_URL.snapchat(user.socials.snapchat)} target="_blank" rel="noopener noreferrer" className="w-full bg-white p-5 rounded-[2rem] border border-slate-50 shadow-sm flex items-center justify-between group hover:border-amber-200 transition-colors">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-amber-400 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-amber-100">
                         <Ghost size={24} />
@@ -620,11 +679,11 @@ const getZodiacEmoji = (zodiac: string) => {
                       </div>
                     </div>
                     <ExternalLink size={18} className="text-slate-300 group-hover:text-amber-400 transition-colors" />
-                  </button>
+                  </a>
                 )}
 
                 {user.socials.tiktok && (
-                  <button className="w-full bg-white p-5 rounded-[2rem] border border-slate-50 shadow-sm flex items-center justify-between group hover:border-slate-400 transition-colors">
+                  <a href={SOCIAL_URL.tiktok(user.socials.tiktok)} target="_blank" rel="noopener noreferrer" className="w-full bg-white p-5 rounded-[2rem] border border-slate-50 shadow-sm flex items-center justify-between group hover:border-slate-400 transition-colors">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-black rounded-2xl flex items-center justify-center text-white shadow-lg shadow-slate-200">
                         <Smartphone size={24} />
@@ -635,7 +694,7 @@ const getZodiacEmoji = (zodiac: string) => {
                       </div>
                     </div>
                     <ExternalLink size={18} className="text-slate-300 group-hover:text-slate-900 transition-colors" />
-                  </button>
+                  </a>
                 )}
                 
                 <button className="w-full bg-slate-900 p-5 rounded-[2rem] flex items-center justify-between group hover:bg-slate-800 transition-colors">

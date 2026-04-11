@@ -252,6 +252,16 @@ export function useAppState() {
     }
   };
 
+  const updateBirthday = async (birthdayId: string, updates: Partial<import('../types').Birthday>) => {
+    if (!firebaseUser) return;
+    const path = `users/${firebaseUser.uid}/birthdays/${birthdayId}`;
+    try {
+      await updateDoc(doc(db, path), updates as Record<string, unknown>);
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, path);
+    }
+  };
+
   const deleteBirthday = async (birthdayId: string) => {
     if (!firebaseUser) return;
     const path = `users/${firebaseUser.uid}/birthdays/${birthdayId}`;
@@ -262,5 +272,5 @@ export function useAppState() {
     }
   };
 
-  return { user, birthdays, challenges, loading, firebaseUser, setUser, addBirthday, deleteBirthday, incrementScansCount, unlockCard };
+  return { user, birthdays, challenges, loading, firebaseUser, setUser, addBirthday, updateBirthday, deleteBirthday, incrementScansCount, unlockCard };
 }

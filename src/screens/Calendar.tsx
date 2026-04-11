@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronLeft, ChevronRight, ChevronDown, X, Camera, ImageIcon, Phone, Instagram, Twitter, Facebook, Plus, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronDown, X, Camera, ImageIcon, Phone, Instagram, Twitter, Facebook, Plus, Trash2, Gift, Save, Lightbulb } from 'lucide-react';
+import { FriendEditModal } from '../components/FriendEditModal';
 import confetti from 'canvas-confetti';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { auth, storage } from '../firebase';
 import { Birthday } from '../types';
 import { getZodiacSign } from '../utils/gameLogic';
+import { CELEB_BIRTHDAYS } from '../data/celebBirthdays';
 import {
   format,
   startOfMonth,
@@ -18,14 +20,24 @@ import {
 } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
-export function Calendar({ birthdays, onAddBirthday, onDeleteBirthday, onFirstVisit }: {
+export function Calendar({ birthdays, onAddBirthday, onUpdateBirthday, onDeleteBirthday, onFirstVisit, openAddModal, onAddModalOpened }: {
   birthdays: Birthday[],
   onAddBirthday?: (b: Birthday) => void,
+  onUpdateBirthday?: (id: string, updates: Partial<Birthday>) => Promise<void>,
   onDeleteBirthday?: (id: string) => void,
   onFirstVisit?: () => void,
+  openAddModal?: boolean,
+  onAddModalOpened?: () => void,
 }) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [showAddModal, setShowAddModal] = useState(false);
+
+  useEffect(() => {
+    if (openAddModal) {
+      setShowAddModal(true);
+      onAddModalOpened?.();
+    }
+  }, [openAddModal]);
   const [newName, setNewName] = useState('');
   const [newDate, setNewDate] = useState('');
   const [newPhone, setNewPhone] = useState('');
@@ -43,6 +55,9 @@ export function Calendar({ birthdays, onAddBirthday, onDeleteBirthday, onFirstVi
   const [photoUploading, setPhotoUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  // Edit friend modal state
+  const [editingFriend, setEditingFriend] = useState<Birthday | null>(null);
 
   useEffect(() => {
     onFirstVisit?.();
@@ -173,10 +188,16 @@ export function Calendar({ birthdays, onAddBirthday, onDeleteBirthday, onFirstVi
     setTimeout(() => confetti({ ...base, particleCount: 40, startVelocity: 28 }), 350);
   };
 
+  const openEditFriend = (b: Birthday) => {
+    setEditingFriend(b);
+  };
+
   const handleDayClick = (day: Date) => {
     setNewDate(format(day, 'yyyy-MM-dd'));
     setShowAddModal(true);
   };
+
+  const todayCeleb = CELEB_BIRTHDAYS.find(c => c.date === format(new Date(), 'MM-dd'));
 
   return (
     <div className="p-6 space-y-6">
@@ -286,11 +307,11 @@ export function Calendar({ birthdays, onAddBirthday, onDeleteBirthday, onFirstVi
             .filter(b => parseISO(b.birthDate).getMonth() === currentMonth.getMonth())
             .sort((a, b) => parseISO(a.birthDate).getDate() - parseISO(b.birthDate).getDate())
             .map(b => (
-              <div key={b.id} className="flex items-center gap-4 bg-white p-3 rounded-2xl border border-black/60 shadow-sm">
+              <div key={b.id} onClick={() => openEditFriend(b)} className="flex items-center gap-4 bg-white p-3 rounded-2xl border border-black/60 shadow-sm cursor-pointer hover:border-rose-300 transition-colors">
                 {b.photoUrl
                   ? <img src={b.photoUrl} alt={b.name} className="w-10 h-10 rounded-full object-cover border border-black/20 shrink-0" />
-                  : <div className="w-10 h-10 bg-sky-100 rounded-full flex items-center justify-center text-sky-700 font-black text-xs border border-sky-200 shrink-0">
-                      {format(parseISO(b.birthDate), 'dd')}
+                  : <div className="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center text-rose-600 font-black text-sm border border-rose-200 shrink-0">
+                      {b.name.charAt(0)}
                     </div>
                 }
                 <div className="flex-1">
@@ -299,7 +320,7 @@ export function Calendar({ birthdays, onAddBirthday, onDeleteBirthday, onFirstVi
                 </div>
                 <button
                   type="button"
-                  onClick={() => setConfirmDelete(b)}
+                  onClick={(e) => { e.stopPropagation(); setConfirmDelete(b); }}
                   className="w-7 h-7 rounded-full bg-slate-100 hover:bg-rose-100 flex items-center justify-center transition-colors shrink-0"
                 >
                   <X size={14} className="text-slate-400 hover:text-rose-500" />
@@ -308,6 +329,31 @@ export function Calendar({ birthdays, onAddBirthday, onDeleteBirthday, onFirstVi
             ))}
         </div>
       </div>
+
+      {todayCeleb && (
+        <div className="bg-white border border-black/60 rounded-2xl p-4 shadow-sm">
+          <div className="flex items-start justify-between gap-2 mb-2">
+            <div className="flex items-center gap-1.5">
+              <Lightbulb size={16} className="text-yellow-400 fill-yellow-300" />
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Savais-tu ?</p>
+            </div>
+            <span className="text-[9px] font-black text-rose-400 uppercase tracking-wide bg-rose-50 border border-rose-100 px-2 py-0.5 rounded-full shrink-0">
+              Aujourd'hui c'est son anniversaire
+            </span>
+          </div>
+          <p className="font-black text-slate-900 text-sm leading-tight">{todayCeleb.name}</p>
+          <p className="text-[10px] font-bold text-rose-500 uppercase tracking-wide mt-0.5 mb-2">{todayCeleb.title}</p>
+          <p className="text-xs text-slate-600 leading-relaxed mb-3">{todayCeleb.description}</p>
+          <a
+            href={todayCeleb.wikipedia}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 bg-slate-50 border border-black/60 rounded-xl px-3 py-2 text-xs font-black text-slate-700 hover:bg-slate-100 transition-colors"
+          >
+            <span>📖</span> Voir sa page Wikipédia
+          </a>
+        </div>
+      )}
 
       {/* Add Friend Modal */}
       <AnimatePresence>
@@ -557,6 +603,13 @@ export function Calendar({ birthdays, onAddBirthday, onDeleteBirthday, onFirstVi
           </div>
         )}
       </AnimatePresence>
+
+      <FriendEditModal
+        friend={editingFriend}
+        onClose={() => setEditingFriend(null)}
+        onSave={onUpdateBirthday ?? (async () => {})}
+        onDelete={(b) => setConfirmDelete(b)}
+      />
 
       {/* Modale confirmation suppression */}
       <AnimatePresence>
