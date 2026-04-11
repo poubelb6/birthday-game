@@ -137,17 +137,21 @@ export function useAppState() {
         const snaps = await Promise.all(
           batches.map(batch => getDocs(query(collection(db, 'users'), where(documentId(), 'in', batch))))
         );
-        // photoMap: friendUID -> photoUrl
-        const photoMap: Record<string, string> = {};
+        // profileMap: friendUID -> { photoUrl, wishlist, socials }
+        const profileMap: Record<string, Partial<Birthday>> = {};
         snaps.flatMap(s => s.docs).forEach(d => {
           const data = d.data() as UserProfile;
-          if (data.photoUrl) photoMap[d.id] = data.photoUrl;
+          const patch: Partial<Birthday> = {};
+          if (data.photoUrl) patch.photoUrl = data.photoUrl;
+          if (Array.isArray(data.wishlist) && data.wishlist.length > 0) patch.wishlist = data.wishlist;
+          if (data.socials) patch.socials = data.socials;
+          if (Object.keys(patch).length > 0) profileMap[d.id] = patch;
         });
 
-        // On applique la photo en utilisant le friendUID d'origine (pas le doc ID Firestore)
+        // On enrichit chaque birthday avec les données live du profil de l'ami
         setBirthdays(raw.map((b, i) => {
           const friendUid = (snapshot.docs[i]?.data() as Birthday)?.id;
-          return friendUid && photoMap[friendUid] ? { ...b, photoUrl: photoMap[friendUid] } : b;
+          return friendUid && profileMap[friendUid] ? { ...b, ...profileMap[friendUid] } : b;
         }));
       } catch {
         setBirthdays(raw);
