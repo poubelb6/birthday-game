@@ -10,6 +10,12 @@ import { FriendEditModal } from '../components/FriendEditModal';
 import { FriendProfileModal } from '../components/FriendProfileModal';
 import { checkUnlockedCards } from '../utils/gameLogic';
 
+const ZODIAC_EMOJI: Record<string, string> = {
+  'Bélier': '♈', 'Taureau': '♉', 'Gémeaux': '♊', 'Cancer': '♋',
+  'Lion': '♌', 'Vierge': '♍', 'Balance': '♎', 'Scorpion': '♏',
+  'Sagittaire': '♐', 'Capricorne': '♑', 'Verseau': '♒', 'Poissons': '♓',
+};
+
 export function Dashboard({ birthdays, user, onUpdateBirthday, onDeleteBirthday }: {
   birthdays: Birthday[],
   user: UserProfile | null,
@@ -188,7 +194,7 @@ export function Dashboard({ birthdays, user, onUpdateBirthday, onDeleteBirthday 
 
       <section>
         {upcoming.length > 0 ? (
-          <div className="flex justify-center gap-6">
+          <div className="flex justify-center gap-5">
             {upcoming.slice(0, 3).map((b, i) => (
               <motion.div
                 key={b.id}
@@ -196,10 +202,10 @@ export function Dashboard({ birthdays, user, onUpdateBirthday, onDeleteBirthday 
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
                 onClick={() => setSelectedFriend(b)}
-                className="flex flex-col items-center gap-2 cursor-pointer"
+                className="flex flex-col items-center gap-1.5 cursor-pointer"
               >
                 <div className="relative">
-                  <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-slate-100 shadow-sm">
+                  <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-slate-100 shadow-sm">
                     <img
                       src={b.photoUrl || `https://picsum.photos/seed/${b.id}/100/100`}
                       alt={b.name}
@@ -209,16 +215,20 @@ export function Dashboard({ birthdays, user, onUpdateBirthday, onDeleteBirthday 
                   <motion.div
                     animate={b.daysUntil === 0 ? { scale: [1, 1.1, 1] } : {}}
                     transition={b.daysUntil === 0 ? { duration: 1.2, repeat: Infinity } : {}}
-                    className="absolute -top-2 -right-2 px-1.5 py-0.5 rounded-full text-[9px] font-black text-white shadow-sm"
-                    style={{
-                      background: b.daysUntil === 0 ? '#58CC02' : b.daysUntil <= 7 ? '#FF4B4B' : '#0f172a',
-                    }}
+                    className={`absolute -top-2 -right-2 px-1.5 py-0.5 rounded-full text-[9px] font-black shadow-sm ${
+                      b.daysUntil === 0 ? 'bg-green-100 text-green-600' :
+                      b.daysUntil <= 7 ? 'bg-red-100 text-red-500' :
+                      'bg-slate-100 text-slate-500'
+                    }`}
                   >
                     {b.daysUntil === 0 ? '🎂' : `J-${b.daysUntil}`}
                   </motion.div>
                 </div>
-                <span className="text-xs font-bold text-slate-700 truncate max-w-[76px] text-center">
+                <span className="text-xs font-bold text-slate-800 truncate max-w-[72px] text-center">
                   {b.name.split(' ')[0]}
+                </span>
+                <span className="text-[10px] text-slate-400 font-medium text-center leading-none">
+                  {format(parseISO(b.birthDate), 'd MMM', { locale: fr })} · {ZODIAC_EMOJI[b.zodiac] ?? b.zodiac}
                 </span>
               </motion.div>
             ))}
