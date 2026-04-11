@@ -185,13 +185,20 @@ export function useAppState() {
       console.error('[Firestore] challenges snapshot error:', error.code, error.message);
     });
 
-    // Inbox listener — messages reçus en temps réel
-    const inboxRef = collection(db, 'users', firebaseUser.uid, 'inbox');
-    const unsubInbox = onSnapshot(query(inboxRef, orderBy('createdAt', 'desc')), (snapshot) => {
-      setInbox(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Message)));
-    }, (error) => {
-      console.error('[Firestore] inbox snapshot error:', error.code, error.message);
-    });
+    // Inbox listener — collection racine /messages filtrée par toId (tri client-side)
+    const messagesRef = collection(db, 'messages');
+    const unsubInbox = onSnapshot(
+      query(messagesRef, where('toId', '==', firebaseUser.uid)),
+      (snapshot) => {
+        const msgs = snapshot.docs
+          .map(d => ({ ...d.data(), id: d.id } as Message))
+          .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+        setInbox(msgs);
+      },
+      (error) => {
+        console.error('[Firestore] inbox snapshot error:', error.code, error.message);
+      }
+    );
 
     return () => {
       unsubUser();
@@ -322,14 +329,13 @@ export function useAppState() {
     }
   };
 
-  // toId doit être le vrai UID Firebase de l'ami (birthday.userId)
   const sendMessage = async (toId: string, text: string) => {
     if (!firebaseUser || !user || !text.trim() || !toId) return;
-    const inboxRef = collection(db, 'users', toId, 'inbox');
-    await addDoc(inboxRef, {
+    await addDoc(collection(db, 'messages'), {
       fromId: firebaseUser.uid,
       fromName: user.name,
       fromPhotoUrl: user.photoUrl ?? '',
+      toId,
       text: text.trim(),
       createdAt: new Date().toISOString(),
       read: false,
@@ -342,7 +348,7 @@ export function useAppState() {
     if (unread.length === 0) return;
     const batch = writeBatch(db);
     unread.forEach(m => {
-      batch.update(doc(db, 'users', firebaseUser.uid, 'inbox', m.id), { read: true });
+      batch.update(doc(db, 'messages', m.id), { read: true });
     });
     await batch.commit();
   };

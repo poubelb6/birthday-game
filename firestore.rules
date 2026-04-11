@@ -138,6 +138,19 @@ service cloud.firestore {
       }
     }
 
+    // ===============================================================
+    // Messages (collection racine — envoi entre utilisateurs)
+    // ===============================================================
+    match /messages/{messageId} {
+      // Créer un message : authentifié + fromId == son propre UID
+      allow create: if isAuthenticated() && request.resource.data.fromId == request.auth.uid;
+      // Lire : expéditeur ou destinataire
+      allow read: if isAuthenticated() &&
+        (resource.data.toId == request.auth.uid || resource.data.fromId == request.auth.uid);
+      // Marquer comme lu : destinataire uniquement
+      allow update: if isAuthenticated() && resource.data.toId == request.auth.uid;
+    }
+
     // Default deny
     match /{path=**} {
       allow read, write: if false;
