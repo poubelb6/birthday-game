@@ -120,21 +120,35 @@ export function useAppState() {
 
     // Birthdays Listener — enrichit avec la photoUrl live du compte Firestore de chaque ami
     const unsubBirthdays = onSnapshot(query(birthdaysRef, orderBy('addedAt', 'desc')), async (snapshot) => {
+      // d.id = ID du document Firestore (auto-généré, utilisé pour CRUD)
+      // d.data().id = UID Firebase de l'ami (utilisé pour retrouver son profil)
       const raw = snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Birthday));
-      const ids = raw.map(b => b.id).filter(Boolean);
-      if (ids.length === 0) { setBirthdays(raw); return; }
+
+      // On récupère les vrais UIDs Firebase des amis (stockés dans le champ `id` du document)
+      const friendUids = snapshot.docs
+        .map(d => (d.data() as Birthday).id)
+        .filter(Boolean);
+
+      if (friendUids.length === 0) { setBirthdays(raw); return; }
+
       try {
         const batches: string[][] = [];
-        for (let i = 0; i < ids.length; i += 30) batches.push(ids.slice(i, i + 30));
+        for (let i = 0; i < friendUids.length; i += 30) batches.push(friendUids.slice(i, i + 30));
         const snaps = await Promise.all(
           batches.map(batch => getDocs(query(collection(db, 'users'), where(documentId(), 'in', batch))))
         );
+        // photoMap: friendUID -> photoUrl
         const photoMap: Record<string, string> = {};
         snaps.flatMap(s => s.docs).forEach(d => {
           const data = d.data() as UserProfile;
           if (data.photoUrl) photoMap[d.id] = data.photoUrl;
         });
-        setBirthdays(raw.map(b => photoMap[b.id] ? { ...b, photoUrl: photoMap[b.id] } : b));
+
+        // On applique la photo en utilisant le friendUID d'origine (pas le doc ID Firestore)
+        setBirthdays(raw.map((b, i) => {
+          const friendUid = (snapshot.docs[i]?.data() as Birthday)?.id;
+          return friendUid && photoMap[friendUid] ? { ...b, photoUrl: photoMap[friendUid] } : b;
+        }));
       } catch {
         setBirthdays(raw);
       }
