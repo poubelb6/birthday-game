@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { 
+import {
   doc,
   setDoc,
   getDoc,
+  getDocs,
   collection,
   onSnapshot,
   query,
   orderBy,
+  where,
+  documentId,
   addDoc,
   updateDoc,
   deleteDoc,
@@ -115,9 +118,26 @@ export function useAppState() {
       setLoading(false);
     });
 
-    // Birthdays Listener
-    const unsubBirthdays = onSnapshot(query(birthdaysRef, orderBy('addedAt', 'desc')), (snapshot) => {
-      setBirthdays(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Birthday)));
+    // Birthdays Listener — enrichit avec la photoUrl live du compte Firestore de chaque ami
+    const unsubBirthdays = onSnapshot(query(birthdaysRef, orderBy('addedAt', 'desc')), async (snapshot) => {
+      const raw = snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Birthday));
+      const ids = raw.map(b => b.id).filter(Boolean);
+      if (ids.length === 0) { setBirthdays(raw); return; }
+      try {
+        const batches: string[][] = [];
+        for (let i = 0; i < ids.length; i += 30) batches.push(ids.slice(i, i + 30));
+        const snaps = await Promise.all(
+          batches.map(batch => getDocs(query(collection(db, 'users'), where(documentId(), 'in', batch))))
+        );
+        const photoMap: Record<string, string> = {};
+        snaps.flatMap(s => s.docs).forEach(d => {
+          const data = d.data() as UserProfile;
+          if (data.photoUrl) photoMap[d.id] = data.photoUrl;
+        });
+        setBirthdays(raw.map(b => photoMap[b.id] ? { ...b, photoUrl: photoMap[b.id] } : b));
+      } catch {
+        setBirthdays(raw);
+      }
     }, (error) => {
       console.error('[Firestore] birthdays snapshot error:', error.code, error.message);
     });

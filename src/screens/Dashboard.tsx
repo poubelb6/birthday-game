@@ -37,7 +37,6 @@ export function Dashboard({ birthdays, user, onUpdateBirthday, onDeleteBirthday 
   const [viewingFriend, setViewingFriend] = useState<Birthday | null>(null);
   const [friendSearch, setFriendSearch] = useState('');
   const [friendsWithAccount, setFriendsWithAccount] = useState<Set<string>>(new Set());
-  const [friendsPhotoMap, setFriendsPhotoMap] = useState<Record<string, string>>({});
 
     useEffect(() => {
       const cycle = () => {
@@ -52,7 +51,6 @@ export function Dashboard({ birthdays, user, onUpdateBirthday, onDeleteBirthday 
   useEffect(() => {
     if (birthdays.length === 0) { setFriendsWithAccount(new Set()); return; }
     const ids = birthdays.map(b => b.id).filter(Boolean);
-    // Firestore `in` is limited to 30 per query — batch if needed
     const batches: string[][] = [];
     for (let i = 0; i < ids.length; i += 30) batches.push(ids.slice(i, i + 30));
     Promise.all(
@@ -60,15 +58,7 @@ export function Dashboard({ birthdays, user, onUpdateBirthday, onDeleteBirthday 
         getDocs(query(collection(db, 'users'), where(documentId(), 'in', batch)))
       )
     ).then(snapshots => {
-      const ids = new Set<string>();
-      const photoMap: Record<string, string> = {};
-      snapshots.flatMap(s => s.docs).forEach(doc => {
-        ids.add(doc.id);
-        const data = doc.data() as UserProfile;
-        if (data.photoUrl) photoMap[doc.id] = data.photoUrl;
-      });
-      setFriendsWithAccount(ids);
-      setFriendsPhotoMap(photoMap);
+      setFriendsWithAccount(new Set(snapshots.flatMap(s => s.docs.map(d => d.id))));
     }).catch(() => {});
   }, [birthdays.length]);
 
@@ -216,7 +206,7 @@ export function Dashboard({ birthdays, user, onUpdateBirthday, onDeleteBirthday 
                 <div className="relative">
                   <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-slate-100 shadow-sm">
                     <img
-                      src={friendsPhotoMap[b.id] || b.photoUrl || `https://picsum.photos/seed/${b.id}/100/100`}
+                      src={b.photoUrl || `https://picsum.photos/seed/${b.id}/100/100`}
                       alt={b.name}
                       className="w-full h-full object-cover"
                     />
