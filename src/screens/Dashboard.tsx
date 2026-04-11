@@ -37,6 +37,7 @@ export function Dashboard({ birthdays, user, onUpdateBirthday, onDeleteBirthday 
   const [viewingFriend, setViewingFriend] = useState<Birthday | null>(null);
   const [friendSearch, setFriendSearch] = useState('');
   const [friendsWithAccount, setFriendsWithAccount] = useState<Set<string>>(new Set());
+  const [friendsPhotoMap, setFriendsPhotoMap] = useState<Record<string, string>>({});
 
     useEffect(() => {
       const cycle = () => {
@@ -59,7 +60,15 @@ export function Dashboard({ birthdays, user, onUpdateBirthday, onDeleteBirthday 
         getDocs(query(collection(db, 'users'), where(documentId(), 'in', batch)))
       )
     ).then(snapshots => {
-      setFriendsWithAccount(new Set(snapshots.flatMap(s => s.docs.map(d => d.id))));
+      const ids = new Set<string>();
+      const photoMap: Record<string, string> = {};
+      snapshots.flatMap(s => s.docs).forEach(doc => {
+        ids.add(doc.id);
+        const data = doc.data() as UserProfile;
+        if (data.photoUrl) photoMap[doc.id] = data.photoUrl;
+      });
+      setFriendsWithAccount(ids);
+      setFriendsPhotoMap(photoMap);
     }).catch(() => {});
   }, [birthdays.length]);
 
@@ -207,7 +216,7 @@ export function Dashboard({ birthdays, user, onUpdateBirthday, onDeleteBirthday 
                 <div className="relative">
                   <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-slate-100 shadow-sm">
                     <img
-                      src={b.photoUrl || `https://picsum.photos/seed/${b.id}/100/100`}
+                      src={friendsPhotoMap[b.id] || b.photoUrl || `https://picsum.photos/seed/${b.id}/100/100`}
                       alt={b.name}
                       className="w-full h-full object-cover"
                     />
