@@ -710,23 +710,34 @@ const getZodiacEmoji = (zodiac: string) => {
                   <ChevronRight size={18} className="text-white/20 group-hover:text-white transition-colors" />
                 </button>
 
-                <button
-                  onClick={() => { setBgPassword(''); setBgStatus(null); setShowBgModal(true); }}
-                  className="w-full bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex items-center justify-between group hover:border-rose-200 transition-colors"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-sm border border-slate-100">
+                <div className="w-full bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex items-center justify-between gap-3">
+                  <button
+                    onClick={() => { setBgPassword(''); setBgStatus(null); setShowBgModal(true); }}
+                    className="flex items-center gap-4 flex-1 text-left group"
+                  >
+                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-sm border border-slate-100 shrink-0">
                       🎨
                     </div>
-                    <div className="text-left">
+                    <div>
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Personnalisation</p>
                       <p className="font-bold text-slate-900">
                         Fond d'écran {gigiBgActive && <span className="text-[10px] font-black text-emerald-500 ml-1">● ACTIF</span>}
                       </p>
                     </div>
-                  </div>
-                  <ChevronRight size={18} className="text-slate-300 group-hover:text-rose-400 transition-colors" />
-                </button>
+                  </button>
+                  {gigiBgActive && (
+                    <button
+                      onClick={() => {
+                        localStorage.setItem('gigiBg', 'false');
+                        setGigiBgActive(false);
+                        window.dispatchEvent(new CustomEvent('gigiBgChange', { detail: false }));
+                      }}
+                      className="shrink-0 px-3 py-1.5 rounded-xl text-xs font-black text-rose-500 border border-rose-200 bg-rose-50 hover:bg-rose-100 transition-colors"
+                    >
+                      Annuler
+                    </button>
+                  )}
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
