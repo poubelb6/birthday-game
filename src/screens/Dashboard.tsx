@@ -186,50 +186,40 @@ export function Dashboard({ birthdays, user, onUpdateBirthday, onDeleteBirthday 
         </div>
       </section>
 
-      <section className="space-y-4">
-        <div className="flex flex-col items-center justify-center text-center">
-          <h3 className="font-display text-lg font-black text-slate-900">Prochains Anniversaires</h3>
-          <span className="text-xs font-bold text-rose-400 uppercase tracking-wider">Calendrier</span>
-        </div>
-
+      <section>
         {upcoming.length > 0 ? (
-          <div className="space-y-3">
-            {upcoming.map((b, i) => (
+          <div className="flex justify-center gap-6">
+            {upcoming.slice(0, 3).map((b, i) => (
               <motion.div
                 key={b.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
-                whileHover={{ x: 4 }}
                 onClick={() => setSelectedFriend(b)}
-                className="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-4 group cursor-pointer hover:border-rose-200 transition-colors"
+                className="flex flex-col items-center gap-2 cursor-pointer"
               >
-                <div className="w-14 h-14 bg-slate-100 rounded-2xl overflow-hidden flex-shrink-0">
-                  <img src={b.photoUrl || `https://picsum.photos/seed/${b.id}/100/100`} alt={b.name} className="w-full h-full object-cover" />
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-bold text-slate-900">{b.name}</h4>
-                  <p className="text-xs text-slate-600 font-medium">
-                    {format(parseISO(b.birthDate), 'd MMMM', { locale: fr })} • {b.zodiac}
-                  </p>
-                </div>
-                <div className="text-right">
+                <div className="relative">
+                  <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-slate-100 shadow-sm">
+                    <img
+                      src={b.photoUrl || `https://picsum.photos/seed/${b.id}/100/100`}
+                      alt={b.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                   <motion.div
-                    className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                      b.daysUntil === 0 ? 'bg-green-100' :
-                      b.daysUntil <= 7 ? 'bg-red-100' : 'bg-slate-100 text-slate-500'
-                    }`}
-                    style={b.daysUntil === 0 ? { color: '#58CC02', border: '1px solid #FF4B4B' } : b.daysUntil <= 7 ? { color: '#FF4B4B' } : {}}
-                    animate={b.daysUntil === 0 ? { scale: [1, 1.08, 1], boxShadow: ['0 0 0px #FF4B4B', '0 0 4px #FF4B4B', '0 0 0px #FF4B4B'] } : {}}
-                    transition={b.daysUntil === 0 ? { duration: 1.4, repeat: Infinity, ease: 'easeInOut' } : {}}
+                    animate={b.daysUntil === 0 ? { scale: [1, 1.1, 1] } : {}}
+                    transition={b.daysUntil === 0 ? { duration: 1.2, repeat: Infinity } : {}}
+                    className="absolute -top-2 -right-2 px-1.5 py-0.5 rounded-full text-[9px] font-black text-white shadow-sm"
+                    style={{
+                      background: b.daysUntil === 0 ? '#58CC02' : b.daysUntil <= 7 ? '#FF4B4B' : '#0f172a',
+                    }}
                   >
-                    {b.daysUntil === 0
-                      ? "C'est aujourd'hui ! 🎉"
-                      : b.daysUntil <= 7
-                      ? `Dans ${b.daysUntil} jour${b.daysUntil > 1 ? 's' : ''} 🎂`
-                      : `J-${b.daysUntil}`}
+                    {b.daysUntil === 0 ? '🎂' : `J-${b.daysUntil}`}
                   </motion.div>
                 </div>
+                <span className="text-xs font-bold text-slate-700 truncate max-w-[76px] text-center">
+                  {b.name.split(' ')[0]}
+                </span>
               </motion.div>
             ))}
           </div>
