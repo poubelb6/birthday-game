@@ -13,11 +13,12 @@ import {
   documentId,
   addDoc,
   updateDoc,
+  writeBatch,
   deleteDoc,
   FirestoreError
 } from 'firebase/firestore';
 import { auth, db } from '../firebase';
-import { UserProfile, Birthday, Challenge } from '../types';
+import { UserProfile, Birthday, Challenge, Message } from '../types';
 
 enum OperationType {
   CREATE = 'create',
@@ -74,6 +75,7 @@ export function useAppState() {
   const [user, setUserProfile] = useState<UserProfile | null>(null);
   const [birthdays, setBirthdays] = useState<Birthday[]>([]);
   const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const [inbox, setInbox] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
 
@@ -148,10 +150,11 @@ export function useAppState() {
           if (Object.keys(patch).length > 0) profileMap[d.id] = patch;
         });
 
-        // On enrichit chaque birthday avec les données live du profil de l'ami
+        // On enrichit chaque birthday avec les données live + on stocke le vrai UID de l'ami
         setBirthdays(raw.map((b, i) => {
           const friendUid = (snapshot.docs[i]?.data() as Birthday)?.id;
-          return friendUid && profileMap[friendUid] ? { ...b, ...profileMap[friendUid] } : b;
+          const patch = friendUid && profileMap[friendUid] ? profileMap[friendUid] : {};
+          return { ...b, ...patch, ...(friendUid && profileMap[friendUid] ? { userId: friendUid } : {}) };
         }));
       } catch {
         setBirthdays(raw);
@@ -182,10 +185,19 @@ export function useAppState() {
       console.error('[Firestore] challenges snapshot error:', error.code, error.message);
     });
 
+    // Inbox listener — messages reçus en temps réel
+    const inboxRef = collection(db, 'users', firebaseUser.uid, 'inbox');
+    const unsubInbox = onSnapshot(query(inboxRef, orderBy('createdAt', 'desc')), (snapshot) => {
+      setInbox(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Message)));
+    }, (error) => {
+      console.error('[Firestore] inbox snapshot error:', error.code, error.message);
+    });
+
     return () => {
       unsubUser();
       unsubBirthdays();
       unsubChallenges();
+      unsubInbox();
     };
   }, [firebaseUser]);
 
@@ -310,5 +322,30 @@ export function useAppState() {
     }
   };
 
-  return { user, birthdays, challenges, loading, firebaseUser, setUser, addBirthday, updateBirthday, deleteBirthday, incrementScansCount, unlockCard };
+  // toId doit être le vrai UID Firebase de l'ami (birthday.userId)
+  const sendMessage = async (toId: string, text: string) => {
+    if (!firebaseUser || !user || !text.trim() || !toId) return;
+    const inboxRef = collection(db, 'users', toId, 'inbox');
+    await addDoc(inboxRef, {
+      fromId: firebaseUser.uid,
+      fromName: user.name,
+      fromPhotoUrl: user.photoUrl ?? '',
+      text: text.trim(),
+      createdAt: new Date().toISOString(),
+      read: false,
+    });
+  };
+
+  const markMessagesRead = async () => {
+    if (!firebaseUser) return;
+    const unread = inbox.filter(m => !m.read);
+    if (unread.length === 0) return;
+    const batch = writeBatch(db);
+    unread.forEach(m => {
+      batch.update(doc(db, 'users', firebaseUser.uid, 'inbox', m.id), { read: true });
+    });
+    await batch.commit();
+  };
+
+  return { user, birthdays, challenges, inbox, loading, firebaseUser, setUser, addBirthday, updateBirthday, deleteBirthday, incrementScansCount, unlockCard, sendMessage, markMessagesRead };
 }

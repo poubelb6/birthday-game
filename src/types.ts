@@ -38,6 +38,7 @@ export interface UserProfile {
 
 export interface Birthday {
   id: string;
+  userId?: string; // UID Firebase de l'ami (si il a un compte), distinct du doc ID Firestore
   name: string;
   birthDate: string;
   photoUrl?: string;
@@ -52,6 +53,16 @@ export interface Birthday {
   zodiac: ZodiacSign;
   addedAt: string;
   wishlist?: string[];
+}
+
+export interface Message {
+  id: string;
+  fromId: string;
+  fromName: string;
+  fromPhotoUrl?: string;
+  text: string;
+  createdAt: string;
+  read: boolean;
 }
 
 export interface Challenge {

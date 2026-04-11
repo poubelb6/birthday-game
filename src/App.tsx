@@ -4,6 +4,7 @@ import {
   QrCode,
   Plus,
   X,
+  MessageCircle,
 } from 'lucide-react';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from './firebase';
@@ -16,6 +17,7 @@ import { Collection } from './screens/Collection';
 import { Profile } from './screens/Profile';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Logo } from './components/Logo';
+import { MessagesModal } from './components/MessagesModal';
 import confetti from 'canvas-confetti';
 import { Birthday } from './types';
 
@@ -42,11 +44,13 @@ const GIGI_PARTICLES = [
 type Screen = 'dashboard' | 'scanner' | 'calendar' | 'collection' | 'profile';
 
 function AppContent() {
-  const { user, birthdays, challenges, loading, firebaseUser, setUser, addBirthday, updateBirthday, deleteBirthday, incrementScansCount, unlockCard } = useAppState();
+  const { user, birthdays, challenges, inbox, loading, firebaseUser, setUser, addBirthday, updateBirthday, deleteBirthday, incrementScansCount, unlockCard, sendMessage, markMessagesRead } = useAppState();
   const [activeScreen, setActiveScreen] = useState<Screen>('dashboard');
   const [showSplash, setShowSplash] = useState(true);
   const [pendingDeepLink, setPendingDeepLink] = useState<string | null>(null);
   const [triggerAddFriend, setTriggerAddFriend] = useState(false);
+  const [showMessages, setShowMessages] = useState(false);
+  const [friendsWithAccount, setFriendsWithAccount] = useState<Set<string>>(new Set());
   const [celebrationFriend, setCelebrationFriend] = useState<Birthday | null>(null);
   const [gigiBg, setGigiBg] = useState(() => localStorage.getItem('gigiBg') === 'true');
 
@@ -292,7 +296,7 @@ function AppContent() {
           <Logo size={32} />
           <div>
             <h1 className="text-xl font-black text-slate-900 tracking-tight">
-              {activeScreen === 'dashboard' ? 'Birthday Game' : 
+              {activeScreen === 'dashboard' ? 'Birthday Game' :
                activeScreen.charAt(0).toUpperCase() + activeScreen.slice(1)}
             </h1>
             <p className="text-[12px] font-black uppercase tracking-widest" style={{ color: '#FF4B4B', fontFamily: "'Press Start 2P', monospace" }}>
@@ -300,16 +304,41 @@ function AppContent() {
             </p>
           </div>
         </div>
-        <motion.button
-          onClick={() => setActiveScreen('scanner')}
-          aria-label="Scanner un QR code"
-          whileHover={{ scale: 1.15, rotate: 5 }}
-          whileTap={{ scale: 0.9 }}
-          className="w-12 h-12 rounded-2xl flex items-center justify-center text-white"
-          style={{ background: '#FF4B4B' }}
-        >
-          <QrCode size={24} strokeWidth={2.5} />
-        </motion.button>
+        <div className="flex items-center gap-2">
+          {/* Message button */}
+          <motion.button
+            onClick={() => setShowMessages(true)}
+            aria-label="Messages"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            className="relative w-10 h-10 rounded-2xl flex items-center justify-center border-2 border-slate-900"
+            style={{ background: '#FEFCE8' }}
+          >
+            <MessageCircle size={18} style={{ color: '#A16207' }} />
+            {inbox.filter(m => !m.read).length > 0 && (
+              <motion.span
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] rounded-full text-white text-[10px] font-black flex items-center justify-center px-1"
+                style={{ background: '#FF4B4B' }}
+              >
+                {inbox.filter(m => !m.read).length}
+              </motion.span>
+            )}
+          </motion.button>
+
+          {/* QR scan button */}
+          <motion.button
+            onClick={() => setActiveScreen('scanner')}
+            aria-label="Scanner un QR code"
+            whileHover={{ scale: 1.15, rotate: 5 }}
+            whileTap={{ scale: 0.9 }}
+            className="w-10 h-10 rounded-2xl flex items-center justify-center text-white"
+            style={{ background: '#FF4B4B' }}
+          >
+            <QrCode size={20} strokeWidth={2.5} />
+          </motion.button>
+        </div>
       </header>
 
       <main className={activeScreen === 'scanner' ? 'flex-1 overflow-hidden flex flex-col pb-24' : 'flex-1 overflow-y-auto pb-24'}>
@@ -401,6 +430,17 @@ function AppContent() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <MessagesModal
+        open={showMessages}
+        onClose={() => setShowMessages(false)}
+        inbox={inbox}
+        friends={birthdays}
+        friendsWithAccount={friendsWithAccount}
+        currentUser={user}
+        onSend={sendMessage}
+        onMarkRead={markMessagesRead}
+      />
 
       <nav
         aria-label="Navigation principale"
