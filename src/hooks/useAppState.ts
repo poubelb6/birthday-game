@@ -123,8 +123,16 @@ export function useAppState() {
     // Birthdays Listener — enrichit avec la photoUrl live du compte Firestore de chaque ami
     const unsubBirthdays = onSnapshot(query(birthdaysRef, orderBy('addedAt', 'desc')), async (snapshot) => {
       // d.id = ID du document Firestore (auto-généré, utilisé pour CRUD)
-      // d.data().id = UID Firebase de l'ami (utilisé pour retrouver son profil)
-      const raw = snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Birthday));
+      // d.data().id = UID Firebase de l'ami — préservé dans userId pour éviter les doublons
+      const raw = snapshot.docs.map(d => {
+        const data = d.data() as Birthday;
+        return {
+          ...data,
+          id: d.id,
+          // Préserve le vrai UID de l'ami immédiatement (sans attendre l'enrichissement async)
+          ...(data.id && data.id !== d.id ? { userId: data.id } : {}),
+        };
+      });
 
       // On récupère les vrais UIDs Firebase des amis (stockés dans le champ `id` du document)
       const friendUids = snapshot.docs
