@@ -301,17 +301,22 @@ function AppContent() {
       <header className="bg-white px-6 pt-4 pb-2 flex justify-between items-center border-b-2 border-slate-900 shadow-sm">
         <div className="flex items-center gap-2.5">
           <Logo size={28} />
-          <div className="flex items-center gap-2">
-            <h1 className="text-lg font-black text-slate-900 tracking-tight">
-              {activeScreen === 'dashboard' ? 'Birthday Game' :
-               activeScreen.charAt(0).toUpperCase() + activeScreen.slice(1)}
-            </h1>
-            <span
-              className="text-[8px] font-black px-1.5 py-0.5 rounded-full"
-              style={{ color: '#FF4B4B', background: 'rgba(255,75,75,0.08)', fontFamily: "'Press Start 2P', monospace" }}
-            >
-              Niv.{user.level}
-            </span>
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg font-black text-slate-900 tracking-tight">
+                {activeScreen === 'dashboard' ? 'Birthday Game' :
+                 activeScreen.charAt(0).toUpperCase() + activeScreen.slice(1)}
+              </h1>
+              <span
+                className="text-[8px] font-black px-2 py-0.5 rounded-full text-white"
+                style={{ background: '#FF4B4B', fontFamily: "'Press Start 2P', monospace" }}
+              >
+                Niv.{user.level}
+              </span>
+            </div>
+            <p className="text-[10px] font-black tracking-widest" style={{ color: '#FF4B4B', fontFamily: "'Press Start 2P', monospace" }}>
+              {user.xp} XP
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
