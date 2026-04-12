@@ -58,6 +58,7 @@ export interface Birthday {
 export interface Message {
   id: string;
   fromId: string;
+  toId: string;
   fromName: string;
   fromPhotoUrl?: string;
   text: string;

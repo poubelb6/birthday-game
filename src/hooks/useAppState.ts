@@ -76,6 +76,7 @@ export function useAppState() {
   const [birthdays, setBirthdays] = useState<Birthday[]>([]);
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [inbox, setInbox] = useState<Message[]>([]);
+  const [sentMessages, setSentMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
 
@@ -194,7 +195,7 @@ export function useAppState() {
       console.error('[Firestore] challenges snapshot error:', error.code, error.message);
     });
 
-    // Inbox listener — collection racine /messages filtrée par toId (tri client-side)
+    // Inbox listener — messages reçus
     const messagesRef = collection(db, 'messages');
     const unsubInbox = onSnapshot(
       query(messagesRef, where('toId', '==', firebaseUser.uid)),
@@ -209,11 +210,26 @@ export function useAppState() {
       }
     );
 
+    // Sent listener — messages envoyés
+    const unsubSent = onSnapshot(
+      query(messagesRef, where('fromId', '==', firebaseUser.uid)),
+      (snapshot) => {
+        const msgs = snapshot.docs
+          .map(d => ({ ...d.data(), id: d.id } as Message))
+          .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+        setSentMessages(msgs);
+      },
+      (error) => {
+        console.error('[Firestore] sent snapshot error:', error.code, error.message);
+      }
+    );
+
     return () => {
       unsubUser();
       unsubBirthdays();
       unsubChallenges();
       unsubInbox();
+      unsubSent();
     };
   }, [firebaseUser]);
 
@@ -351,9 +367,9 @@ export function useAppState() {
     });
   };
 
-  const markMessagesRead = async () => {
+  const markConversationRead = async (fromId: string) => {
     if (!firebaseUser) return;
-    const unread = inbox.filter(m => !m.read);
+    const unread = inbox.filter(m => m.fromId === fromId && !m.read);
     if (unread.length === 0) return;
     const batch = writeBatch(db);
     unread.forEach(m => {
@@ -362,5 +378,5 @@ export function useAppState() {
     await batch.commit();
   };
 
-  return { user, birthdays, challenges, inbox, loading, firebaseUser, setUser, addBirthday, updateBirthday, deleteBirthday, incrementScansCount, unlockCard, sendMessage, markMessagesRead };
+  return { user, birthdays, challenges, inbox, sentMessages, loading, firebaseUser, setUser, addBirthday, updateBirthday, deleteBirthday, incrementScansCount, unlockCard, sendMessage, markConversationRead };
 }

@@ -44,13 +44,13 @@ const GIGI_PARTICLES = [
 type Screen = 'dashboard' | 'scanner' | 'calendar' | 'collection' | 'profile';
 
 function AppContent() {
-  const { user, birthdays, challenges, inbox, loading, firebaseUser, setUser, addBirthday, updateBirthday, deleteBirthday, incrementScansCount, unlockCard, sendMessage, markMessagesRead } = useAppState();
+  const { user, birthdays, challenges, inbox, sentMessages, loading, firebaseUser, setUser, addBirthday, updateBirthday, deleteBirthday, incrementScansCount, unlockCard, sendMessage, markConversationRead } = useAppState();
   const [activeScreen, setActiveScreen] = useState<Screen>('dashboard');
   const [showSplash, setShowSplash] = useState(true);
   const [pendingDeepLink, setPendingDeepLink] = useState<string | null>(null);
   const [triggerAddFriend, setTriggerAddFriend] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
-  const [friendsWithAccount, setFriendsWithAccount] = useState<Set<string>>(new Set());
+
   const [celebrationFriend, setCelebrationFriend] = useState<Birthday | null>(null);
   const [gigiBg, setGigiBg] = useState(() => localStorage.getItem('gigiBg') === 'true');
 
@@ -435,11 +435,11 @@ function AppContent() {
         open={showMessages}
         onClose={() => setShowMessages(false)}
         inbox={inbox}
+        sentMessages={sentMessages}
         friends={birthdays}
-        friendsWithAccount={friendsWithAccount}
         currentUser={user}
         onSend={sendMessage}
-        onMarkRead={markMessagesRead}
+        onMarkConversationRead={markConversationRead}
       />
 
       <nav
