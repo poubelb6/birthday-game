@@ -58,6 +58,10 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
 
   // Swipe touch tracking
   const touchStartX = useRef<number | null>(null);
+  const [slideDirection, setSlideDirection] = useState(1); // 1 = next (→left), -1 = prev (→right)
+
+  const goNext = () => { setSlideDirection(1);  setCurrentMonth(m => addMonths(m, 1)); };
+  const goPrev = () => { setSlideDirection(-1); setCurrentMonth(m => subMonths(m, 1)); };
 
     useEffect(() => {
       const cycle = () => {
@@ -202,7 +206,7 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
     if (touchStartX.current === null) return;
     const delta = e.changedTouches[0].clientX - touchStartX.current;
     if (Math.abs(delta) > 50) {
-      setCurrentMonth(delta < 0 ? addMonths(currentMonth, 1) : subMonths(currentMonth, 1));
+      delta < 0 ? goNext() : goPrev();
     }
     touchStartX.current = null;
   };
@@ -231,21 +235,23 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
             onTouchEnd={handleTouchEnd}
           >
             <div className="bg-rose-500 px-3 py-2.5 flex items-center justify-between border-b-[0.5px] border-rose-600/30">
-              <button
-                onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-                className="text-white/80 hover:text-white p-1"
+              <motion.button
+                onClick={goPrev}
+                whileTap={{ scale: 0.88 }}
+                className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/35 flex items-center justify-center transition-colors"
               >
-                <ChevronLeft size={16} />
-              </button>
+                <ChevronLeft size={18} className="text-white" strokeWidth={3} />
+              </motion.button>
               <h4 className="text-white font-black uppercase tracking-widest text-[13px] capitalize">
                 {format(currentMonth, 'MMMM yyyy', { locale: fr })}
               </h4>
-              <button
-                onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-                className="text-white/80 hover:text-white p-1"
+              <motion.button
+                onClick={goNext}
+                whileTap={{ scale: 0.88 }}
+                className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/35 flex items-center justify-center transition-colors"
               >
-                <ChevronRight size={16} />
-              </button>
+                <ChevronRight size={18} className="text-white" strokeWidth={3} />
+              </motion.button>
             </div>
 
             <div className="p-3 bg-[#FEFFEE]">
@@ -257,6 +263,21 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
                 ))}
               </div>
 
+              <div className="overflow-hidden">
+              <AnimatePresence mode="wait" custom={slideDirection}>
+              <motion.div
+                key={format(currentMonth, 'yyyy-MM')}
+                custom={slideDirection}
+                variants={{
+                  enter: (dir: number) => ({ x: dir > 0 ? '100%' : '-100%', opacity: 0 }),
+                  center: { x: 0, opacity: 1 },
+                  exit:  (dir: number) => ({ x: dir > 0 ? '-100%' : '100%', opacity: 0 }),
+                }}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.28, ease: [0.32, 0, 0.68, 1] }}
+              >
               <div className="grid grid-cols-7 gap-1.5">
                 {Array.from({ length: (monthStart.getDay() + 6) % 7 }).map((_, i) => (
                   <div key={`empty-${i}`} />
@@ -316,6 +337,9 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
                     </motion.div>
                   );
                 })}
+              </div>
+              </motion.div>
+              </AnimatePresence>
               </div>
             </div>
           </div>
