@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { formatZodiac } from './utils/zodiac';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -50,6 +50,8 @@ function AppContent() {
   const { user, birthdays, challenges, inbox, sentMessages, loading, firebaseUser, setUser, addBirthday, updateBirthday, deleteBirthday, incrementScansCount, unlockCard, sendMessage, markConversationRead } = useAppState();
   const [activeScreen, setActiveScreen] = useState<Screen>('dashboard');
   const [slideDir, setSlideDir] = useState(1);
+  const [navTrigger, setNavTrigger] = useState<'tap' | 'swipe'>('tap');
+  const mainTouchX = useRef<number | null>(null);
   const [showSplash, setShowSplash] = useState(true);
   const [pendingDeepLink, setPendingDeepLink] = useState<string | null>(null);
   const [triggerAddFriend, setTriggerAddFriend] = useState(false);
@@ -109,11 +111,26 @@ function AppContent() {
     return () => clearTimeout(timer);
   }, []);
 
-  const navigateTo = (screen: Screen) => {
+  const navigateTo = (screen: Screen, trigger: 'tap' | 'swipe' = 'tap') => {
     const from = SCREEN_ORDER.indexOf(activeScreen);
     const to   = SCREEN_ORDER.indexOf(screen);
     setSlideDir(to >= from ? 1 : -1);
+    setNavTrigger(trigger);
     setActiveScreen(screen);
+  };
+
+  const handleMainTouchStart = (e: React.TouchEvent) => {
+    mainTouchX.current = e.touches[0].clientX;
+  };
+
+  const handleMainTouchEnd = (e: React.TouchEvent) => {
+    if (mainTouchX.current === null) return;
+    const delta = e.changedTouches[0].clientX - mainTouchX.current;
+    mainTouchX.current = null;
+    if (Math.abs(delta) < 60) return;
+    const idx = SCREEN_ORDER.indexOf(activeScreen);
+    if (delta < 0 && idx < SCREEN_ORDER.length - 1) navigateTo(SCREEN_ORDER[idx + 1], 'swipe');
+    if (delta > 0 && idx > 0) navigateTo(SCREEN_ORDER[idx - 1], 'swipe');
   };
 
   const handleLogin = async () => {
@@ -352,15 +369,19 @@ function AppContent() {
         </div>
       </header>
 
-      <main className={activeScreen === 'scanner' ? 'flex-1 overflow-hidden flex flex-col pb-24' : 'flex-1 overflow-y-auto overflow-x-hidden pb-24'}>
+      <main
+        className={activeScreen === 'scanner' ? 'flex-1 overflow-hidden flex flex-col pb-24' : 'flex-1 overflow-y-auto overflow-x-hidden pb-24'}
+        onTouchStart={handleMainTouchStart}
+        onTouchEnd={handleMainTouchEnd}
+      >
         <AnimatePresence mode="wait" custom={slideDir}>
           <motion.div
             key={activeScreen}
             custom={slideDir}
             variants={{
-              enter: (dir: number) => ({ x: dir > 0 ? '100%' : '-100%', opacity: 0 }),
-              center: { x: 0, opacity: 1 },
-              exit:  (dir: number) => ({ x: dir > 0 ? '-100%' : '100%', opacity: 0 }),
+              enter: (dir: number) => navTrigger === 'swipe' ? { x: dir > 0 ? '100%' : '-100%', opacity: 0 } : { x: 0, opacity: 0, y: 10 },
+              center: { x: 0, opacity: 1, y: 0 },
+              exit:  (dir: number) => navTrigger === 'swipe' ? { x: dir > 0 ? '-100%' : '100%', opacity: 0 } : { x: 0, opacity: 0, y: -10 },
             }}
             initial="enter"
             animate="center"
@@ -464,17 +485,17 @@ function AppContent() {
         className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/80 backdrop-blur-2xl border-t-2 border-slate-900 px-2 py-4 flex items-center z-50 rounded-t-[2.5rem] shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.05)]"
       >
         <div className="flex-1 flex justify-center">
-          <NavButton active={activeScreen === 'dashboard'} onClick={() => navigateTo('dashboard')} icon="🏠" label="Accueil" ariaLabel="Accueil" />
+          <NavButton active={activeScreen === 'dashboard'} onClick={() => navigateTo('dashboard', 'tap')} icon="🏠" label="Accueil" ariaLabel="Accueil" />
         </div>
         <div className="flex-1 flex justify-center">
-          <NavButton active={activeScreen === 'calendar'} onClick={() => navigateTo('calendar')} icon="📅" label="Calendrier" ariaLabel="Calendrier des anniversaires" />
+          <NavButton active={activeScreen === 'calendar'} onClick={() => navigateTo('calendar', 'tap')} icon="📅" label="Calendrier" ariaLabel="Calendrier des anniversaires" />
         </div>
         <div className="flex-1 flex justify-center">
           <motion.button
             aria-label="Ajouter un ami"
             whileHover={{ scale: 1.15, rotate: 5 }}
             whileTap={{ scale: 0.9 }}
-            onClick={() => { navigateTo('calendar'); setTriggerAddFriend(true); }}
+            onClick={() => { navigateTo('calendar', 'tap'); setTriggerAddFriend(true); }}
             className="w-14 h-14 rounded-2xl flex items-center justify-center text-white"
             style={{ background: '#FF4B4B' }}
           >
@@ -482,10 +503,10 @@ function AppContent() {
           </motion.button>
         </div>
         <div className="flex-1 flex justify-center">
-          <NavButton active={activeScreen === 'collection'} onClick={() => navigateTo('collection')} icon="🃏" label="Cartes" ariaLabel="Ma collection de cartes" />
+          <NavButton active={activeScreen === 'collection'} onClick={() => navigateTo('collection', 'tap')} icon="🃏" label="Cartes" ariaLabel="Ma collection de cartes" />
         </div>
         <div className="flex-1 flex justify-center">
-          <NavButton active={activeScreen === 'profile'} onClick={() => navigateTo('profile')} icon="👤" label="Profil" ariaLabel="Mon profil" />
+          <NavButton active={activeScreen === 'profile'} onClick={() => navigateTo('profile', 'tap')} icon="👤" label="Profil" ariaLabel="Mon profil" />
         </div>
       </nav>
     </div>
