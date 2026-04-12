@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { ZODIAC_EMOJI, formatZodiac } from '../utils/zodiac';
+import { formatZodiac } from '../utils/zodiac';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronLeft, ChevronRight, ChevronDown, X, Camera, ImageIcon, Phone, Instagram, Twitter, Facebook, Plus, Trash2, Gift, Save, Lightbulb, Users, Trophy, Search } from 'lucide-react';
+import { ChevronDown, X, Camera, ImageIcon, Phone, Instagram, Twitter, Facebook, Plus, Trash2, Search, Trophy, Heart, Users, UserCircle } from 'lucide-react';
 import { FriendEditModal } from '../components/FriendEditModal';
 import { FriendProfileModal } from '../components/FriendProfileModal';
 import confetti from 'canvas-confetti';
@@ -10,45 +10,193 @@ import { auth, storage, db } from '../firebase';
 import { collection, getDocs, query, orderBy, where, documentId } from 'firebase/firestore';
 import { Birthday, UserProfile } from '../types';
 import { getZodiacSign } from '../utils/gameLogic';
-import { CELEB_BIRTHDAYS } from '../data/celebBirthdays';
-import {
-  format,
-  startOfMonth,
-  endOfMonth,
-  eachDayOfInterval,
-  isSameDay,
-  addMonths,
-  subMonths,
-  parseISO
-} from 'date-fns';
+import { format, parseISO, differenceInDays, startOfDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { ZODIAC_EMOJI } from '../utils/zodiac';
 
-export function Calendar({ birthdays, user, onAddBirthday, onUpdateBirthday, onDeleteBirthday, onFirstVisit, openAddModal, onAddModalOpened }: {
-  birthdays: Birthday[],
-  user?: UserProfile | null,
-  onAddBirthday?: (b: Birthday) => void,
-  onUpdateBirthday?: (id: string, updates: Partial<Birthday>) => Promise<void>,
-  onDeleteBirthday?: (id: string) => void,
-  onFirstVisit?: () => void,
-  openAddModal?: boolean,
-  onAddModalOpened?: () => void,
+type TabId = 'tous' | 'famille' | 'ami' | 'connaissance';
+
+const MONTHS_FR = [
+  'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+  'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre',
+];
+
+function getDaysUntil(birthDate: string): number {
+  const today = startOfDay(new Date());
+  const bDate = parseISO(birthDate);
+  const next = new Date(today.getFullYear(), bDate.getMonth(), bDate.getDate());
+  if (next < today) next.setFullYear(today.getFullYear() + 1);
+  return differenceInDays(next, today);
+}
+
+function getCategoryStyle(category?: string) {
+  switch (category) {
+    case 'famille':
+      return { borderColor: '#f43f5e', icon: <Heart size={11} className="text-rose-500" strokeWidth={2.5} /> };
+    case 'ami':
+      return { borderColor: '#0ea5e9', icon: <Users size={11} className="text-sky-500" strokeWidth={2.5} /> };
+    case 'connaissance':
+      return { borderColor: '#94a3b8', icon: <UserCircle size={11} className="text-slate-400" strokeWidth={2.5} /> };
+    default:
+      return { borderColor: '#e2e8f0', icon: null };
+  }
+}
+
+function DaysUntilBadge({ days }: { days: number }) {
+  if (days === 0) {
+    return (
+      <span className="text-[10px] font-black px-2 py-1 rounded-xl bg-rose-50 text-rose-500 whitespace-nowrap">
+        🎂 Aujourd'hui
+      </span>
+    );
+  }
+  if (days <= 7) {
+    return (
+      <span className="text-[10px] font-black px-2 py-1 rounded-xl bg-amber-50 text-amber-600 whitespace-nowrap">
+        J-{days}
+      </span>
+    );
+  }
+  return (
+    <span className="text-[10px] font-black px-2 py-1 rounded-xl bg-slate-100 text-slate-500 whitespace-nowrap">
+      J-{days}
+    </span>
+  );
+}
+
+function FriendRow({
+  friend,
+  hasAccount,
+  onPress,
+  onLongPressStart,
+  onLongPressEnd,
+}: {
+  friend: Birthday;
+  hasAccount: boolean;
+  onPress: () => void;
+  onLongPressStart: () => void;
+  onLongPressEnd: () => void;
 }) {
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [showAddModal, setShowAddModal] = useState(false);
+  const days = getDaysUntil(friend.birthDate);
+  const { borderColor, icon: categoryIcon } = getCategoryStyle(friend.category);
+  const zodiacEmoji = ZODIAC_EMOJI[friend.zodiac] ?? '';
 
-  useEffect(() => {
-    if (openAddModal) {
-      setShowAddModal(true);
-      onAddModalOpened?.();
-    }
-  }, [openAddModal]);
+  return (
+    <motion.div
+      whileTap={{ scale: 0.985 }}
+      onPointerDown={onLongPressStart}
+      onPointerUp={onLongPressEnd}
+      onPointerLeave={onLongPressEnd}
+      onClick={onPress}
+      className="flex items-center gap-3 bg-white rounded-2xl border border-slate-100 p-3 cursor-pointer active:bg-slate-50 transition-colors"
+    >
+      {/* Photo */}
+      <div className="relative shrink-0">
+        {friend.photoUrl ? (
+          <img
+            src={friend.photoUrl}
+            alt={friend.name}
+            className="w-14 h-14 rounded-2xl object-cover"
+            style={{ border: `2px solid ${borderColor}` }}
+          />
+        ) : (
+          <div
+            className="w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl text-white"
+            style={{ background: '#FF4B4B', border: `2px solid ${borderColor}` }}
+          >
+            {friend.name.charAt(0).toUpperCase()}
+          </div>
+        )}
+        {categoryIcon && (
+          <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded-full border border-slate-100 flex items-center justify-center shadow-sm">
+            {categoryIcon}
+          </div>
+        )}
+        {hasAccount && (
+          <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-400 rounded-full border-2 border-white flex items-center justify-center">
+            <span className="text-[7px] text-white font-black">✓</span>
+          </div>
+        )}
+      </div>
+
+      {/* Info */}
+      <div className="flex-1 min-w-0">
+        <p className="font-black text-slate-900 text-sm truncate">{friend.name}</p>
+        <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+          {format(parseISO(friend.birthDate), 'd MMM', { locale: fr })}
+          {' · '}
+          {zodiacEmoji} {formatZodiac(friend.zodiac)}
+        </p>
+      </div>
+
+      {/* Badge */}
+      <div className="shrink-0">
+        <DaysUntilBadge days={days} />
+      </div>
+    </motion.div>
+  );
+}
+
+function EmptyState({ tab, onAdd }: { tab: TabId; onAdd: () => void }) {
+  const config: Record<TabId, { emoji: string; title: string; sub: string }> = {
+    tous: { emoji: '👥', title: "Aucun ami pour l'instant", sub: "Commence par ajouter quelqu'un !" },
+    famille: { emoji: '❤️', title: 'Aucun membre de la famille', sub: 'Maintiens appuyé sur un ami pour le classer.' },
+    ami: { emoji: '🤝', title: 'Aucun ami classé', sub: 'Maintiens appuyé sur un ami pour le classer.' },
+    connaissance: { emoji: '👋', title: 'Aucune connaissance', sub: 'Maintiens appuyé sur un ami pour le classer.' },
+  };
+  const { emoji, title, sub } = config[tab];
+  return (
+    <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
+      <span className="text-5xl">{emoji}</span>
+      <p className="font-black text-slate-700 text-base">{title}</p>
+      <p className="text-sm text-slate-400 font-medium max-w-[200px]">{sub}</p>
+      {tab === 'tous' && (
+        <motion.button
+          whileTap={{ scale: 0.95 }}
+          onClick={onAdd}
+          className="mt-2 inline-flex items-center gap-2 px-5 py-3 rounded-2xl text-white font-black text-sm"
+          style={{ background: '#FF4B4B', boxShadow: '0 4px 0 #CC2E2E' }}
+        >
+          <Plus size={16} strokeWidth={3} />
+          Ajouter un ami
+        </motion.button>
+      )}
+    </div>
+  );
+}
+
+export function Calendar({
+  birthdays,
+  user,
+  onAddBirthday,
+  onUpdateBirthday,
+  onDeleteBirthday,
+  onFirstVisit,
+  openAddModal,
+  onAddModalOpened,
+}: {
+  birthdays: Birthday[];
+  user?: UserProfile | null;
+  onAddBirthday?: (b: Birthday) => void;
+  onUpdateBirthday?: (id: string, updates: Partial<Birthday>) => Promise<void>;
+  onDeleteBirthday?: (id: string) => void;
+  onFirstVisit?: () => void;
+  openAddModal?: boolean;
+  onAddModalOpened?: () => void;
+}) {
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabId>('tous');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [classifyingFriend, setClassifyingFriend] = useState<Birthday | null>(null);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Add friend form state
   const [newName, setNewName] = useState('');
   const [newDate, setNewDate] = useState('');
   const [newPhone, setNewPhone] = useState('');
   const [newPhotoUrl, setNewPhotoUrl] = useState('');
   const [newPhotoPreview, setNewPhotoPreview] = useState('');
   const [newSocials, setNewSocials] = useState({ instagram: '', snapchat: '', tiktok: '', twitter: '', facebook: '' });
-  const [showCake, setShowCake] = useState(true);
   const [showSocials, setShowSocials] = useState(false);
   const [showWishlist, setShowWishlist] = useState(false);
   const [newWishlist, setNewWishlist] = useState<string[]>([]);
@@ -60,31 +208,22 @@ export function Calendar({ birthdays, user, onAddBirthday, onUpdateBirthday, onD
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
-  // Edit friend modal state
   const [editingFriend, setEditingFriend] = useState<Birthday | null>(null);
-
-  // Amis / leaderboard state
-  const [showFriendsModal, setShowFriendsModal] = useState(false);
-  const [friendSearch, setFriendSearch] = useState('');
-  const [friendsWithAccount, setFriendsWithAccount] = useState<Set<string>>(new Set());
   const [viewingFriend, setViewingFriend] = useState<Birthday | null>(null);
+  const [friendsWithAccount, setFriendsWithAccount] = useState<Set<string>>(new Set());
+
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [leaderboard, setLeaderboard] = useState<UserProfile[]>([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
 
   useEffect(() => {
-    onFirstVisit?.();
-  }, []);
+    if (openAddModal) {
+      setShowAddModal(true);
+      onAddModalOpened?.();
+    }
+  }, [openAddModal]);
 
-  useEffect(() => {
-    const cycle = () => {
-      setShowCake(true);
-      setTimeout(() => setShowCake(false), 6000);
-    };
-    cycle();
-    const interval = setInterval(cycle, 8000);
-    return () => clearInterval(interval);
-  }, []);
+  useEffect(() => { onFirstVisit?.(); }, []);
 
   useEffect(() => {
     if (birthdays.length === 0) { setFriendsWithAccount(new Set()); return; }
@@ -112,18 +251,6 @@ export function Calendar({ birthdays, user, onAddBirthday, onUpdateBirthday, onD
     }
   };
 
-  const today = new Date();
-  const monthStart = startOfMonth(currentMonth);
-  const monthEnd = endOfMonth(currentMonth);
-  const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
-
-  const getBirthdaysForDay = (day: Date) => {
-    return birthdays.filter(b => {
-      const bDate = parseISO(b.birthDate);
-      return bDate.getDate() === day.getDate() && bDate.getMonth() === day.getMonth();
-    });
-  };
-
   const handlePhotoFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -138,7 +265,6 @@ export function Calendar({ birthdays, user, onAddBirthday, onUpdateBirthday, onD
         canvas.width = Math.round(img.width * ratio);
         canvas.height = Math.round(img.height * ratio);
         canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
-        // Show preview immediately using blob URL
         canvas.toBlob(async (blob) => {
           if (!blob) { setPhotoUploading(false); return; }
           const preview = URL.createObjectURL(blob);
@@ -169,17 +295,11 @@ export function Calendar({ birthdays, user, onAddBirthday, onUpdateBirthday, onD
   };
 
   const handleAddFriend = () => {
-    console.log('[AddFriend] Déclenchement — newName:', newName, '| newDate:', newDate, '| onAddBirthday:', !!onAddBirthday, '| newPhotoUrl length:', newPhotoUrl.length);
-    if (!newName || !newDate || !onAddBirthday) {
-      console.warn('[AddFriend] Bloqué par la garde —', { newName: !!newName, newDate: !!newDate, onAddBirthday: !!onAddBirthday });
-      return;
-    }
-
+    if (!newName || !newDate || !onAddBirthday) return;
     const birthDate = parseISO(newDate);
     const socials = Object.fromEntries(
       Object.entries(newSocials).filter(([, v]) => v.trim() !== '')
     ) as Birthday['socials'];
-
     const birthday: Birthday = {
       id: Math.random().toString(36).substr(2, 9),
       name: newName,
@@ -191,310 +311,248 @@ export function Calendar({ birthdays, user, onAddBirthday, onUpdateBirthday, onD
       ...(Object.keys(socials ?? {}).length > 0 && { socials }),
       ...(newWishlist.length > 0 && { wishlist: newWishlist }),
     };
-
-    console.log('[AddFriend] Objet Birthday complet:', {
-      ...birthday,
-      photoUrl: birthday.photoUrl ? `[base64 ${(birthday.photoUrl.length * 0.75 / 1024).toFixed(1)} Ko]` : undefined,
-    });
-
-    try {
-      onAddBirthday(birthday);
-      console.log('[AddFriend] onAddBirthday appelé avec succès');
-    } catch (err) {
-      console.error('[AddFriend] Erreur lors de onAddBirthday:', err);
-    }
-
+    onAddBirthday(birthday);
     const addedName = newName;
-    setNewName('');
-    setNewDate('');
-    setNewPhone('');
-    setNewPhotoUrl('');
-    setNewPhotoPreview('');
+    setNewName(''); setNewDate(''); setNewPhone('');
+    setNewPhotoUrl(''); setNewPhotoPreview('');
     setNewSocials({ instagram: '', snapchat: '', tiktok: '', twitter: '', facebook: '' });
-    setNewWishlist([]);
-    setNewWishInput('');
-    setShowWishlist(false);
-    setShowPhotoMenu(false);
-    setShowAddModal(false);
-
-    // Célébration
+    setNewWishlist([]); setNewWishInput('');
+    setShowWishlist(false); setShowPhotoMenu(false); setShowAddModal(false);
     setToastName(addedName);
     setTimeout(() => setToastName(null), 5000);
-
     const colors = ['#FF4B4B', '#58CC02', '#ffffff', '#FEF08A'];
     const base = { particleCount: 60, angle: 90, spread: 160, colors, scalar: 1.4, startVelocity: 35, ticks: 250, origin: { x: 0.5, y: 0 } };
     confetti(base);
     setTimeout(() => confetti({ ...base, particleCount: 40, startVelocity: 28 }), 350);
   };
 
-  const openEditFriend = (b: Birthday) => {
-    setEditingFriend(b);
+  const handleClassify = async (category: 'famille' | 'ami' | 'connaissance') => {
+    if (!classifyingFriend || !onUpdateBirthday) return;
+    await onUpdateBirthday(classifyingFriend.id, { category });
+    setClassifyingFriend(null);
   };
 
-  const handleDayClick = (day: Date) => {
-    setNewDate(format(day, 'yyyy-MM-dd'));
-    setShowAddModal(true);
+  const handleLongPressStart = (friend: Birthday) => {
+    longPressTimer.current = setTimeout(() => setClassifyingFriend(friend), 550);
+  };
+  const handleLongPressEnd = () => {
+    if (longPressTimer.current) clearTimeout(longPressTimer.current);
   };
 
-  const todayCeleb = CELEB_BIRTHDAYS.find(c => c.date === format(new Date(), 'MM-dd'));
+  // Filter birthdays for current tab + search
+  const filtered = birthdays.filter(b => {
+    const matchSearch = b.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchTab = activeTab === 'tous' || b.category === activeTab;
+    return matchSearch && matchTab;
+  });
+
+  // Group by birth month (for "Tous" tab)
+  const groupedByMonth = MONTHS_FR.map((month, i) => ({
+    month,
+    friends: filtered
+      .filter(b => parseISO(b.birthDate).getMonth() === i)
+      .sort((a, b) => parseISO(a.birthDate).getDate() - parseISO(b.birthDate).getDate()),
+  })).filter(g => g.friends.length > 0);
+
+  // Sorted by days until birthday (for filtered tabs)
+  const sortedFlat = [...filtered].sort(
+    (a, b) => getDaysUntil(a.birthDate) - getDaysUntil(b.birthDate)
+  );
+
+  const tabCounts = {
+    tous: birthdays.length,
+    famille: birthdays.filter(b => b.category === 'famille').length,
+    ami: birthdays.filter(b => b.category === 'ami').length,
+    connaissance: birthdays.filter(b => b.category === 'connaissance').length,
+  };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="font-display text-2xl font-black text-slate-900 capitalize">
-          {format(currentMonth, 'MMMM yyyy', { locale: fr })}
-        </h2>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-            className="p-2 bg-white border border-black/60 rounded-xl text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
-          >
-            <ChevronLeft size={20} />
-          </button>
-          <button
-            onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-            className="p-2 bg-white border border-black/60 rounded-xl text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
-          >
-            <ChevronRight size={20} />
-          </button>
+    <div className="flex flex-col min-h-full">
+      {/* ── Header ─────────────────────────────────────────────── */}
+      <div className="px-5 pt-5 pb-3 space-y-3">
+        {/* Title row */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="font-display text-2xl font-black text-slate-900">Mes amis</h2>
+            <p className="text-xs font-bold text-slate-400 mt-0.5">
+              {birthdays.length} contact{birthdays.length !== 1 ? 's' : ''}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <motion.button
+              whileTap={{ scale: 0.92 }}
+              onClick={openLeaderboard}
+              className="w-10 h-10 rounded-2xl bg-white border border-slate-200 flex items-center justify-center shadow-sm"
+            >
+              <Trophy size={18} className="text-slate-600" />
+            </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.92 }}
+              onClick={() => setShowAddModal(true)}
+              className="w-10 h-10 rounded-2xl flex items-center justify-center text-white"
+              style={{ background: '#FF4B4B', boxShadow: '0 3px 0 #CC2E2E' }}
+            >
+              <Plus size={20} strokeWidth={3} />
+            </motion.button>
+          </div>
+        </div>
+
+        {/* Search */}
+        <div className="flex items-center gap-2 bg-slate-50 border border-black/10 rounded-2xl px-4 py-2.5">
+          <Search size={14} className="text-slate-400 shrink-0" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="Rechercher..."
+            className="flex-1 bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
+          />
+          {searchQuery && (
+            <button onClick={() => setSearchQuery('')}><X size={14} className="text-slate-400" /></button>
+          )}
+        </div>
+
+        {/* Tabs */}
+        <div className="flex bg-slate-100 rounded-2xl p-1 gap-1">
+          {([
+            { id: 'tous' as TabId, label: 'Tous', icon: null },
+            { id: 'famille' as TabId, label: 'Famille', icon: <Heart size={11} strokeWidth={2.5} />, activeColor: 'text-rose-500' },
+            { id: 'ami' as TabId, label: 'Amis', icon: <Users size={11} strokeWidth={2.5} />, activeColor: 'text-sky-500' },
+            { id: 'connaissance' as TabId, label: 'Connect.', icon: <UserCircle size={11} strokeWidth={2.5} />, activeColor: 'text-slate-500' },
+          ] as const).map(tab => {
+            const isActive = activeTab === tab.id;
+            const count = tabCounts[tab.id];
+            return (
+              <motion.button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                whileTap={{ scale: 0.95 }}
+                className={`flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[11px] font-black transition-all ${
+                  isActive ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'
+                }`}
+              >
+                {tab.icon && (
+                  <span className={isActive && 'activeColor' in tab ? tab.activeColor : ''}>
+                    {tab.icon}
+                  </span>
+                )}
+                <span>{tab.label}</span>
+                {count > 0 && (
+                  <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${
+                    isActive ? 'bg-slate-100 text-slate-600' : 'bg-slate-200/60 text-slate-400'
+                  }`}>
+                    {count}
+                  </span>
+                )}
+              </motion.button>
+            );
+          })}
         </div>
       </div>
 
-      <div className="bg-[#FEFFEE] rounded-[28px] shadow-[0_24px_60px_rgba(0,0,0,0.18),0_8px_20px_rgba(0,0,0,0.08)] border border-black/40 overflow-hidden relative">
-        <div className="bg-rose-500 px-3 py-2.5 text-center border-b-[0.5px] border-rose-600/30">
-          <h4 className="text-white font-black uppercase tracking-widest text-[13px]">
-            {format(currentMonth, 'MMMM yyyy', { locale: fr })}
-          </h4>
-        </div>
-
-        <div className="p-3 bg-[#FEFFEE]">
-          <div className="grid grid-cols-7 gap-1 mb-1.5">
-            {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day, i) => (
-              <div key={`${day}-${i}`} className={`text-center text-[13px] font-bold tracking-wide font-display py-0.5 ${i >= 5 ? 'text-rose-600' : 'text-slate-700'}`}>
-                {day}
-              </div>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-7 gap-1.5">
-            {Array.from({ length: (monthStart.getDay() + 6) % 7 }).map((_, i) => (
-              <div key={`empty-${i}`} />
-            ))}
-            {days.map(day => {
-              const dayBirthdays = getBirthdaysForDay(day);
-              const hasBirthdays = dayBirthdays.length > 0;
-              const isToday = isSameDay(day, today);
-
-              return (
-                <motion.div
-                  key={day.toString()}
-                  onClick={() => handleDayClick(day)}
-                  whileHover={{ scale: 1.15, zIndex: 10 }}
-                  whileTap={{ scale: 0.95 }}
-                  animate={hasBirthdays && !isToday && showCake ? { scale: [1, 1.12, 1] } : { scale: 1 }}
-                  transition={hasBirthdays && !isToday && showCake ? { duration: 0.5, ease: 'easeInOut' } : {}}
-                  className={`aspect-square rounded-full flex flex-col items-center justify-center font-black relative cursor-pointer ${
-                    isToday
-                      ? 'border-[0.5px] border-rose-500 text-rose-500'
-                      : hasBirthdays
-                      ? 'border-[0.5px] border-green-400 text-green-600'
-                      : 'bg-white text-slate-800 shadow-[0_2px_6px_rgba(0,0,0,0.10),0_1px_2px_rgba(0,0,0,0.05)] [outline:0.5px_solid_rgba(0,0,0,0.12)]'
-                  }`}
-                >
-                  {!hasBirthdays && !isToday && (
-                    <div className="absolute inset-0 rounded-full pointer-events-none bg-gradient-to-b from-white/60 to-transparent" />
-                  )}
-                  {hasBirthdays && !isToday ? (
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={showCake ? 'cake' : 'date'}
-                        initial={{ opacity: 0, y: 3 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -3 }}
-                        transition={{ duration: 0.4 }}
-                        className="flex items-center justify-center"
-                      >
-                        {showCake ? (
-                          <motion.span
-                            animate={{ y: [0, -2, 0] }}
-                            transition={{ duration: 1, repeat: Infinity }}
-                            className="text-[16px]"
-                          >
-                            🎉
-                          </motion.span>
-                        ) : (
-                          <span className="text-[13px] font-black font-display text-green-700">
-                            {format(day, 'd')}
-                          </span>
-                        )}
-                      </motion.div>
-                    </AnimatePresence>
-                  ) : (
-                    <span className="text-[13px] font-black font-display text-slate-800">{format(day, 'd')}</span>
-                  )}
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-4 pt-4">
-        <h3 className="text-sm font-black text-slate-500 uppercase tracking-widest">Événements du mois</h3>
-        <div className="space-y-3">
-          {birthdays
-            .filter(b => parseISO(b.birthDate).getMonth() === currentMonth.getMonth())
-            .sort((a, b) => parseISO(a.birthDate).getDate() - parseISO(b.birthDate).getDate())
-            .map(b => (
-              <div key={b.id} onClick={() => openEditFriend(b)} className="flex items-center gap-4 bg-white p-3 rounded-2xl border border-black/60 shadow-sm cursor-pointer hover:border-rose-300 transition-colors">
-                {b.photoUrl
-                  ? <img src={b.photoUrl} alt={b.name} className="w-10 h-10 rounded-full object-cover border border-black/20 shrink-0" />
-                  : <div className="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center text-rose-600 font-black text-sm border border-rose-200 shrink-0">
-                      {b.name.charAt(0)}
-                    </div>
-                }
-                <div className="flex-1">
-                  <p className="font-black text-slate-900 text-sm">{b.name}</p>
-                  <p className="text-[10px] text-slate-600 font-bold uppercase tracking-wider">{formatZodiac(b.zodiac)}</p>
+      {/* ── List ───────────────────────────────────────────────── */}
+      <div className="flex-1 px-5 pb-28">
+        {filtered.length === 0 ? (
+          <EmptyState tab={activeTab} onAdd={() => setShowAddModal(true)} />
+        ) : activeTab === 'tous' ? (
+          <div className="space-y-5 pt-1">
+            {groupedByMonth.map(({ month, friends }) => (
+              <div key={month}>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">{month}</p>
+                <div className="space-y-2">
+                  {friends.map(friend => (
+                    <FriendRow
+                      key={friend.id}
+                      friend={friend}
+                      hasAccount={friendsWithAccount.has(friend.id)}
+                      onPress={() => setViewingFriend(friend)}
+                      onLongPressStart={() => handleLongPressStart(friend)}
+                      onLongPressEnd={handleLongPressEnd}
+                    />
+                  ))}
                 </div>
-                <button
-                  type="button"
-                  onClick={(e) => { e.stopPropagation(); setConfirmDelete(b); }}
-                  className="w-7 h-7 rounded-full bg-slate-100 hover:bg-rose-100 flex items-center justify-center transition-colors shrink-0"
-                >
-                  <X size={14} className="text-slate-400 hover:text-rose-500" />
-                </button>
               </div>
             ))}
-        </div>
-      </div>
-
-      {todayCeleb && (
-        <div className="bg-white border border-black/60 rounded-2xl p-4 shadow-sm">
-          <div className="flex items-start justify-between gap-2 mb-2">
-            <div className="flex items-center gap-1.5">
-              <Lightbulb size={16} className="text-yellow-400 fill-yellow-300" />
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Savais-tu ?</p>
-            </div>
-            <span className="text-[9px] font-black text-rose-400 uppercase tracking-wide bg-rose-50 border border-rose-100 px-2 py-0.5 rounded-full shrink-0">
-              Aujourd'hui c'est son anniversaire
-            </span>
           </div>
-          <p className="font-black text-slate-900 text-sm leading-tight">{todayCeleb.name}</p>
-          <p className="text-[10px] font-bold text-rose-500 uppercase tracking-wide mt-0.5 mb-2">{todayCeleb.title}</p>
-          <p className="text-xs text-slate-600 leading-relaxed mb-3">{todayCeleb.description}</p>
-          <a
-            href={todayCeleb.wikipedia}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 bg-slate-50 border border-black/60 rounded-xl px-3 py-2 text-xs font-black text-slate-700 hover:bg-slate-100 transition-colors"
-          >
-            <span>📖</span> Voir sa page Wikipédia
-          </a>
-        </div>
-      )}
-
-      {/* ── Voir mes amis ───────────────────────────────────────── */}
-      <div className="flex justify-center">
-        <motion.button
-          type="button"
-          whileHover={{ scale: 1.04 }}
-          whileTap={{ scale: 0.96 }}
-          onClick={() => { setShowFriendsModal(true); setFriendSearch(''); }}
-          className="flex items-center gap-2.5 px-5 py-2.5 bg-white rounded-full border border-slate-200 shadow-sm"
-        >
-          <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: '#FF4B4B' }}>
-            <Users size={12} className="text-white" />
+        ) : (
+          <div className="space-y-2 pt-1">
+            {sortedFlat.map(friend => (
+              <FriendRow
+                key={friend.id}
+                friend={friend}
+                hasAccount={friendsWithAccount.has(friend.id)}
+                onPress={() => setViewingFriend(friend)}
+                onLongPressStart={() => handleLongPressStart(friend)}
+                onLongPressEnd={handleLongPressEnd}
+              />
+            ))}
           </div>
-          <span className="text-sm font-black text-slate-800">Voir mes amis</span>
-          <span className="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{birthdays.length}</span>
-        </motion.button>
+        )}
       </div>
 
-      {/* ── Stats Total Amis / Cartes ────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-4">
-        <motion.div
-          whileHover={{ y: -4 }}
-          whileTap={{ scale: 0.97 }}
-          onClick={openLeaderboard}
-          className="bg-rose-300 p-4 rounded-3xl text-white space-y-0.5 shadow-lg shadow-rose-100 cursor-pointer"
-          style={{ boxShadow: '0 4px 0 #e57373' }}
-        >
-          <p className="text-[11px] font-black uppercase tracking-widest text-rose-900/80 text-center">Total Amis</p>
-          <p className="text-2xl font-black text-center">{birthdays.length}</p>
-          <p className="text-[11px] font-bold text-rose-900/60 uppercase tracking-widest text-center">Voir classement</p>
-        </motion.div>
-        <motion.div
-          whileHover={{ y: -4 }}
-          className="bg-emerald-300 p-4 rounded-3xl text-white space-y-0.5 shadow-lg shadow-emerald-100"
-          style={{ boxShadow: '0 4px 0 #6abf69' }}
-        >
-          <p className="text-[11px] font-black uppercase tracking-widest text-emerald-900/80 text-center">Cartes</p>
-          <p className="text-2xl font-black text-center">{user?.collectedCards.length ?? 0}</p>
-        </motion.div>
-      </div>
-
-      {/* ── Friends list modal ───────────────────────────────────── */}
+      {/* ── Classification bottom sheet ─────────────────────────── */}
       <AnimatePresence>
-        {showFriendsModal && (
-          <div className="fixed inset-0 z-[150] flex items-center justify-center p-6">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowFriendsModal(false)} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
-            <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} transition={{ type: 'spring', stiffness: 400, damping: 30 }} className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl flex flex-col max-h-[90vh]">
-              <div className="flex items-center justify-center relative px-8 pt-8 pb-4 shrink-0">
-                <div className="text-center">
-                  <h3 className="font-display text-xl font-black text-slate-900">Mes amis</h3>
-                  <p className="text-xs font-bold text-rose-400 uppercase tracking-widest mt-0.5">
-                    {birthdays.length} contact{birthdays.length !== 1 ? 's' : ''}
-                    {friendsWithAccount.size > 0 && ` · ${friendsWithAccount.size} sur l'appli`}
-                  </p>
-                </div>
-                <button onClick={() => setShowFriendsModal(false)} className="absolute right-8 text-slate-500 hover:text-slate-700"><X size={24} /></button>
-              </div>
-              <div className="px-8 pb-3 shrink-0">
-                <div className="flex items-center gap-2 bg-slate-50 border border-black/60 rounded-2xl px-4 py-2.5">
-                  <Search size={14} className="text-slate-400 shrink-0" />
-                  <input type="text" value={friendSearch} onChange={e => setFriendSearch(e.target.value)} placeholder="Rechercher un ami..." className="flex-1 bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none" />
-                </div>
-              </div>
-              <div className="overflow-y-auto px-8 pb-8 space-y-2">
-                {birthdays.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12 gap-3 text-center">
-                    <span className="text-4xl">👥</span>
-                    <p className="font-bold text-slate-400 text-sm">Aucun ami pour l'instant</p>
-                  </div>
-                ) : (() => {
-                  const filtered = [...birthdays].sort((a, b) => a.name.localeCompare(b.name)).filter(b => b.name.toLowerCase().includes(friendSearch.toLowerCase()));
-                  if (filtered.length === 0) return <div className="flex flex-col items-center justify-center py-10 gap-2 text-center"><span className="text-3xl">🔍</span><p className="font-bold text-slate-400 text-sm">Aucun résultat</p></div>;
-                  return filtered.map((b, i) => {
-                    const hasAccount = friendsWithAccount.has(b.id);
-                    const socialIcons: Record<string, string> = { instagram: '📸', snapchat: '👻', tiktok: '🎵', twitter: '🐦', facebook: '👤' };
-                    const filledSocials = b.socials ? Object.entries(b.socials).filter(([, v]) => v) : [];
-                    return (
-                      <motion.div key={b.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }} onClick={() => { setViewingFriend(b); setShowFriendsModal(false); }} className="flex items-center gap-3 p-3 bg-slate-50 border border-black/60 rounded-2xl cursor-pointer hover:border-sky-400 transition-colors active:scale-[0.98]">
-                        <div className="relative shrink-0">
-                          <img src={b.photoUrl || `https://picsum.photos/seed/${b.id}/80/80`} alt={b.name} className="w-11 h-11 rounded-xl object-cover border border-black/10" />
-                          {hasAccount && <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-emerald-400 rounded-full border-2 border-white flex items-center justify-center"><span className="text-[7px]">✓</span></div>}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <p className="font-black text-slate-900 text-sm truncate">{b.name}</p>
-                            {hasAccount && <span className="text-[8px] font-black text-emerald-600 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded-full shrink-0">🎮</span>}
-                          </div>
-                          <p className="text-[11px] text-slate-600 font-medium">{format(parseISO(b.birthDate), 'd MMM', { locale: fr })} · {formatZodiac(b.zodiac)}</p>
-                          {filledSocials.length > 0 && <div className="flex gap-1 mt-0.5">{filledSocials.map(([key]) => <span key={key} className="text-[11px]">{socialIcons[key]}</span>)}</div>}
-                        </div>
-                        <span className="text-slate-400 text-lg shrink-0">›</span>
-                      </motion.div>
-                    );
-                  });
-                })()}
+        {classifyingFriend && (
+          <div className="fixed inset-0 z-[300]">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/40"
+              onClick={() => setClassifyingFriend(null)}
+            />
+            <motion.div
+              initial={{ y: 220 }}
+              animate={{ y: 0 }}
+              exit={{ y: 220 }}
+              transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+              className="absolute bottom-0 inset-x-0 bg-white rounded-t-3xl px-6 pt-5 pb-10"
+            >
+              <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5" />
+              <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest text-center mb-4">
+                Classer <span className="text-slate-800 normal-case text-sm">{classifyingFriend.name}</span>
+              </p>
+              <div className="grid grid-cols-3 gap-3">
+                {([
+                  {
+                    cat: 'famille' as const,
+                    label: 'Famille',
+                    icon: <Heart size={24} className="text-rose-500" strokeWidth={2} />,
+                    bg: 'bg-rose-50', border: 'border-rose-200',
+                    ring: classifyingFriend.category === 'famille' ? 'ring-2 ring-rose-400 ring-offset-1' : '',
+                  },
+                  {
+                    cat: 'ami' as const,
+                    label: 'Amis',
+                    icon: <Users size={24} className="text-sky-500" strokeWidth={2} />,
+                    bg: 'bg-sky-50', border: 'border-sky-200',
+                    ring: classifyingFriend.category === 'ami' ? 'ring-2 ring-sky-400 ring-offset-1' : '',
+                  },
+                  {
+                    cat: 'connaissance' as const,
+                    label: 'Connais.',
+                    icon: <UserCircle size={24} className="text-slate-400" strokeWidth={2} />,
+                    bg: 'bg-slate-50', border: 'border-slate-200',
+                    ring: classifyingFriend.category === 'connaissance' ? 'ring-2 ring-slate-300 ring-offset-1' : '',
+                  },
+                ]).map(({ cat, label, icon, bg, border, ring }) => (
+                  <motion.button
+                    key={cat}
+                    whileTap={{ scale: 0.92 }}
+                    onClick={() => handleClassify(cat)}
+                    className={`flex flex-col items-center gap-2.5 p-4 rounded-2xl border ${bg} ${border} ${ring} transition-all`}
+                  >
+                    {icon}
+                    <span className="text-[11px] font-black text-slate-700">{label}</span>
+                  </motion.button>
+                ))}
               </div>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
 
-      {/* Friend profile modal */}
+      {/* ── Friend profile modal ────────────────────────────────── */}
       <FriendProfileModal
         friend={viewingFriend}
         hasAccount={viewingFriend ? friendsWithAccount.has(viewingFriend.id) : false}
@@ -502,32 +560,87 @@ export function Calendar({ birthdays, user, onAddBirthday, onUpdateBirthday, onD
         onEdit={() => { setEditingFriend(viewingFriend); setViewingFriend(null); }}
       />
 
-      {/* Leaderboard */}
+      {/* ── Leaderboard modal ───────────────────────────────────── */}
       <AnimatePresence>
         {showLeaderboard && (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowLeaderboard(false)} className="fixed inset-0 z-[100] bg-slate-900/50 backdrop-blur-sm" />
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 16 }} transition={{ type: 'spring', damping: 28, stiffness: 340 }} className="fixed inset-x-4 top-1/2 -translate-y-1/2 z-[101] max-w-md mx-auto bg-white rounded-3xl border border-slate-100 shadow-2xl overflow-hidden" style={{ maxHeight: '75vh' }}>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowLeaderboard(false)}
+              className="fixed inset-0 z-[100] bg-slate-900/50 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 16 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 340 }}
+              className="fixed inset-x-4 top-1/2 -translate-y-1/2 z-[101] max-w-md mx-auto bg-white rounded-3xl border border-slate-100 shadow-2xl overflow-hidden"
+              style={{ maxHeight: '75vh' }}
+            >
               <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-slate-100">
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-2"><Trophy size={18} style={{ color: '#FF4B4B' }} /><h2 className="font-display text-lg font-black text-slate-900">Classement Amis</h2></div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Trophy size={18} style={{ color: '#FF4B4B' }} />
+                    <h2 className="font-display text-lg font-black text-slate-900">Classement</h2>
+                  </div>
                   <span className="text-xs font-bold text-rose-400 uppercase tracking-wider ml-7">Classement global</span>
                 </div>
-                <button onClick={() => setShowLeaderboard(false)} className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center"><X size={16} className="text-slate-500" /></button>
+                <button
+                  onClick={() => setShowLeaderboard(false)}
+                  className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center"
+                >
+                  <X size={16} className="text-slate-500" />
+                </button>
               </div>
               <div className="overflow-y-auto px-5 py-4 space-y-3" style={{ maxHeight: 'calc(75vh - 90px)' }}>
                 {leaderboardLoading ? (
-                  <div className="flex flex-col items-center justify-center py-12 gap-3"><motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }} className="w-8 h-8 rounded-full border-2 border-slate-200 border-t-rose-500" /><p className="text-sm font-bold text-slate-400">Chargement...</p></div>
+                  <div className="flex flex-col items-center justify-center py-12 gap-3">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                      className="w-8 h-8 rounded-full border-2 border-slate-200 border-t-rose-500"
+                    />
+                    <p className="text-sm font-bold text-slate-400">Chargement...</p>
+                  </div>
                 ) : leaderboard.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12 gap-3 text-center"><span className="text-4xl">🎂</span><p className="font-bold text-slate-500 text-sm">Aucun joueur trouvé.</p></div>
+                  <div className="flex flex-col items-center justify-center py-12 gap-3 text-center">
+                    <span className="text-4xl">🎂</span>
+                    <p className="font-bold text-slate-500 text-sm">Aucun joueur trouvé.</p>
+                  </div>
                 ) : leaderboard.map((friend, i) => {
                   const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : null;
                   return (
-                    <motion.div key={friend.id} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.06 }} className="flex items-center gap-3 p-3 rounded-2xl border" style={{ borderColor: i === 0 ? '#FFD700' : i === 1 ? '#C0C0C0' : i === 2 ? '#CD7F32' : '#f1f5f9', background: i < 3 ? 'rgba(255,75,75,0.04)' : 'white' }}>
-                      <div className="w-7 text-center shrink-0">{medal ? <span className="text-xl">{medal}</span> : <span className="text-xs font-black text-slate-400">#{i + 1}</span>}</div>
-                      {friend.photoUrl ? <img src={friend.photoUrl} alt={friend.name} className="w-11 h-11 rounded-xl object-cover shrink-0 border border-black/10" /> : <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-black text-lg shrink-0" style={{ background: '#FF4B4B' }}>{friend.name.charAt(0).toUpperCase()}</div>}
-                      <div className="flex-1 min-w-0"><p className="font-black text-slate-900 text-sm truncate">{friend.name}</p><p className="text-[11px] font-bold text-slate-600">Niveau {friend.level}</p></div>
-                      <div className="text-right shrink-0"><p className="font-black text-xs" style={{ color: '#FF4B4B', fontFamily: "'Press Start 2P', monospace" }}>{friend.xp}</p><p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">XP</p></div>
+                    <motion.div
+                      key={friend.id}
+                      initial={{ opacity: 0, x: -16 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.06 }}
+                      className="flex items-center gap-3 p-3 rounded-2xl border"
+                      style={{
+                        borderColor: i === 0 ? '#FFD700' : i === 1 ? '#C0C0C0' : i === 2 ? '#CD7F32' : '#f1f5f9',
+                        background: i < 3 ? 'rgba(255,75,75,0.04)' : 'white',
+                      }}
+                    >
+                      <div className="w-7 text-center shrink-0">
+                        {medal
+                          ? <span className="text-xl">{medal}</span>
+                          : <span className="text-xs font-black text-slate-400">#{i + 1}</span>
+                        }
+                      </div>
+                      {friend.photoUrl
+                        ? <img src={friend.photoUrl} alt={friend.name} className="w-11 h-11 rounded-xl object-cover shrink-0 border border-black/10" />
+                        : <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-black text-lg shrink-0" style={{ background: '#FF4B4B' }}>{friend.name.charAt(0).toUpperCase()}</div>
+                      }
+                      <div className="flex-1 min-w-0">
+                        <p className="font-black text-slate-900 text-sm truncate">{friend.name}</p>
+                        <p className="text-[11px] font-bold text-slate-600">Niveau {friend.level}</p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="font-black text-xs" style={{ color: '#FF4B4B', fontFamily: "'Press Start 2P', monospace" }}>{friend.xp}</p>
+                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">XP</p>
+                      </div>
                     </motion.div>
                   );
                 })}
@@ -537,7 +650,7 @@ export function Calendar({ birthdays, user, onAddBirthday, onUpdateBirthday, onD
         )}
       </AnimatePresence>
 
-      {/* Add Friend Modal */}
+      {/* ── Add Friend modal ────────────────────────────────────── */}
       <AnimatePresence>
         {showAddModal && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
@@ -564,7 +677,9 @@ export function Calendar({ birthdays, user, onAddBirthday, onUpdateBirthday, onD
               <div className="space-y-4 overflow-y-auto px-8 pb-2 pr-7">
                 {/* Photo */}
                 <div className="space-y-2">
-                  <label className="block text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">Photo <span className="text-slate-400 normal-case font-medium">(optionnel)</span></label>
+                  <label className="block text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                    Photo <span className="text-slate-400 normal-case font-medium">(optionnel)</span>
+                  </label>
                   <div className="flex flex-col items-center gap-2">
                     <div
                       onClick={() => setShowPhotoMenu(v => !v)}
@@ -587,14 +702,14 @@ export function Calendar({ birthdays, user, onAddBirthday, onUpdateBirthday, onD
                           <button
                             type="button"
                             onClick={() => { cameraInputRef.current?.click(); setShowPhotoMenu(false); }}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-black/60 rounded-xl text-[11px] font-bold text-slate-700 hover:bg-slate-100 transition-colors"
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-black/60 rounded-xl text-[11px] font-bold text-slate-700"
                           >
                             <Camera size={13} /> Appareil photo
                           </button>
                           <button
                             type="button"
                             onClick={() => { fileInputRef.current?.click(); setShowPhotoMenu(false); }}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-black/60 rounded-xl text-[11px] font-bold text-slate-700 hover:bg-slate-100 transition-colors"
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-black/60 rounded-xl text-[11px] font-bold text-slate-700"
                           >
                             <ImageIcon size={13} /> Galerie
                           </button>
@@ -632,7 +747,7 @@ export function Calendar({ birthdays, user, onAddBirthday, onUpdateBirthday, onD
                 {/* Téléphone */}
                 <div className="space-y-1">
                   <label className="flex justify-center items-center gap-1.5 text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                    <Phone size={11} />Téléphone <span className="text-slate-400 normal-case font-medium">(optionnel)</span>
+                    <Phone size={11} /> Téléphone <span className="text-slate-400 normal-case font-medium">(optionnel)</span>
                   </label>
                   <input
                     type="tel"
@@ -643,14 +758,16 @@ export function Calendar({ birthdays, user, onAddBirthday, onUpdateBirthday, onD
                   />
                 </div>
 
-                {/* Réseaux sociaux — accordéon */}
+                {/* Réseaux sociaux */}
                 <div className="border border-black/60 rounded-2xl overflow-hidden">
                   <button
                     type="button"
                     onClick={() => setShowSocials(v => !v)}
                     className="w-full flex items-center justify-between px-4 py-3 bg-slate-50 hover:bg-slate-100 transition-colors"
                   >
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Réseaux sociaux <span className="text-slate-400 normal-case font-medium">(optionnel)</span></span>
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                      Réseaux sociaux <span className="text-slate-400 normal-case font-medium">(optionnel)</span>
+                    </span>
                     <motion.span animate={{ rotate: showSocials ? 180 : 0 }} transition={{ duration: 0.25 }}>
                       <ChevronDown size={16} className="text-slate-400" />
                     </motion.span>
@@ -691,7 +808,7 @@ export function Calendar({ birthdays, user, onAddBirthday, onUpdateBirthday, onD
                   </AnimatePresence>
                 </div>
 
-                {/* Wishlist — accordéon */}
+                {/* Wishlist */}
                 <div className="border border-black/60 rounded-2xl overflow-hidden">
                   <button
                     type="button"
@@ -778,7 +895,7 @@ export function Calendar({ birthdays, user, onAddBirthday, onUpdateBirthday, onD
                   disabled={!newName || !newDate || photoUploading}
                   className="w-full bg-sky-500 text-white font-black py-4 rounded-2xl shadow-lg shadow-sky-100 hover:bg-sky-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  AJOUTER L'AMI
+                  {photoUploading ? 'Upload en cours...' : "AJOUTER L'AMI"}
                 </button>
               </div>
             </motion.div>
@@ -786,6 +903,7 @@ export function Calendar({ birthdays, user, onAddBirthday, onUpdateBirthday, onD
         )}
       </AnimatePresence>
 
+      {/* ── Edit modal ──────────────────────────────────────────── */}
       <FriendEditModal
         friend={editingFriend}
         onClose={() => setEditingFriend(null)}
@@ -793,7 +911,7 @@ export function Calendar({ birthdays, user, onAddBirthday, onUpdateBirthday, onD
         onDelete={(b) => setConfirmDelete(b)}
       />
 
-      {/* Modale confirmation suppression */}
+      {/* ── Confirm delete modal ────────────────────────────────── */}
       <AnimatePresence>
         {confirmDelete && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
@@ -819,17 +937,14 @@ export function Calendar({ birthdays, user, onAddBirthday, onUpdateBirthday, onD
                 <button
                   type="button"
                   onClick={() => setConfirmDelete(null)}
-                  className="flex-1 py-3 rounded-2xl bg-slate-100 text-slate-600 font-black text-sm hover:bg-slate-200 transition-colors"
+                  className="flex-1 py-3 rounded-2xl bg-slate-100 text-slate-600 font-black text-sm"
                 >
                   Annuler
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    onDeleteBirthday?.(confirmDelete.id);
-                    setConfirmDelete(null);
-                  }}
-                  className="flex-1 py-3 rounded-2xl font-black text-sm text-white transition-all active:translate-y-[2px]"
+                  onClick={() => { onDeleteBirthday?.(confirmDelete.id); setConfirmDelete(null); }}
+                  className="flex-1 py-3 rounded-2xl font-black text-sm text-white"
                   style={{ background: '#FF4B4B', boxShadow: '0 4px 0 #c0392b' }}
                 >
                   Supprimer
@@ -840,7 +955,7 @@ export function Calendar({ birthdays, user, onAddBirthday, onUpdateBirthday, onD
         )}
       </AnimatePresence>
 
-      {/* Toast célébration */}
+      {/* ── Toast ───────────────────────────────────────────────── */}
       <AnimatePresence>
         {toastName && (
           <motion.div

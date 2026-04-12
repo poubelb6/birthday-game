@@ -53,6 +53,7 @@ export interface Birthday {
   zodiac: ZodiacSign;
   addedAt: string;
   wishlist?: string[];
+  category?: 'famille' | 'ami' | 'connaissance';
 }
 
 export interface Message {

@@ -305,6 +305,7 @@ function AppContent() {
             <div className="flex items-center gap-2">
               <h1 className="text-lg font-black text-slate-900 tracking-tight">
                 {activeScreen === 'dashboard' ? 'Birthday Game' :
+                 activeScreen === 'calendar' ? 'Mes amis' :
                  activeScreen.charAt(0).toUpperCase() + activeScreen.slice(1)}
               </h1>
               <span
@@ -465,7 +466,7 @@ function AppContent() {
           <NavButton active={activeScreen === 'dashboard'} onClick={() => navigateTo('dashboard')} icon="🏠" label="Accueil" ariaLabel="Accueil" />
         </div>
         <div className="flex-1 flex justify-center">
-          <NavButton active={activeScreen === 'calendar'} onClick={() => navigateTo('calendar')} icon="📅" label="Calendrier" ariaLabel="Calendrier des anniversaires" />
+          <NavButton active={activeScreen === 'calendar'} onClick={() => navigateTo('calendar')} icon="👥" label="Amis" ariaLabel="Mes amis" />
         </div>
         <div className="flex-1 flex justify-center">
           <motion.button
