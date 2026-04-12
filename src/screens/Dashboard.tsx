@@ -328,7 +328,10 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
         </div>
       </section>
 
-      <section>
+      <section className="space-y-3">
+        {upcoming.length > 0 && (
+          <p className="text-xs font-black text-slate-400 uppercase tracking-widest text-center">Prochains anniversaires</p>
+        )}
         {upcoming.length > 0 ? (
           <div className="flex justify-between gap-3 px-2">
             {upcoming.slice(0, 3).map((b, i) => (
