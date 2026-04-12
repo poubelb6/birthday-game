@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { formatZodiac } from './utils/zodiac';
+import { formatZodiac, getAvatarColor } from './utils/zodiac';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   QrCode,
@@ -430,7 +430,7 @@ function AppContent() {
                   {celebrationFriend.photoUrl ? (
                     <img src={celebrationFriend.photoUrl} alt={celebrationFriend.name} className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-2xl font-black text-white" style={{ background: '#FF4B4B' }}>
+                    <div className="w-full h-full flex items-center justify-center text-2xl font-black text-white" style={{ background: getAvatarColor(celebrationFriend.name) }}>
                       {celebrationFriend.name.charAt(0).toUpperCase()}
                     </div>
                   )}

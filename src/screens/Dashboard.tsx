@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useEffect, useRef } from 'react';
-import { ZODIAC_EMOJI, formatZodiac } from '../utils/zodiac';
+import { ZODIAC_EMOJI, formatZodiac, getAvatarColor } from '../utils/zodiac';
 import { Star, X, ChevronLeft, ChevronRight, Camera, ImageIcon, Phone, Instagram, Twitter, Facebook, Plus, Trash2, ChevronDown, Sparkles, Globe2 } from 'lucide-react';
 import { Birthday, UserProfile } from '../types';
 import { format, differenceInDays, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, startOfDay, addMonths, subMonths } from 'date-fns';
@@ -343,11 +343,13 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
               >
                 <div className="relative">
                   <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-slate-100 shadow-sm">
-                    <img
-                      src={b.photoUrl || `https://picsum.photos/seed/${b.id}/100/100`}
-                      alt={b.name}
-                      className="w-full h-full object-cover"
-                    />
+                    {b.photoUrl ? (
+                      <img src={b.photoUrl} alt={b.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center font-black text-2xl text-white" style={{ background: getAvatarColor(b.name) }}>
+                        {b.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
                   </div>
                   <motion.div
                     animate={b.daysUntil === 0 ? { scale: [1, 1.1, 1] } : {}}

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { formatZodiac } from '../utils/zodiac';
+import { formatZodiac, getAvatarColor } from '../utils/zodiac';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronDown, X, Camera, ImageIcon, Phone, Instagram, Twitter, Facebook, Plus, Trash2, Search, Trophy, Heart, Users, UserCircle, Pencil } from 'lucide-react';
 import { FriendEditModal } from '../components/FriendEditModal';
@@ -105,7 +105,7 @@ function FriendRow({
         ) : (
           <div
             className="w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl text-white"
-            style={{ background: '#FF4B4B', border: `2px solid ${borderColor}` }}
+            style={{ background: getAvatarColor(friend.name), border: `2px solid ${borderColor}` }}
           >
             {friend.name.charAt(0).toUpperCase()}
           </div>
