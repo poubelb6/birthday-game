@@ -362,7 +362,17 @@ function AppContent() {
         </div>
       </header>
 
-      <main className={activeScreen === 'scanner' ? 'flex-1 overflow-hidden flex flex-col pb-24' : 'flex-1 overflow-y-auto pb-24'}>
+      <main
+        className={activeScreen === 'scanner' ? 'flex-1 overflow-hidden flex flex-col pb-24' : 'flex-1 overflow-y-auto pb-24'}
+        style={{
+          backgroundImage: activeScreen === 'scanner' ? 'none' : {
+            dashboard:  'linear-gradient(180deg, rgba(255,75,75,0.05) 0%, transparent 100px)',
+            calendar:   'linear-gradient(180deg, rgba(244,63,94,0.04) 0%, transparent 80px)',
+            collection: 'linear-gradient(180deg, rgba(167,139,250,0.05) 0%, transparent 80px)',
+            profile:    'linear-gradient(180deg, rgba(100,116,139,0.04) 0%, transparent 80px)',
+          }[activeScreen] ?? 'none',
+        }}
+      >
         <AnimatePresence mode="wait" custom={slideDirection}>
           <motion.div
             key={activeScreen}
@@ -393,66 +403,58 @@ function AppContent() {
             className="fixed inset-0 z-[200] flex items-center justify-center p-6"
           >
             <motion.div
-              className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
               onClick={() => setCelebrationFriend(null)}
             />
             <motion.div
-              initial={{ scale: 0.8, opacity: 0, y: 20 }}
+              initial={{ scale: 0.92, opacity: 0, y: 16 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.8, opacity: 0, y: 20 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 28 }}
-              className="relative w-full max-w-sm bg-white rounded-3xl px-6 py-8 shadow-2xl flex flex-col items-center gap-4 text-center"
-              style={{ border: '2px solid #FF4B4B', boxShadow: '0 6px 0 #CC2E2E, 0 16px 50px rgba(255,75,75,0.2)' }}
+              exit={{ scale: 0.92, opacity: 0, y: 16 }}
+              transition={{ type: 'spring', stiffness: 360, damping: 28 }}
+              className="relative w-full max-w-sm bg-white rounded-3xl overflow-hidden flex flex-col items-center text-center"
+              style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.12)' }}
             >
-              <button
-                onClick={() => setCelebrationFriend(null)}
-                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center"
-              >
-                <X size={15} className="text-slate-500" />
-              </button>
+              {/* Accent strip */}
+              <div className="w-full h-1" style={{ background: '#FF4B4B' }} />
 
-              <motion.span
-                animate={{ y: [0, -6, 0] }}
-                transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
-                className="text-5xl"
-              >
-                🎉
-              </motion.span>
+              <div className="px-7 pt-7 pb-8 flex flex-col items-center gap-5 w-full">
+                <button
+                  onClick={() => setCelebrationFriend(null)}
+                  className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center"
+                >
+                  <X size={14} className="text-slate-400" />
+                </button>
 
-              {celebrationFriend.photoUrl && (
-                <img
-                  src={celebrationFriend.photoUrl}
-                  alt={celebrationFriend.name}
-                  className="w-20 h-20 rounded-2xl object-cover border-2 border-rose-200 shadow-md"
-                />
-              )}
+                {/* Photo ou initiale */}
+                <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-sm border border-slate-100">
+                  {celebrationFriend.photoUrl ? (
+                    <img src={celebrationFriend.photoUrl} alt={celebrationFriend.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-2xl font-black text-white" style={{ background: '#FF4B4B' }}>
+                      {celebrationFriend.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </div>
 
-              <div className="space-y-1">
-                <p className="text-xl font-black text-slate-900">
-                  <span style={{ color: '#FF4B4B' }}>{celebrationFriend.name}</span>
-                  <br />a été ajouté à tes amis !
-                </p>
-                <p className="text-sm text-slate-500 font-medium">{formatZodiac(celebrationFriend.zodiac)}</p>
+                <div className="space-y-1">
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Ami ajouté</p>
+                  <p className="text-2xl font-black text-slate-900">{celebrationFriend.name}</p>
+                  <p className="text-sm text-slate-400 font-medium">{formatZodiac(celebrationFriend.zodiac)}</p>
+                </div>
+
+                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-50 border border-slate-100">
+                  <span className="text-sm font-black text-slate-500">+20 XP</span>
+                </div>
+
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => setCelebrationFriend(null)}
+                  className="w-full py-3.5 rounded-2xl font-black text-white text-sm"
+                  style={{ background: '#FF4B4B' }}
+                >
+                  Continuer
+                </motion.button>
               </div>
-
-              <div
-                className="flex items-center gap-2 px-5 py-2.5 rounded-2xl"
-                style={{ background: 'rgba(255,75,75,0.08)', border: '1px solid rgba(255,75,75,0.2)' }}
-              >
-                <span className="text-lg">⭐</span>
-                <span className="font-black text-base" style={{ color: '#FF4B4B', fontFamily: "'Press Start 2P', monospace", fontSize: 13 }}>
-                  +20 XP
-                </span>
-              </div>
-
-              <motion.button
-                whileTap={{ scale: 0.97 }}
-                onClick={() => setCelebrationFriend(null)}
-                className="w-full py-4 rounded-2xl font-black text-white text-sm mt-1"
-                style={{ background: '#FF4B4B', boxShadow: '0 4px 0 #CC2E2E' }}
-              >
-                SUPER ! 🎂
-              </motion.button>
             </motion.div>
           </motion.div>
         )}
