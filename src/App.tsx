@@ -6,6 +6,7 @@ import {
   Plus,
   X,
   MessageCircle,
+  Heart,
 } from 'lucide-react';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from './firebase';
@@ -466,7 +467,7 @@ function AppContent() {
           <NavButton active={activeScreen === 'dashboard'} onClick={() => navigateTo('dashboard')} icon="🏠" label="Accueil" ariaLabel="Accueil" />
         </div>
         <div className="flex-1 flex justify-center">
-          <NavButton active={activeScreen === 'calendar'} onClick={() => navigateTo('calendar')} icon="👥" label="Amis" ariaLabel="Mes amis" />
+          <NavButton active={activeScreen === 'calendar'} onClick={() => navigateTo('calendar')} icon={<Heart size={22} className="text-pink-400" strokeWidth={2.5} />} label="Amis" ariaLabel="Mes amis" activeBg="bg-pink-50" />
         </div>
         <div className="flex-1 flex justify-center">
           <motion.button
@@ -499,7 +500,7 @@ export default function App() {
   );
 }
 
-function NavButton({ active, onClick, icon, label, ariaLabel }: { active: boolean, onClick: () => void, icon: string, label: string, ariaLabel: string }) {
+function NavButton({ active, onClick, icon, label, ariaLabel, activeBg = 'bg-red-50' }: { active: boolean, onClick: () => void, icon: React.ReactNode, label: string, ariaLabel: string, activeBg?: string }) {
   return (
     <button
       onClick={onClick}
@@ -511,7 +512,7 @@ function NavButton({ active, onClick, icon, label, ariaLabel }: { active: boolea
         animate={active ? { y: -4 } : { y: 0 }}
         transition={{ duration: 0.3 }}
         className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 ${
-          active ? 'bg-red-50' : 'bg-transparent'
+          active ? activeBg : 'bg-transparent'
         }`}
       >
         <div className={`text-2xl transition-all duration-300 ${active ? 'scale-110' : 'scale-90'}`}>

@@ -90,7 +90,8 @@ function FriendRow({
       onPointerUp={onLongPressEnd}
       onPointerLeave={onLongPressEnd}
       onClick={onPress}
-      className="flex items-center gap-3 bg-white rounded-2xl border border-slate-100 p-3 cursor-pointer active:bg-slate-50 transition-colors"
+      className="flex items-center gap-3 bg-white rounded-2xl border border-slate-100 p-3 cursor-pointer active:bg-slate-50 transition-colors overflow-hidden"
+      style={{ borderLeftColor: borderColor, borderLeftWidth: 3 }}
     >
       {/* Photo */}
       <div className="relative shrink-0">
@@ -428,10 +429,10 @@ export function Calendar({
         {/* Tabs */}
         <div className="flex bg-slate-100 rounded-2xl p-1 gap-1">
           {([
-            { id: 'tous' as TabId, label: 'Tous', icon: null },
-            { id: 'famille' as TabId, label: 'Famille', icon: <Heart size={11} strokeWidth={2.5} />, activeColor: 'text-rose-500' },
-            { id: 'ami' as TabId, label: 'Amis', icon: <Users size={11} strokeWidth={2.5} />, activeColor: 'text-sky-500' },
-            { id: 'autre' as TabId, label: 'Autre', icon: <UserCircle size={11} strokeWidth={2.5} />, activeColor: 'text-slate-500' },
+            { id: 'tous'    as TabId, label: 'Tous',    icon: null,                                             active: 'bg-white shadow-sm text-slate-800',       badge: 'bg-slate-100 text-slate-500',    iconCls: '' },
+            { id: 'famille' as TabId, label: 'Famille', icon: <Heart size={11} strokeWidth={2.5} />,            active: 'bg-rose-100 shadow-sm text-rose-700',     badge: 'bg-rose-200 text-rose-600',      iconCls: 'text-rose-500' },
+            { id: 'ami'     as TabId, label: 'Amis',    icon: <Users size={11} strokeWidth={2.5} />,            active: 'bg-sky-100 shadow-sm text-sky-700',       badge: 'bg-sky-200 text-sky-600',        iconCls: 'text-sky-500' },
+            { id: 'autre'   as TabId, label: 'Autre',   icon: <UserCircle size={11} strokeWidth={2.5} />,      active: 'bg-slate-200 shadow-sm text-slate-700',   badge: 'bg-slate-300 text-slate-500',    iconCls: 'text-slate-500' },
           ] as const).map(tab => {
             const isActive = activeTab === tab.id;
             const count = tabCounts[tab.id];
@@ -441,18 +442,18 @@ export function Calendar({
                 onClick={() => setActiveTab(tab.id)}
                 whileTap={{ scale: 0.95 }}
                 className={`flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[11px] font-black transition-all ${
-                  isActive ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'
+                  isActive ? tab.active : 'text-slate-500'
                 }`}
               >
                 {tab.icon && (
-                  <span className={isActive && 'activeColor' in tab ? tab.activeColor : ''}>
+                  <span className={isActive ? tab.iconCls : 'text-slate-400'}>
                     {tab.icon}
                   </span>
                 )}
                 <span>{tab.label}</span>
                 {count > 0 && (
                   <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${
-                    isActive ? 'bg-slate-100 text-slate-600' : 'bg-slate-200/60 text-slate-400'
+                    isActive ? tab.badge : 'bg-slate-200/60 text-slate-400'
                   }`}>
                     {count}
                   </span>
@@ -464,14 +465,17 @@ export function Calendar({
       </div>
 
       {/* ── List ───────────────────────────────────────────────── */}
-      <div className="flex-1 px-5 pb-28">
+      <div className="flex-1 bg-slate-50 rounded-t-3xl px-5 pb-28 pt-4">
         {filtered.length === 0 ? (
           <EmptyState tab={activeTab} onAdd={() => setShowAddModal(true)} />
         ) : activeTab === 'tous' ? (
-          <div className="space-y-5 pt-1">
+          <div className="space-y-5">
             {groupedByMonth.map(({ month, friends }) => (
               <div key={month}>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">{month}</p>
+                <div className="flex items-center gap-2 mb-2.5 px-1">
+                  <span className="text-[11px] font-black text-slate-700 uppercase tracking-widest">{month}</span>
+                  <span className="text-[9px] font-black bg-slate-200 text-slate-500 px-1.5 py-0.5 rounded-full">{friends.length}</span>
+                </div>
                 <div className="space-y-2">
                   {friends.map(friend => (
                     <FriendRow
