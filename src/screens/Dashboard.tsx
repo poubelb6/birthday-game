@@ -478,12 +478,12 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
                   </span>
                 </div>
 
-                <div className="flex items-end justify-between gap-1.5" style={{ height: 96 }}>
+                <div className="flex items-end justify-between gap-1.5" style={{ height: 64 }}>
                   {counts.map((count, m) => {
                     const isCurrentMonth = m === today.getMonth();
                     const barHeightPx = count === 0
-                      ? 6
-                      : Math.max(18, Math.round((count / max) * 80));
+                      ? 4
+                      : Math.max(12, Math.round((count / max) * 52));
                     return (
                       <div key={m} className="flex flex-col items-center gap-1 flex-1 h-full justify-end">
                         {count > 0 && (
