@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useEffect, useRef } from 'react';
 import { ZODIAC_EMOJI, formatZodiac } from '../utils/zodiac';
-import { Star, Calendar as CalendarIcon, X, ChevronLeft, ChevronRight, Camera, ImageIcon, Phone, Instagram, Twitter, Facebook, Plus, Trash2, ChevronDown, BookOpen, Globe2 } from 'lucide-react';
+import { Star, X, ChevronLeft, ChevronRight, Camera, ImageIcon, Phone, Instagram, Twitter, Facebook, Plus, Trash2, ChevronDown, Sparkles, Globe2 } from 'lucide-react';
 import { Birthday, UserProfile } from '../types';
 import { format, differenceInDays, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, startOfDay, addMonths, subMonths } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -186,12 +186,73 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
     <div className="p-6 space-y-8">
 
       <section className="space-y-4 relative">
-        <div className="flex flex-col items-center justify-center text-center">
-          <h3 className="font-display text-lg font-black text-slate-900 flex items-center gap-2">
-            <CalendarIcon size={20} className="text-rose-500" />
-            Calendrier
-          </h3>
-        </div>
+
+        {/* ── Le saviez-vous ? ─── carte compacte au-dessus du calendrier */}
+        {celebOfDay && (
+          <div
+            className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 relative overflow-hidden"
+            style={{ borderLeft: '4px solid #F59E0B' }}
+          >
+            {/* Partie haute — toujours visible */}
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center text-xl shrink-0 border border-amber-200">
+                {celebOfDay.emoji}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <Sparkles size={10} className="text-amber-500 shrink-0" />
+                  <span className="text-[9px] font-black text-amber-600 uppercase tracking-wider">Né(e) aujourd'hui</span>
+                </div>
+                <h4 className="font-display font-black text-slate-900 text-[14px] leading-tight truncate">
+                  {celebOfDay.name}
+                </h4>
+                <p className="text-[11px] text-slate-500 font-medium leading-tight mt-0.5 truncate">
+                  {celebOfDay.title}
+                </p>
+              </div>
+              <motion.button
+                onClick={() => setCelebExpanded(v => !v)}
+                whileTap={{ scale: 0.88 }}
+                className="w-8 h-8 rounded-xl bg-amber-100 border border-amber-200 flex items-center justify-center shrink-0"
+              >
+                <motion.div
+                  animate={{ rotate: celebExpanded ? 180 : 0 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <ChevronDown size={15} className="text-amber-600" strokeWidth={2.5} />
+                </motion.div>
+              </motion.button>
+            </div>
+
+            {/* Partie basse — dépliable */}
+            <AnimatePresence initial={false}>
+              {celebExpanded && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.28, ease: 'easeInOut' }}
+                  className="overflow-hidden"
+                >
+                  <div className="pt-3 mt-3 border-t border-amber-200 space-y-3">
+                    <p className="text-[13px] text-slate-700 leading-relaxed">
+                      {celebOfDay.description}
+                    </p>
+                    <a
+                      href={celebOfDay.wikipedia}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 bg-amber-100 border border-amber-300 rounded-xl px-3 py-1.5 active:scale-95 transition-transform"
+                    >
+                      <Globe2 size={12} className="text-amber-700" />
+                      <span className="text-[11px] font-black text-amber-700">Wikipedia</span>
+                    </a>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        )}
 
         <div className="relative pt-4">
           <div className="absolute top-0 left-0 right-0 flex justify-around px-8 z-20">
@@ -485,93 +546,6 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
           })()}
         </div>
       </section>
-
-      {/* ── Le saviez-vous ? ─────────────────────────────────────── */}
-      {celebOfDay && (
-        <section className="space-y-4">
-          <div className="flex flex-col items-center justify-center text-center">
-            <h3 className="font-display text-lg font-black text-slate-900 flex items-center gap-2">
-              <BookOpen size={20} className="text-violet-500" />
-              Le saviez-vous ?
-            </h3>
-            <span className="text-xs font-bold text-violet-400 uppercase tracking-wider">Personnalité du jour</span>
-          </div>
-
-          <div
-            className="relative overflow-hidden rounded-3xl"
-            style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 55%, #4c1d95 100%)', boxShadow: '0 8px 0 #1e1b4b, 0 16px 40px rgba(49,46,129,0.35)' }}
-          >
-            {/* Décoration fond */}
-            <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.08), transparent 70%)' }} />
-            <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(167,139,250,0.12), transparent 70%)' }} />
-
-            <div className="relative p-5 space-y-3.5">
-              {/* En-tête : emoji + nom + date */}
-              <div className="flex items-start gap-3.5">
-                <div
-                  className="w-[52px] h-[52px] rounded-2xl flex items-center justify-center text-[28px] shrink-0 border border-white/20"
-                  style={{ background: 'rgba(255,255,255,0.12)' }}
-                >
-                  {celebOfDay.emoji}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-1.5 mb-1">
-                    <span className="text-[9px] font-black bg-rose-500 text-white px-2 py-0.5 rounded-full uppercase tracking-wider">
-                      🎂 Né(e) aujourd'hui
-                    </span>
-                    <span className="text-[10px] font-bold text-white/40 capitalize">
-                      {format(new Date(2000, Number(celebOfDay.date.split('-')[0]) - 1, Number(celebOfDay.date.split('-')[1])), 'd MMMM', { locale: fr })}
-                    </span>
-                  </div>
-                  <h4 className="font-display font-black text-white text-[15px] leading-tight">
-                    {celebOfDay.name}
-                  </h4>
-                  <p className="text-[11px] text-violet-300/80 font-medium leading-tight mt-0.5 line-clamp-1">
-                    {celebOfDay.title}
-                  </p>
-                </div>
-              </div>
-
-              {/* Séparateur */}
-              <div className="h-px bg-white/10 mx-1" />
-
-              {/* Description */}
-              <p className={`text-[13px] text-white/75 leading-relaxed ${celebExpanded ? '' : 'line-clamp-3'}`}>
-                {celebOfDay.description}
-              </p>
-
-              {/* Actions */}
-              <div className="flex items-center justify-between pt-0.5">
-                <motion.button
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setCelebExpanded(v => !v)}
-                  className="flex items-center gap-1 text-[11px] font-black text-violet-300"
-                >
-                  <motion.span
-                    animate={{ rotate: celebExpanded ? 180 : 0 }}
-                    transition={{ duration: 0.25 }}
-                    className="inline-block"
-                  >
-                    <ChevronDown size={14} className="text-violet-300" />
-                  </motion.span>
-                  {celebExpanded ? 'Réduire' : 'Lire plus'}
-                </motion.button>
-
-                <a
-                  href={celebOfDay.wikipedia}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 border border-white/20 transition-colors active:scale-95"
-                  style={{ background: 'rgba(255,255,255,0.10)' }}
-                >
-                  <Globe2 size={12} className="text-white" />
-                  <span className="text-[11px] font-black text-white">Wikipedia</span>
-                </a>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* Add Friend Modal */}
       <AnimatePresence>
