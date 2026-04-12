@@ -539,22 +539,26 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
       {/* Add Friend Modal */}
       <AnimatePresence>
         {showAddModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+          <div className="fixed inset-0 z-[100] flex items-end">
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setShowAddModal(false)}
               className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl flex flex-col max-h-[90vh]"
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', stiffness: 300, damping: 32 }}
+              className="relative w-full bg-white rounded-t-3xl shadow-2xl flex flex-col max-h-[92vh]"
             >
-              <div className="flex items-center justify-center relative px-8 pt-8 pb-4 shrink-0">
-                <h3 className="font-display text-xl font-black text-slate-900">Ajouter un ami</h3>
-                <button onClick={() => setShowAddModal(false)} className="absolute right-8 text-slate-500 hover:text-slate-700">
-                  <X size={24} />
+              <div className="flex justify-center pt-3 pb-1 shrink-0">
+                <div className="w-10 h-1 rounded-full bg-slate-200" />
+              </div>
+              <div className="flex items-center justify-between px-6 py-3 shrink-0">
+                <h3 className="text-xl font-black text-slate-900">Ajouter un ami</h3>
+                <button onClick={() => setShowAddModal(false)} className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+                  <X size={16} />
                 </button>
               </div>
 
@@ -699,15 +703,16 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
       <AnimatePresence>
         {toastName && (
           <motion.div
-            initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }}
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 20, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 400, damping: 28 }}
-            className="fixed inset-x-6 top-1/2 -translate-y-1/2 z-[200] mx-auto max-w-sm bg-white rounded-3xl px-6 py-6"
-            style={{ border: '2px solid #FF4B4B', boxShadow: '0 6px 0 #CC2E2E, 0 12px 40px rgba(255,75,75,0.18)' }}
+            className="fixed bottom-28 inset-x-4 z-[200] mx-auto max-w-sm bg-white rounded-2xl px-5 py-4 flex items-center gap-3"
+            style={{ border: '1.5px solid #FF4B4B', boxShadow: '0 4px 0 #CC2E2E, 0 12px 40px rgba(255,75,75,0.15)' }}
           >
-            <p className="text-2xl text-center mb-1">🎉</p>
-            <p className="text-base font-black font-display text-slate-900 text-center leading-snug">
-              Bravo ! Tu as ajouté<br />
-              <span style={{ color: '#FF4B4B' }}>{toastName}</span> à ta collection !
+            <span className="text-2xl shrink-0">🎉</span>
+            <p className="text-sm font-black text-slate-900 leading-snug">
+              Bravo ! <span style={{ color: '#FF4B4B' }}>{toastName}</span> ajouté à ta collection !
             </p>
           </motion.div>
         )}

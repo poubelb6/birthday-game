@@ -118,7 +118,7 @@ export function FriendEditModal({ friend, onClose, onSave, onDelete }: Props) {
   return (
     <AnimatePresence>
       {friend && (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center p-6">
+        <div className="fixed inset-0 z-[150] flex items-end">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -127,16 +127,21 @@ export function FriendEditModal({ friend, onClose, onSave, onDelete }: Props) {
             className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl flex flex-col max-h-[90vh]"
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ type: 'spring', stiffness: 300, damping: 32 }}
+            className="relative w-full bg-white rounded-t-3xl shadow-2xl flex flex-col max-h-[92vh]"
           >
+            {/* Drag handle */}
+            <div className="flex justify-center pt-3 pb-1 shrink-0">
+              <div className="w-10 h-1 rounded-full bg-slate-200" />
+            </div>
             {/* Header */}
-            <div className="flex items-center justify-center relative px-8 pt-8 pb-4 shrink-0">
-              <h3 className="font-display text-xl font-black text-slate-900">Modifier le profil</h3>
-              <button onClick={onClose} className="absolute right-8 text-slate-500 hover:text-slate-700">
-                <X size={24} />
+            <div className="flex items-center justify-between px-6 py-3 shrink-0">
+              <h3 className="text-xl font-black text-slate-900">Modifier le profil</h3>
+              <button onClick={onClose} className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+                <X size={16} />
               </button>
             </div>
 
