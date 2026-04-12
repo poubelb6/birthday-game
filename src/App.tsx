@@ -256,7 +256,7 @@ function AppContent() {
     switch (activeScreen) {
       case 'dashboard': return <Dashboard birthdays={birthdays} user={user} onAddBirthday={addBirthday} onUpdateBirthday={updateBirthday} onDeleteBirthday={deleteBirthday} />;
       case 'scanner': return <Scanner onScan={addBirthday} onScanSuccess={incrementScansCount} existingBirthdays={birthdays} />;
-      case 'calendar': return <Calendar birthdays={birthdays} onAddBirthday={addBirthday} onUpdateBirthday={updateBirthday} onDeleteBirthday={deleteBirthday} onFirstVisit={() => unlockCard('c2')} openAddModal={triggerAddFriend} onAddModalOpened={() => setTriggerAddFriend(false)} />;
+      case 'calendar': return <Calendar birthdays={birthdays} user={user} onAddBirthday={addBirthday} onUpdateBirthday={updateBirthday} onDeleteBirthday={deleteBirthday} onFirstVisit={() => unlockCard('c2')} openAddModal={triggerAddFriend} onAddModalOpened={() => setTriggerAddFriend(false)} />;
       case 'collection': return <Collection user={user} birthdays={birthdays} />;
       case 'profile': return <Profile user={user} onUpdate={setUser} birthdays={birthdays} challenges={challenges} />;
       default: return <Dashboard birthdays={birthdays} user={user} />;
