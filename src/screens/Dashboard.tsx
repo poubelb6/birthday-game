@@ -393,7 +393,7 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
 
         {/* ── Le saviez-vous ? ─── sous les profils */}
         {celebOfDay && (
-          <div className="bg-amber-50 border border-amber-100 rounded-2xl px-4 py-3 overflow-hidden">
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 overflow-hidden shadow-sm">
             <div className="flex items-center gap-3">
               <span className="text-xl shrink-0">{celebOfDay.emoji}</span>
               <div className="flex-1 min-w-0">
