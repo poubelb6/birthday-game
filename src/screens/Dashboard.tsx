@@ -224,7 +224,7 @@ export function Dashboard({ birthdays, user, onUpdateBirthday, onDeleteBirthday 
                   </motion.div>
                 </div>
                 <span className="text-[11px] font-black text-slate-700 text-center leading-tight">
-                  {format(parseISO(b.birthDate), 'd MMM', { locale: fr })}
+                  {format(parseISO(b.birthDate), 'd MMM', { locale: fr })} {ZODIAC_EMOJI[b.zodiac] ?? ''}
                 </span>
                 <span className="text-xs font-bold text-slate-800 truncate max-w-[72px] text-center">
                   {b.name.split(' ')[0]}
