@@ -58,12 +58,25 @@ function AppContent() {
 
   const [celebrationFriend, setCelebrationFriend] = useState<Birthday | null>(null);
   const [gigiBg, setGigiBg] = useState(() => localStorage.getItem('gigiBg') === 'true');
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('darkMode') === 'true');
+
+  // Apply / remove dark class on <html>
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', darkMode);
+  }, [darkMode]);
 
   // Listen for easter egg toggle from Profile
   useEffect(() => {
     const handler = (e: Event) => setGigiBg((e as CustomEvent<boolean>).detail);
     window.addEventListener('gigiBgChange', handler);
     return () => window.removeEventListener('gigiBgChange', handler);
+  }, []);
+
+  // Listen for dark mode toggle from Profile
+  useEffect(() => {
+    const handler = (e: Event) => setDarkMode((e as CustomEvent<boolean>).detail);
+    window.addEventListener('darkModeChange', handler);
+    return () => window.removeEventListener('darkModeChange', handler);
   }, []);
 
   // Read deep link from URL on first load

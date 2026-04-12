@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { ZODIAC_EMOJI } from '../utils/zodiac';
 import { QRCodeSVG } from 'qrcode.react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Share2, Settings, Instagram, Gift, ChevronRight, Sparkles, Users, Trophy, ExternalLink, Copy, Twitter, Facebook, Save, X, Smartphone, LogOut, Ghost, Camera, Plus, Trash2 } from 'lucide-react';
+import { Share2, Settings, Instagram, Gift, ChevronRight, Sparkles, Users, Trophy, ExternalLink, Copy, Twitter, Facebook, Save, X, Smartphone, LogOut, Ghost, Camera, Plus, Trash2, Moon, Sun } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { auth, storage } from '../firebase';
@@ -35,6 +35,7 @@ export function Profile({ user, onUpdate, birthdays = [], challenges = [] }: { u
   const [bgPassword, setBgPassword] = useState('');
   const [bgStatus, setBgStatus] = useState<'success' | 'error' | null>(null);
   const [gigiBgActive, setGigiBgActive] = useState(() => localStorage.getItem('gigiBg') === 'true');
+  const [darkModeActive, setDarkModeActive] = useState(() => localStorage.getItem('darkMode') === 'true');
 
   const toggleEdit = () => {
     if (!isEditingSocials) {
@@ -732,6 +733,40 @@ const getZodiacEmoji = (zodiac: string) => {
                       Annuler
                     </button>
                   )}
+                </div>
+
+                {/* Dark mode toggle */}
+                <div className="w-full bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border border-slate-100 shadow-sm"
+                      style={{ background: darkModeActive ? '#1e293b' : '#f8fafc' }}>
+                      {darkModeActive
+                        ? <Moon size={22} className="text-sky-300" />
+                        : <Sun size={22} className="text-amber-400" />
+                      }
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Apparence</p>
+                      <p className="font-bold text-slate-900">{darkModeActive ? 'Mode sombre' : 'Mode clair'}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      const next = !darkModeActive;
+                      localStorage.setItem('darkMode', String(next));
+                      setDarkModeActive(next);
+                      window.dispatchEvent(new CustomEvent('darkModeChange', { detail: next }));
+                    }}
+                    className="relative w-12 h-6 rounded-full transition-colors duration-300 shrink-0"
+                    style={{ background: darkModeActive ? '#6366f1' : '#e2e8f0' }}
+                    aria-label="Basculer le mode sombre"
+                  >
+                    <motion.div
+                      animate={{ x: darkModeActive ? 24 : 2 }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 26 }}
+                      className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm"
+                    />
+                  </button>
                 </div>
               </motion.div>
             )}
