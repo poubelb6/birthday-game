@@ -342,7 +342,7 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
                 className="flex flex-col items-center gap-1.5 cursor-pointer flex-1"
               >
                 <div className="relative">
-                  <div className="w-16 h-16 rounded-2xl overflow-hidden border-2" style={{ borderColor: 'var(--color-warm-200)', boxShadow: 'var(--shadow-card)' }}>
+                  <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-slate-100 shadow-sm">
                     <img
                       src={b.photoUrl || `https://picsum.photos/seed/${b.id}/100/100`}
                       alt={b.name}
@@ -361,23 +361,23 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
                     {b.daysUntil === 0 ? '🎂' : `J-${b.daysUntil}`}
                   </motion.div>
                 </div>
-                <span className="text-[11px] font-black text-center leading-tight" style={{ color: 'var(--color-warm-600)' }}>
+                <span className="text-[11px] font-black text-slate-700 text-center leading-tight">
                   {format(parseISO(b.birthDate), 'd MMM', { locale: fr })} {ZODIAC_EMOJI[b.zodiac] ?? ''}
                 </span>
-                <span className="text-xs font-bold truncate max-w-[72px] text-center" style={{ color: 'var(--color-warm-800)' }}>
+                <span className="text-xs font-bold text-slate-800 truncate max-w-[72px] text-center">
                   {b.name.split(' ')[0]}
                 </span>
               </motion.div>
             ))}
           </div>
         ) : (
-          <div className="rounded-3xl p-10 text-center space-y-4 border border-dashed" style={{ background: 'var(--color-surface-subtle)', borderColor: 'var(--color-warm-300)' }}>
-            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto" style={{ background: 'var(--color-surface-card)', boxShadow: 'var(--shadow-card)' }}>
-              <Star size={32} style={{ color: 'var(--color-warm-300)' }} />
+          <div className="bg-slate-50 border border-dashed border-black/60 rounded-3xl p-10 text-center space-y-4">
+            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto shadow-sm">
+              <Star className="text-slate-300" size={32} />
             </div>
             <div className="space-y-1">
-              <p className="font-bold" style={{ color: 'var(--color-warm-600)' }}>Aucun anniversaire</p>
-              <p className="text-xs" style={{ color: 'var(--color-warm-500)' }}>Commence par ajouter un ami à ta collection</p>
+              <p className="font-bold text-slate-600">Aucun anniversaire</p>
+              <p className="text-xs text-slate-500">Commence par ajouter un ami à ta collection</p>
             </div>
             <motion.button
               whileTap={{ scale: 0.96 }}
@@ -456,7 +456,7 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
       />
 
       <section className="space-y-4">
-        <div className="card-soft rounded-3xl px-4 pt-4 pb-3">
+        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm px-4 pt-4 pb-3">
           {(() => {
             const monthLabels = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
             const monthZodiacs = ['♑','♒','♓','♈','♉','♊','♋','♌','♍','♎','♏','♐'];
@@ -549,11 +549,10 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-sm rounded-3xl flex flex-col max-h-[90vh]"
-              style={{ background: 'var(--color-surface-card)', boxShadow: 'var(--shadow-modal)' }}
+              className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl flex flex-col max-h-[90vh]"
             >
               <div className="flex items-center justify-center relative px-8 pt-8 pb-4 shrink-0">
-                <h3 className="text-xl font-black" style={{ color: 'var(--color-warm-900)' }}>Ajouter un ami</h3>
+                <h3 className="font-display text-xl font-black text-slate-900">Ajouter un ami</h3>
                 <button onClick={() => setShowAddModal(false)} className="absolute right-8 text-slate-500 hover:text-slate-700">
                   <X size={24} />
                 </button>
@@ -566,7 +565,7 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
                   <div className="flex flex-col items-center gap-2">
                     <div
                       onClick={() => setShowPhotoMenu(v => !v)}
-                      className="w-16 h-16 rounded-full bg-surface-subtle border border-warm-200 flex items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors overflow-hidden"
+                      className="w-16 h-16 rounded-full bg-slate-50 border border-black/60 flex items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors overflow-hidden"
                     >
                       {newPhotoPreview
                         ? <img src={newPhotoPreview} alt="preview" className="w-full h-full object-cover" />
@@ -582,10 +581,10 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
                           transition={{ duration: 0.18 }}
                           className="flex gap-2"
                         >
-                          <button type="button" onClick={() => { cameraInputRef.current?.click(); setShowPhotoMenu(false); }} className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-warm-200 rounded-xl text-[11px] font-bold text-slate-700 hover:bg-slate-100 transition-colors">
+                          <button type="button" onClick={() => { cameraInputRef.current?.click(); setShowPhotoMenu(false); }} className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-black/60 rounded-xl text-[11px] font-bold text-slate-700 hover:bg-slate-100 transition-colors">
                             <Camera size={13} /> Appareil photo
                           </button>
-                          <button type="button" onClick={() => { fileInputRef.current?.click(); setShowPhotoMenu(false); }} className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-warm-200 rounded-xl text-[11px] font-bold text-slate-700 hover:bg-slate-100 transition-colors">
+                          <button type="button" onClick={() => { fileInputRef.current?.click(); setShowPhotoMenu(false); }} className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-black/60 rounded-xl text-[11px] font-bold text-slate-700 hover:bg-slate-100 transition-colors">
                             <ImageIcon size={13} /> Galerie
                           </button>
                         </motion.div>
@@ -599,13 +598,13 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
                 {/* Nom */}
                 <div className="space-y-1">
                   <label className="block text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">Nom</label>
-                  <input type="text" value={newName} onChange={e => setNewName(e.target.value)} placeholder="Ex: Marie" className="w-full bg-slate-50 border border-warm-200 rounded-2xl p-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-sky-500 transition-colors" />
+                  <input type="text" value={newName} onChange={e => setNewName(e.target.value)} placeholder="Ex: Marie" className="w-full bg-slate-50 border border-black/60 rounded-2xl p-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-sky-500 transition-colors" />
                 </div>
 
                 {/* Date */}
                 <div className="space-y-1">
                   <label className="block text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">Date de naissance</label>
-                  <input type="date" value={newDate} onChange={e => setNewDate(e.target.value)} className="w-full bg-slate-50 border border-warm-200 rounded-2xl p-4 text-slate-900 focus:outline-none focus:border-sky-500 transition-colors" />
+                  <input type="date" value={newDate} onChange={e => setNewDate(e.target.value)} className="w-full bg-slate-50 border border-black/60 rounded-2xl p-4 text-slate-900 focus:outline-none focus:border-sky-500 transition-colors" />
                 </div>
 
                 {/* Téléphone */}
@@ -613,11 +612,11 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
                   <label className="flex justify-center items-center gap-1.5 text-[10px] font-black text-slate-500 uppercase tracking-widest">
                     <Phone size={11} /> Téléphone <span className="text-slate-400 normal-case font-medium">(optionnel)</span>
                   </label>
-                  <input type="tel" value={newPhone} onChange={e => setNewPhone(e.target.value)} placeholder="Ex: +33 6 12 34 56 78" className="w-full bg-slate-50 border border-warm-200 rounded-2xl p-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-sky-500 transition-colors" />
+                  <input type="tel" value={newPhone} onChange={e => setNewPhone(e.target.value)} placeholder="Ex: +33 6 12 34 56 78" className="w-full bg-slate-50 border border-black/60 rounded-2xl p-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-sky-500 transition-colors" />
                 </div>
 
                 {/* Réseaux sociaux */}
-                <div className="border border-warm-200 rounded-2xl overflow-hidden">
+                <div className="border border-black/60 rounded-2xl overflow-hidden">
                   <button type="button" onClick={() => setShowSocials(v => !v)} className="w-full flex items-center justify-between px-4 py-3 bg-slate-50 hover:bg-slate-100 transition-colors">
                     <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Réseaux sociaux <span className="text-slate-400 normal-case font-medium">(optionnel)</span></span>
                     <motion.span animate={{ rotate: showSocials ? 180 : 0 }} transition={{ duration: 0.25 }}>
@@ -636,8 +635,8 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
                             { key: 'facebook',  icon: <Facebook size={15} className="text-blue-600" />,   placeholder: 'Nom complet' },
                           ] as const).map(({ key, icon, placeholder }) => (
                             <div key={key} className="flex items-center gap-2.5">
-                              <div className="w-8 h-8 bg-slate-50 border border-warm-200 rounded-xl flex items-center justify-center shrink-0">{icon}</div>
-                              <input type="text" value={newSocials[key]} onChange={e => setNewSocials(s => ({ ...s, [key]: e.target.value }))} placeholder={placeholder} className="flex-1 bg-slate-50 border border-warm-200 rounded-2xl px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-sky-500 transition-colors" />
+                              <div className="w-8 h-8 bg-slate-50 border border-black/60 rounded-xl flex items-center justify-center shrink-0">{icon}</div>
+                              <input type="text" value={newSocials[key]} onChange={e => setNewSocials(s => ({ ...s, [key]: e.target.value }))} placeholder={placeholder} className="flex-1 bg-slate-50 border border-black/60 rounded-2xl px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-sky-500 transition-colors" />
                             </div>
                           ))}
                         </div>
@@ -647,7 +646,7 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
                 </div>
 
                 {/* Wishlist */}
-                <div className="border border-warm-200 rounded-2xl overflow-hidden">
+                <div className="border border-black/60 rounded-2xl overflow-hidden">
                   <button type="button" onClick={() => setShowWishlist(v => !v)} className="w-full flex items-center justify-between px-4 py-3 bg-slate-50 hover:bg-slate-100 transition-colors">
                     <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
                       🎁 Wishlist <span className="text-slate-400 normal-case font-medium">(optionnel)</span>
@@ -662,7 +661,7 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
                       <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.28, ease: 'easeInOut' }} className="overflow-hidden">
                         <div className="space-y-3 p-3 bg-white">
                           <div className="flex gap-2">
-                            <input type="text" value={newWishInput} onChange={e => setNewWishInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && newWishInput.trim()) { setNewWishlist(w => [...w, newWishInput.trim()]); setNewWishInput(''); } }} placeholder="Ex: Roman, parfum..." className="flex-1 bg-slate-50 border border-warm-200 rounded-2xl px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-amber-400 transition-colors" />
+                            <input type="text" value={newWishInput} onChange={e => setNewWishInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && newWishInput.trim()) { setNewWishlist(w => [...w, newWishInput.trim()]); setNewWishInput(''); } }} placeholder="Ex: Roman, parfum..." className="flex-1 bg-slate-50 border border-black/60 rounded-2xl px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-amber-400 transition-colors" />
                             <button type="button" disabled={!newWishInput.trim()} onClick={() => { if (!newWishInput.trim()) return; setNewWishlist(w => [...w, newWishInput.trim()]); setNewWishInput(''); }} className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 disabled:opacity-40 transition-opacity" style={{ background: '#FF4B4B' }}>
                               <Plus size={18} className="text-white" strokeWidth={3} />
                             </button>
