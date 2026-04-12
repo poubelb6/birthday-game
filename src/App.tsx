@@ -135,13 +135,7 @@ function AppContent() {
         className="min-h-screen flex flex-col items-center justify-center gap-6"
         style={{ background: 'linear-gradient(160deg, #fff5f5 0%, #ffffff 100%)' }}
       >
-        <motion.div
-          initial={{ scale: 0.7, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: 'spring', stiffness: 320, damping: 22 }}
-        >
-          <Logo size={96} />
-        </motion.div>
+        <Logo size={96} />
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
