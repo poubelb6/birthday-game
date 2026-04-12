@@ -371,14 +371,23 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
             ))}
           </div>
         ) : (
-          <div className="bg-slate-50 border border-dashed border-black/60 rounded-3xl p-12 text-center space-y-4">
+          <div className="bg-slate-50 border border-dashed border-black/60 rounded-3xl p-10 text-center space-y-4">
             <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto shadow-sm">
               <Star className="text-slate-300" size={32} />
             </div>
             <div className="space-y-1">
               <p className="font-bold text-slate-600">Aucun anniversaire</p>
-              <p className="text-xs text-slate-500">Scanne un QR code pour commencer ta collection !</p>
+              <p className="text-xs text-slate-500">Commence par ajouter un ami à ta collection</p>
             </div>
+            <motion.button
+              whileTap={{ scale: 0.96 }}
+              onClick={() => setShowAddModal(true)}
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl text-white font-black text-sm"
+              style={{ background: '#FF4B4B', boxShadow: '0 4px 0 #CC2E2E' }}
+            >
+              <Plus size={16} strokeWidth={3} />
+              Ajouter un ami
+            </motion.button>
           </div>
         )}
 
