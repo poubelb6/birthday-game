@@ -193,7 +193,7 @@ export function Dashboard({ birthdays, user, onUpdateBirthday, onDeleteBirthday 
 
       <section>
         {upcoming.length > 0 ? (
-          <div className="flex justify-center gap-5">
+          <div className="flex justify-between gap-3 px-2">
             {upcoming.slice(0, 3).map((b, i) => (
               <motion.div
                 key={b.id}
@@ -201,7 +201,7 @@ export function Dashboard({ birthdays, user, onUpdateBirthday, onDeleteBirthday 
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
                 onClick={() => setViewingFriend(b)}
-                className="flex flex-col items-center gap-1.5 cursor-pointer"
+                className="flex flex-col items-center gap-1.5 cursor-pointer flex-1"
               >
                 <div className="relative">
                   <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-slate-100 shadow-sm">
@@ -223,11 +223,11 @@ export function Dashboard({ birthdays, user, onUpdateBirthday, onDeleteBirthday 
                     {b.daysUntil === 0 ? '🎂' : `J-${b.daysUntil}`}
                   </motion.div>
                 </div>
+                <span className="text-[11px] font-black text-slate-700 text-center leading-tight">
+                  {format(parseISO(b.birthDate), 'd MMM', { locale: fr })}
+                </span>
                 <span className="text-xs font-bold text-slate-800 truncate max-w-[72px] text-center">
                   {b.name.split(' ')[0]}
-                </span>
-                <span className="text-[10px] text-slate-400 font-medium text-center leading-none">
-                  {format(parseISO(b.birthDate), 'd MMM', { locale: fr })} · {ZODIAC_EMOJI[b.zodiac] ?? b.zodiac}
                 </span>
               </motion.div>
             ))}
