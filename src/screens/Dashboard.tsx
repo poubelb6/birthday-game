@@ -330,6 +330,59 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
 
       <section className="space-y-3">
         {/* ── Le saviez-vous ? ─── remplace le titre "Prochains anniversaires" */}
+        {upcoming.length > 0 ? (
+          <div className="flex justify-between gap-3 px-2">
+            {upcoming.slice(0, 3).map((b, i) => (
+              <motion.div
+                key={b.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                onClick={() => setViewingFriend(b)}
+                className="flex flex-col items-center gap-1.5 cursor-pointer flex-1"
+              >
+                <div className="relative">
+                  <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-slate-100 shadow-sm">
+                    <img
+                      src={b.photoUrl || `https://picsum.photos/seed/${b.id}/100/100`}
+                      alt={b.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <motion.div
+                    animate={b.daysUntil === 0 ? { scale: [1, 1.1, 1] } : {}}
+                    transition={b.daysUntil === 0 ? { duration: 1.2, repeat: Infinity } : {}}
+                    className={`absolute -top-2 -right-2 px-1.5 py-0.5 rounded-full text-[9px] font-black shadow-sm ${
+                      b.daysUntil === 0 ? 'bg-green-100 text-green-600' :
+                      b.daysUntil <= 7 ? 'bg-red-100 text-red-500' :
+                      'bg-slate-100 text-slate-500'
+                    }`}
+                  >
+                    {b.daysUntil === 0 ? '🎂' : `J-${b.daysUntil}`}
+                  </motion.div>
+                </div>
+                <span className="text-[11px] font-black text-slate-700 text-center leading-tight">
+                  {format(parseISO(b.birthDate), 'd MMM', { locale: fr })} {ZODIAC_EMOJI[b.zodiac] ?? ''}
+                </span>
+                <span className="text-xs font-bold text-slate-800 truncate max-w-[72px] text-center">
+                  {b.name.split(' ')[0]}
+                </span>
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <div className="bg-slate-50 border border-dashed border-black/60 rounded-3xl p-12 text-center space-y-4">
+            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto shadow-sm">
+              <Star className="text-slate-300" size={32} />
+            </div>
+            <div className="space-y-1">
+              <p className="font-bold text-slate-600">Aucun anniversaire</p>
+              <p className="text-xs text-slate-500">Scanne un QR code pour commencer ta collection !</p>
+            </div>
+          </div>
+        )}
+
+        {/* ── Le saviez-vous ? ─── sous les profils */}
         {celebOfDay && (
           <div className="bg-amber-50 border border-amber-100 rounded-2xl px-4 py-3 overflow-hidden">
             <div className="flex items-center gap-3">
@@ -381,57 +434,6 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
-        )}
-        {upcoming.length > 0 ? (
-          <div className="flex justify-between gap-3 px-2">
-            {upcoming.slice(0, 3).map((b, i) => (
-              <motion.div
-                key={b.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-                onClick={() => setViewingFriend(b)}
-                className="flex flex-col items-center gap-1.5 cursor-pointer flex-1"
-              >
-                <div className="relative">
-                  <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-slate-100 shadow-sm">
-                    <img
-                      src={b.photoUrl || `https://picsum.photos/seed/${b.id}/100/100`}
-                      alt={b.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <motion.div
-                    animate={b.daysUntil === 0 ? { scale: [1, 1.1, 1] } : {}}
-                    transition={b.daysUntil === 0 ? { duration: 1.2, repeat: Infinity } : {}}
-                    className={`absolute -top-2 -right-2 px-1.5 py-0.5 rounded-full text-[9px] font-black shadow-sm ${
-                      b.daysUntil === 0 ? 'bg-green-100 text-green-600' :
-                      b.daysUntil <= 7 ? 'bg-red-100 text-red-500' :
-                      'bg-slate-100 text-slate-500'
-                    }`}
-                  >
-                    {b.daysUntil === 0 ? '🎂' : `J-${b.daysUntil}`}
-                  </motion.div>
-                </div>
-                <span className="text-[11px] font-black text-slate-700 text-center leading-tight">
-                  {format(parseISO(b.birthDate), 'd MMM', { locale: fr })} {ZODIAC_EMOJI[b.zodiac] ?? ''}
-                </span>
-                <span className="text-xs font-bold text-slate-800 truncate max-w-[72px] text-center">
-                  {b.name.split(' ')[0]}
-                </span>
-              </motion.div>
-            ))}
-          </div>
-        ) : (
-          <div className="bg-slate-50 border border-dashed border-black/60 rounded-3xl p-12 text-center space-y-4">
-            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto shadow-sm">
-              <Star className="text-slate-300" size={32} />
-            </div>
-            <div className="space-y-1">
-              <p className="font-bold text-slate-600">Aucun anniversaire</p>
-              <p className="text-xs text-slate-500">Scanne un QR code pour commencer ta collection !</p>
-            </div>
           </div>
         )}
       </section>
