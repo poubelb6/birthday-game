@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { formatZodiac } from '../utils/zodiac';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronDown, X, Camera, ImageIcon, Phone, Instagram, Twitter, Facebook, Plus, Trash2, Search, Trophy, Heart, Users, UserCircle } from 'lucide-react';
+import { ChevronDown, X, Camera, ImageIcon, Phone, Instagram, Twitter, Facebook, Plus, Trash2, Search, Trophy, Heart, Users, UserCircle, Pencil } from 'lucide-react';
 import { FriendEditModal } from '../components/FriendEditModal';
 import { FriendProfileModal } from '../components/FriendProfileModal';
 import confetti from 'canvas-confetti';
@@ -68,12 +68,14 @@ function FriendRow({
   friend,
   hasAccount,
   onPress,
+  onEdit,
   onLongPressStart,
   onLongPressEnd,
 }: {
   friend: Birthday;
   hasAccount: boolean;
   onPress: () => void;
+  onEdit: () => void;
   onLongPressStart: () => void;
   onLongPressEnd: () => void;
 }) {
@@ -129,9 +131,16 @@ function FriendRow({
         </p>
       </div>
 
-      {/* Badge */}
-      <div className="shrink-0">
+      {/* Badge + Edit */}
+      <div className="flex items-center gap-2 shrink-0">
         <DaysUntilBadge days={days} />
+        <motion.button
+          whileTap={{ scale: 0.85 }}
+          onClick={e => { e.stopPropagation(); onEdit(); }}
+          className="w-7 h-7 rounded-xl bg-slate-100 flex items-center justify-center"
+        >
+          <Pencil size={13} className="text-slate-400" strokeWidth={2.5} />
+        </motion.button>
       </div>
     </motion.div>
   );
@@ -346,13 +355,17 @@ export function Calendar({
     return matchSearch && matchTab;
   });
 
-  // Group by birth month (for "Tous" tab)
-  const groupedByMonth = MONTHS_FR.map((month, i) => ({
-    month,
-    friends: filtered
-      .filter(b => parseISO(b.birthDate).getMonth() === i)
-      .sort((a, b) => parseISO(a.birthDate).getDate() - parseISO(b.birthDate).getDate()),
-  })).filter(g => g.friends.length > 0);
+  // Group by birth month starting from current month (for "Tous" tab)
+  const currentMonthIndex = new Date().getMonth();
+  const groupedByMonth = Array.from({ length: 12 }, (_, offset) => {
+    const monthIndex = (currentMonthIndex + offset) % 12;
+    return {
+      month: MONTHS_FR[monthIndex],
+      friends: filtered
+        .filter(b => parseISO(b.birthDate).getMonth() === monthIndex)
+        .sort((a, b) => parseISO(a.birthDate).getDate() - parseISO(b.birthDate).getDate()),
+    };
+  }).filter(g => g.friends.length > 0);
 
   // Sorted by days until birthday (for filtered tabs)
   const sortedFlat = [...filtered].sort(
@@ -466,6 +479,7 @@ export function Calendar({
                       friend={friend}
                       hasAccount={friendsWithAccount.has(friend.id)}
                       onPress={() => setViewingFriend(friend)}
+                      onEdit={() => setEditingFriend(friend)}
                       onLongPressStart={() => handleLongPressStart(friend)}
                       onLongPressEnd={handleLongPressEnd}
                     />
@@ -482,6 +496,7 @@ export function Calendar({
                 friend={friend}
                 hasAccount={friendsWithAccount.has(friend.id)}
                 onPress={() => setViewingFriend(friend)}
+                onEdit={() => setEditingFriend(friend)}
                 onLongPressStart={() => handleLongPressStart(friend)}
                 onLongPressEnd={handleLongPressEnd}
               />
