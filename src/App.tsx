@@ -308,8 +308,8 @@ function AppContent() {
                  activeScreen.charAt(0).toUpperCase() + activeScreen.slice(1)}
               </h1>
               <span
-                className="text-[8px] font-black px-2 py-0.5 rounded-full text-white"
-                style={{ background: '#FF4B4B', fontFamily: "'Press Start 2P', monospace" }}
+                className="text-[8px] font-black px-1.5 py-0.5 rounded-full"
+                style={{ color: '#FF4B4B', background: 'rgba(255,75,75,0.08)', fontFamily: "'Press Start 2P', monospace" }}
               >
                 Niv.{user.level}
               </span>
