@@ -330,7 +330,10 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
 
       <section className="space-y-3">
         {upcoming.length > 0 && (
-          <p className="text-xs font-black text-slate-400 uppercase tracking-widest text-center">Prochains anniversaires</p>
+          <div className="flex flex-col items-center justify-center text-center">
+            <h3 className="font-display text-lg font-black text-slate-900">Prochains anniversaires</h3>
+            <span className="text-xs font-bold text-rose-400 uppercase tracking-wider">À venir</span>
+          </div>
         )}
         {upcoming.length > 0 ? (
           <div className="flex justify-between gap-3 px-2">
