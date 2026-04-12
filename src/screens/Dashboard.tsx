@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useEffect, useRef } from 'react';
 import { ZODIAC_EMOJI, formatZodiac } from '../utils/zodiac';
-import { Star, Calendar as CalendarIcon, X, ChevronLeft, ChevronRight, Camera, ImageIcon, Phone, Instagram, Twitter, Facebook, Plus, Trash2, ChevronDown } from 'lucide-react';
+import { Star, Calendar as CalendarIcon, X, ChevronLeft, ChevronRight, Camera, ImageIcon, Phone, Instagram, Twitter, Facebook, Plus, Trash2, ChevronDown, BookOpen, Globe2 } from 'lucide-react';
 import { Birthday, UserProfile } from '../types';
 import { format, differenceInDays, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, startOfDay, addMonths, subMonths } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -11,6 +11,7 @@ import confetti from 'canvas-confetti';
 import { FriendEditModal } from '../components/FriendEditModal';
 import { FriendProfileModal } from '../components/FriendProfileModal';
 import { checkUnlockedCards, getZodiacSign } from '../utils/gameLogic';
+import { CELEB_BIRTHDAYS } from '../data/celebBirthdays';
 
 
 export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, onDeleteBirthday }: {
@@ -46,6 +47,7 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
   const [toastName, setToastName] = useState<string | null>(null);
   const [showPhotoMenu, setShowPhotoMenu] = useState(false);
   const [photoUploading, setPhotoUploading] = useState(false);
+  const [celebExpanded, setCelebExpanded] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
@@ -67,6 +69,10 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
     }, []);
 
   const todayStart = startOfDay(today);
+
+  const todayMMDD = format(today, 'MM-dd');
+  const celebOfDay = CELEB_BIRTHDAYS.find(c => c.date === todayMMDD) ?? null;
+
   const upcoming = birthdays
     .map(b => {
       const bDate = parseISO(b.birthDate);
@@ -479,6 +485,93 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
           })()}
         </div>
       </section>
+
+      {/* ── Le saviez-vous ? ─────────────────────────────────────── */}
+      {celebOfDay && (
+        <section className="space-y-4">
+          <div className="flex flex-col items-center justify-center text-center">
+            <h3 className="font-display text-lg font-black text-slate-900 flex items-center gap-2">
+              <BookOpen size={20} className="text-violet-500" />
+              Le saviez-vous ?
+            </h3>
+            <span className="text-xs font-bold text-violet-400 uppercase tracking-wider">Personnalité du jour</span>
+          </div>
+
+          <div
+            className="relative overflow-hidden rounded-3xl"
+            style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 55%, #4c1d95 100%)', boxShadow: '0 8px 0 #1e1b4b, 0 16px 40px rgba(49,46,129,0.35)' }}
+          >
+            {/* Décoration fond */}
+            <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.08), transparent 70%)' }} />
+            <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(167,139,250,0.12), transparent 70%)' }} />
+
+            <div className="relative p-5 space-y-3.5">
+              {/* En-tête : emoji + nom + date */}
+              <div className="flex items-start gap-3.5">
+                <div
+                  className="w-[52px] h-[52px] rounded-2xl flex items-center justify-center text-[28px] shrink-0 border border-white/20"
+                  style={{ background: 'rgba(255,255,255,0.12)' }}
+                >
+                  {celebOfDay.emoji}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                    <span className="text-[9px] font-black bg-rose-500 text-white px-2 py-0.5 rounded-full uppercase tracking-wider">
+                      🎂 Né(e) aujourd'hui
+                    </span>
+                    <span className="text-[10px] font-bold text-white/40 capitalize">
+                      {format(new Date(2000, Number(celebOfDay.date.split('-')[0]) - 1, Number(celebOfDay.date.split('-')[1])), 'd MMMM', { locale: fr })}
+                    </span>
+                  </div>
+                  <h4 className="font-display font-black text-white text-[15px] leading-tight">
+                    {celebOfDay.name}
+                  </h4>
+                  <p className="text-[11px] text-violet-300/80 font-medium leading-tight mt-0.5 line-clamp-1">
+                    {celebOfDay.title}
+                  </p>
+                </div>
+              </div>
+
+              {/* Séparateur */}
+              <div className="h-px bg-white/10 mx-1" />
+
+              {/* Description */}
+              <p className={`text-[13px] text-white/75 leading-relaxed ${celebExpanded ? '' : 'line-clamp-3'}`}>
+                {celebOfDay.description}
+              </p>
+
+              {/* Actions */}
+              <div className="flex items-center justify-between pt-0.5">
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setCelebExpanded(v => !v)}
+                  className="flex items-center gap-1 text-[11px] font-black text-violet-300"
+                >
+                  <motion.span
+                    animate={{ rotate: celebExpanded ? 180 : 0 }}
+                    transition={{ duration: 0.25 }}
+                    className="inline-block"
+                  >
+                    <ChevronDown size={14} className="text-violet-300" />
+                  </motion.span>
+                  {celebExpanded ? 'Réduire' : 'Lire plus'}
+                </motion.button>
+
+                <a
+                  href={celebOfDay.wikipedia}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 border border-white/20 transition-colors active:scale-95"
+                  style={{ background: 'rgba(255,255,255,0.10)' }}
+                >
+                  <Globe2 size={12} className="text-white" />
+                  <span className="text-[11px] font-black text-white">Wikipedia</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Add Friend Modal */}
       <AnimatePresence>
