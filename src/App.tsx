@@ -156,7 +156,7 @@ function AppContent() {
     return (
       <div className="min-h-screen bg-slate-100 flex flex-col max-w-md mx-auto shadow-2xl overflow-hidden">
         {/* Header skeleton */}
-        <div className="bg-white px-6 pt-12 pb-4 flex justify-between items-center border-b-2 border-slate-900">
+        <div className="bg-white px-6 pt-6 pb-3 flex justify-between items-center border-b-2 border-slate-900">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-xl bg-slate-200 animate-pulse" />
             <div className="space-y-1.5">
@@ -298,7 +298,7 @@ function AppContent() {
           </motion.div>
         )}
       </AnimatePresence>
-      <header className="bg-white px-6 pt-12 pb-4 flex justify-between items-center border-b-2 border-slate-900 shadow-sm">
+      <header className="bg-white px-6 pt-6 pb-3 flex justify-between items-center border-b-2 border-slate-900 shadow-sm">
         <div className="flex items-center gap-3">
           <Logo size={32} />
           <div>
