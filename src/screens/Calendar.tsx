@@ -14,7 +14,7 @@ import { format, parseISO, differenceInDays, startOfDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { ZODIAC_EMOJI } from '../utils/zodiac';
 
-type TabId = 'tous' | 'famille' | 'ami' | 'connaissance';
+type TabId = 'tous' | 'famille' | 'ami' | 'autre';
 
 const MONTHS_FR = [
   'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
@@ -35,7 +35,7 @@ function getCategoryStyle(category?: string) {
       return { borderColor: '#f43f5e', icon: <Heart size={11} className="text-rose-500" strokeWidth={2.5} /> };
     case 'ami':
       return { borderColor: '#0ea5e9', icon: <Users size={11} className="text-sky-500" strokeWidth={2.5} /> };
-    case 'connaissance':
+    case 'autre':
       return { borderColor: '#94a3b8', icon: <UserCircle size={11} className="text-slate-400" strokeWidth={2.5} /> };
     default:
       return { borderColor: '#e2e8f0', icon: null };
@@ -149,9 +149,9 @@ function FriendRow({
 function EmptyState({ tab, onAdd }: { tab: TabId; onAdd: () => void }) {
   const config: Record<TabId, { emoji: string; title: string; sub: string }> = {
     tous: { emoji: '👥', title: "Aucun ami pour l'instant", sub: "Commence par ajouter quelqu'un !" },
-    famille: { emoji: '❤️', title: 'Aucun membre de la famille', sub: 'Maintiens appuyé sur un ami pour le classer.' },
-    ami: { emoji: '🤝', title: 'Aucun ami classé', sub: 'Maintiens appuyé sur un ami pour le classer.' },
-    connaissance: { emoji: '👋', title: 'Aucune connaissance', sub: 'Maintiens appuyé sur un ami pour le classer.' },
+    famille: { emoji: '❤️', title: 'Aucun membre de la famille', sub: 'Classe un ami via le crayon ou appui long.' },
+    ami: { emoji: '🤝', title: 'Aucun ami classé', sub: 'Classe un ami via le crayon ou appui long.' },
+    autre: { emoji: '👋', title: 'Aucun contact dans "Autre"', sub: 'Classe un ami via le crayon ou appui long.' },
   };
   const { emoji, title, sub } = config[tab];
   return (
@@ -335,7 +335,7 @@ export function Calendar({
     setTimeout(() => confetti({ ...base, particleCount: 40, startVelocity: 28 }), 350);
   };
 
-  const handleClassify = async (category: 'famille' | 'ami' | 'connaissance') => {
+  const handleClassify = async (category: 'famille' | 'ami' | 'autre') => {
     if (!classifyingFriend || !onUpdateBirthday) return;
     await onUpdateBirthday(classifyingFriend.id, { category });
     setClassifyingFriend(null);
@@ -376,7 +376,7 @@ export function Calendar({
     tous: birthdays.length,
     famille: birthdays.filter(b => b.category === 'famille').length,
     ami: birthdays.filter(b => b.category === 'ami').length,
-    connaissance: birthdays.filter(b => b.category === 'connaissance').length,
+    autre: birthdays.filter(b => b.category === 'autre').length,
   };
 
   return (
@@ -431,7 +431,7 @@ export function Calendar({
             { id: 'tous' as TabId, label: 'Tous', icon: null },
             { id: 'famille' as TabId, label: 'Famille', icon: <Heart size={11} strokeWidth={2.5} />, activeColor: 'text-rose-500' },
             { id: 'ami' as TabId, label: 'Amis', icon: <Users size={11} strokeWidth={2.5} />, activeColor: 'text-sky-500' },
-            { id: 'connaissance' as TabId, label: 'Connect.', icon: <UserCircle size={11} strokeWidth={2.5} />, activeColor: 'text-slate-500' },
+            { id: 'autre' as TabId, label: 'Autre', icon: <UserCircle size={11} strokeWidth={2.5} />, activeColor: 'text-slate-500' },
           ] as const).map(tab => {
             const isActive = activeTab === tab.id;
             const count = tabCounts[tab.id];
@@ -544,11 +544,11 @@ export function Calendar({
                     ring: classifyingFriend.category === 'ami' ? 'ring-2 ring-sky-400 ring-offset-1' : '',
                   },
                   {
-                    cat: 'connaissance' as const,
-                    label: 'Connais.',
+                    cat: 'autre' as const,
+                    label: 'Autre',
                     icon: <UserCircle size={24} className="text-slate-400" strokeWidth={2} />,
                     bg: 'bg-slate-50', border: 'border-slate-200',
-                    ring: classifyingFriend.category === 'connaissance' ? 'ring-2 ring-slate-300 ring-offset-1' : '',
+                    ring: classifyingFriend.category === 'autre' ? 'ring-2 ring-slate-300 ring-offset-1' : '',
                   },
                 ]).map(({ cat, label, icon, bg, border, ring }) => (
                   <motion.button

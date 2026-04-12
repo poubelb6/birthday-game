@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { formatZodiac } from '../utils/zodiac';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Camera, Phone, Instagram, Twitter, Facebook, ChevronDown, Plus, Trash2, ImageIcon } from 'lucide-react';
+import { X, Camera, Phone, Instagram, Twitter, Facebook, ChevronDown, Plus, Trash2, ImageIcon, Heart, Users, UserCircle } from 'lucide-react';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { auth, storage } from '../firebase';
 import { Birthday } from '../types';
@@ -26,6 +26,7 @@ export function FriendEditModal({ friend, onClose, onSave, onDelete }: Props) {
   const [editPhotoUrl, setEditPhotoUrl] = useState('');
   const [editPhotoUploading, setEditPhotoUploading] = useState(false);
   const [editSaving, setEditSaving] = useState(false);
+  const [editCategory, setEditCategory] = useState<Birthday['category']>(undefined);
   const [showPhotoMenu, setShowPhotoMenu] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -42,6 +43,7 @@ export function FriendEditModal({ friend, onClose, onSave, onDelete }: Props) {
     });
     setEditWishlist(friend.wishlist ?? []);
     setEditWishInput('');
+    setEditCategory(friend.category);
     setEditPhotoUrl(friend.photoUrl ?? '');
     setEditPhotoPreview(friend.photoUrl ?? '');
     setEditShowSocials(false);
@@ -102,6 +104,7 @@ export function FriendEditModal({ friend, onClose, onSave, onDelete }: Props) {
         ...(editPhone.trim() && { phone: editPhone.trim() }),
         ...(Object.keys(cleanSocials ?? {}).length > 0 && { socials: cleanSocials }),
         wishlist: editWishlist,
+        category: editCategory,
       };
       await onSave(friend.id, updates);
       onClose();
@@ -193,6 +196,39 @@ export function FriendEditModal({ friend, onClose, onSave, onDelete }: Props) {
                 <p className="text-sm text-slate-500 mt-0.5">
                   {format(parseISO(friend.birthDate), 'd MMMM yyyy', { locale: fr })} · {formatZodiac(friend.zodiac)}
                 </p>
+              </div>
+
+              {/* Catégorie */}
+              <div className="space-y-2">
+                <label className="block text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">Catégorie</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {([
+                    { cat: 'famille' as const, label: 'Famille', icon: <Heart size={16} strokeWidth={2} /> },
+                    { cat: 'ami'     as const, label: 'Amis',    icon: <Users size={16} strokeWidth={2} /> },
+                    { cat: 'autre'   as const, label: 'Autre',   icon: <UserCircle size={16} strokeWidth={2} /> },
+                  ]).map(({ cat, label, icon }) => {
+                    const isSelected = editCategory === cat;
+                    const styles = {
+                      famille: { on: 'bg-rose-50 border-rose-300 text-rose-600', icon: 'text-rose-500' },
+                      ami:     { on: 'bg-sky-50 border-sky-300 text-sky-600',    icon: 'text-sky-500' },
+                      autre:   { on: 'bg-slate-100 border-slate-300 text-slate-600', icon: 'text-slate-500' },
+                    }[cat];
+                    return (
+                      <motion.button
+                        key={cat}
+                        type="button"
+                        whileTap={{ scale: 0.93 }}
+                        onClick={() => setEditCategory(isSelected ? undefined : cat)}
+                        className={`flex flex-col items-center gap-1.5 py-3 rounded-2xl border text-[11px] font-black transition-all ${
+                          isSelected ? styles.on : 'bg-slate-50 border-black/10 text-slate-400'
+                        }`}
+                      >
+                        <span className={isSelected ? styles.icon : 'text-slate-300'}>{icon}</span>
+                        {label}
+                      </motion.button>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Téléphone */}
