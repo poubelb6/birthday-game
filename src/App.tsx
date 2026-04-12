@@ -106,7 +106,7 @@ function AppContent() {
   }, [pendingDeepLink, user, firebaseUser, loading]);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowSplash(false), 1200);
+    const timer = setTimeout(() => setShowSplash(false), 2500);
     return () => clearTimeout(timer);
   }, []);
 
@@ -145,16 +145,12 @@ function AppContent() {
           <h1 className="text-4xl font-black text-slate-900 uppercase tracking-tight">
             Birthday Game
           </h1>
-          <div className="flex gap-2 mt-1">
-            {[0, 1, 2].map(i => (
-              <motion.div
-                key={i}
-                className="w-1.5 h-1.5 rounded-full bg-red-500"
-                animate={{ opacity: [0.25, 1, 0.25] }}
-                transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.18, ease: 'easeInOut' }}
-              />
-            ))}
-          </div>
+          <motion.div
+            className="h-1.5 bg-red-500 rounded-full mt-1"
+            animate={{ width: [0, 48, 0] }}
+            initial={{ width: 0 }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          />
         </motion.div>
       </motion.div>
     );
