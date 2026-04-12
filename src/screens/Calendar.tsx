@@ -429,11 +429,11 @@ export function Calendar({
         {/* Tabs */}
         <div className="flex bg-slate-100 rounded-2xl p-1 gap-1">
           {([
-            { id: 'tous'    as TabId, label: 'Tous',    icon: null,                                        activeBg: '#ffffff', activeText: '#1e293b', badge: 'bg-slate-100 text-slate-500',  iconCls: '' },
-            { id: 'famille' as TabId, label: 'Famille', icon: <Heart size={11} strokeWidth={2.5} />,       activeBg: '#ffe4e6', activeText: '#be123c', badge: 'bg-rose-200 text-rose-600',    iconCls: 'text-rose-500' },
-            { id: 'ami'     as TabId, label: 'Amis',    icon: <Users size={11} strokeWidth={2.5} />,       activeBg: '#e0f2fe', activeText: '#0369a1', badge: 'bg-sky-200 text-sky-600',     iconCls: 'text-sky-500' },
-            { id: 'autre'   as TabId, label: 'Autre',   icon: <UserCircle size={11} strokeWidth={2.5} />, activeBg: '#e2e8f0', activeText: '#475569', badge: 'bg-slate-300 text-slate-500', iconCls: 'text-slate-500' },
-          ]).map(tab => {
+            { id: 'tous'    as TabId, label: 'Tous',    icon: null,                                             active: 'bg-white shadow-sm text-slate-800',       badge: 'bg-slate-100 text-slate-500',    iconCls: '' },
+            { id: 'famille' as TabId, label: 'Famille', icon: <Heart size={11} strokeWidth={2.5} />,            active: 'bg-rose-100 shadow-sm text-rose-700',     badge: 'bg-rose-200 text-rose-600',      iconCls: 'text-rose-500' },
+            { id: 'ami'     as TabId, label: 'Amis',    icon: <Users size={11} strokeWidth={2.5} />,            active: 'bg-sky-100 shadow-sm text-sky-700',       badge: 'bg-sky-200 text-sky-600',        iconCls: 'text-sky-500' },
+            { id: 'autre'   as TabId, label: 'Autre',   icon: <UserCircle size={11} strokeWidth={2.5} />,      active: 'bg-slate-200 shadow-sm text-slate-700',   badge: 'bg-slate-300 text-slate-500',    iconCls: 'text-slate-500' },
+          ] as const).map(tab => {
             const isActive = activeTab === tab.id;
             const count = tabCounts[tab.id];
             return (
@@ -441,25 +441,18 @@ export function Calendar({
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 whileTap={{ scale: 0.95 }}
-                className="relative flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[11px] font-black"
-                style={{ color: isActive ? tab.activeText : '#94a3b8' }}
+                className={`flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[11px] font-black transition-all ${
+                  isActive ? tab.active : 'text-slate-500'
+                }`}
               >
-                {isActive && (
-                  <motion.div
-                    layoutId="tab-pill"
-                    className="absolute inset-0 rounded-xl shadow-sm"
-                    style={{ background: tab.activeBg }}
-                    transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                  />
+                {tab.icon && (
+                  <span className={isActive ? tab.iconCls : 'text-slate-400'}>
+                    {tab.icon}
+                  </span>
                 )}
-                <span className="relative z-10 flex items-center gap-1">
-                  {tab.icon && (
-                    <span className={isActive ? tab.iconCls : 'text-slate-400'}>{tab.icon}</span>
-                  )}
-                  {tab.label}
-                </span>
+                <span>{tab.label}</span>
                 {count > 0 && (
-                  <span className={`relative z-10 text-[9px] font-black px-1.5 py-0.5 rounded-full ml-0.5 ${
+                  <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${
                     isActive ? tab.badge : 'bg-slate-200/60 text-slate-400'
                   }`}>
                     {count}
@@ -679,7 +672,7 @@ export function Calendar({
       {/* ── Add Friend modal ────────────────────────────────────── */}
       <AnimatePresence>
         {showAddModal && (
-          <div className="fixed inset-0 z-[100] flex items-end">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -688,19 +681,15 @@ export function Calendar({
               className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
             />
             <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', stiffness: 300, damping: 32 }}
-              className="relative w-full bg-white rounded-t-3xl shadow-2xl flex flex-col max-h-[92vh]"
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl flex flex-col max-h-[90vh]"
             >
-              <div className="flex justify-center pt-3 pb-1 shrink-0">
-                <div className="w-10 h-1 rounded-full bg-slate-200" />
-              </div>
-              <div className="flex items-center justify-between px-6 py-3 shrink-0">
-                <h3 className="text-xl font-black text-slate-900">Ajouter un ami</h3>
-                <button onClick={() => setShowAddModal(false)} className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
-                  <X size={16} />
+              <div className="flex items-center justify-center relative px-8 pt-8 pb-4 shrink-0">
+                <h3 className="font-display text-xl font-black text-slate-900">Ajouter un ami</h3>
+                <button onClick={() => setShowAddModal(false)} className="absolute right-8 text-slate-500 hover:text-slate-700">
+                  <X size={24} />
                 </button>
               </div>
 
@@ -989,16 +978,17 @@ export function Calendar({
       <AnimatePresence>
         {toastName && (
           <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 20, opacity: 0 }}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 400, damping: 28 }}
-            className="fixed bottom-28 inset-x-4 z-[200] mx-auto max-w-sm bg-white rounded-2xl px-5 py-4 flex items-center gap-3"
-            style={{ border: '1.5px solid #FF4B4B', boxShadow: '0 4px 0 #CC2E2E, 0 12px 40px rgba(255,75,75,0.15)' }}
+            className="fixed inset-x-6 top-1/2 -translate-y-1/2 z-[200] mx-auto max-w-sm bg-white rounded-3xl px-6 py-6"
+            style={{ border: '2px solid #FF4B4B', boxShadow: '0 6px 0 #CC2E2E, 0 12px 40px rgba(255,75,75,0.18)' }}
           >
-            <span className="text-2xl shrink-0">🎉</span>
-            <p className="text-sm font-black text-slate-900 leading-snug">
-              Bravo ! <span style={{ color: '#FF4B4B' }}>{toastName}</span> ajouté à ta collection !
+            <p className="text-2xl text-center mb-1">🎉</p>
+            <p className="text-base font-black font-display text-slate-900 text-center leading-snug">
+              Bravo ! Tu as ajouté<br />
+              <span style={{ color: '#FF4B4B' }}>{toastName}</span> à ta collection !
             </p>
           </motion.div>
         )}
