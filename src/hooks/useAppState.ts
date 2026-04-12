@@ -129,8 +129,8 @@ export function useAppState() {
         return {
           ...data,
           id: d.id,
-          // Préserve le vrai UID de l'ami immédiatement (sans attendre l'enrichissement async)
-          ...(data.id && data.id !== d.id ? { userId: data.id } : {}),
+          // userId is only set after Firestore verification in the enrichment step below
+          userId: undefined,
         };
       });
 
@@ -147,7 +147,7 @@ export function useAppState() {
         const snaps = await Promise.all(
           batches.map(batch => getDocs(query(collection(db, 'users'), where(documentId(), 'in', batch))))
         );
-        // profileMap: friendUID -> { photoUrl, wishlist, socials }
+        // profileMap: friendUID -> { photoUrl, wishlist, socials } — only populated for real accounts
         const profileMap: Record<string, Partial<Birthday>> = {};
         snaps.flatMap(s => s.docs).forEach(d => {
           const data = d.data() as UserProfile;
@@ -155,7 +155,8 @@ export function useAppState() {
           if (data.photoUrl) patch.photoUrl = data.photoUrl;
           if (Array.isArray(data.wishlist) && data.wishlist.length > 0) patch.wishlist = data.wishlist;
           if (data.socials) patch.socials = data.socials;
-          if (Object.keys(patch).length > 0) profileMap[d.id] = patch;
+          // Always register in profileMap so userId is set even if no extra fields exist
+          profileMap[d.id] = patch;
         });
 
         // On enrichit chaque birthday avec les données live + on stocke le vrai UID de l'ami
