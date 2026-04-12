@@ -447,10 +447,6 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
       />
 
       <section className="space-y-4">
-        <div className="flex flex-col items-center justify-center text-center">
-          <h3 className="font-display text-lg font-black text-slate-900">Anniversaires par mois</h3>
-          <span className="text-xs font-bold text-rose-400 uppercase tracking-wider">Année {today.getFullYear()}</span>
-        </div>
         <div className="bg-white rounded-3xl border border-slate-100 shadow-sm px-4 pt-4 pb-3">
           {(() => {
             const monthLabels = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
@@ -463,6 +459,16 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
             const totalYear = counts.reduce((s, c) => s + c, 0);
             return (
               <>
+                <div className="mb-3 pb-3 border-b border-slate-100 flex items-center justify-center gap-2">
+                  <span className="text-[11px] font-black font-display text-slate-500 uppercase tracking-widest">
+                    Total {today.getFullYear()}
+                  </span>
+                  <span className="text-base">🎂</span>
+                  <span className="text-[11px] font-black font-display text-slate-900">
+                    {birthdays.length} anniversaire{birthdays.length > 1 ? 's' : ''}
+                  </span>
+                </div>
+
                 <div className="flex items-end justify-between gap-1.5" style={{ height: 96 }}>
                   {counts.map((count, m) => {
                     const isCurrentMonth = m === today.getMonth();
@@ -515,15 +521,6 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
                   })}
                 </div>
 
-                <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-center gap-2">
-                  <span className="text-[11px] font-black font-display text-slate-500 uppercase tracking-widest">
-                    Total {today.getFullYear()}
-                  </span>
-                  <span className="text-base">🎂</span>
-                  <span className="text-[11px] font-black font-display text-slate-900">
-                    {birthdays.length} anniversaire{birthdays.length > 1 ? 's' : ''}
-                  </span>
-                </div>
               </>
             );
           })()}
