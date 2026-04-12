@@ -242,9 +242,26 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
               >
                 <ChevronLeft size={18} className="text-white" strokeWidth={3} />
               </motion.button>
-              <h4 className="text-white font-black uppercase tracking-widest text-[13px] capitalize">
-                {format(currentMonth, 'MMMM yyyy', { locale: fr })}
-              </h4>
+              <div className="overflow-hidden flex-1 flex justify-center">
+                <AnimatePresence mode="wait" custom={slideDirection}>
+                  <motion.h4
+                    key={format(currentMonth, 'yyyy-MM')}
+                    custom={slideDirection}
+                    variants={{
+                      enter: (dir: number) => ({ x: dir > 0 ? '60%' : '-60%', opacity: 0 }),
+                      center: { x: 0, opacity: 1 },
+                      exit:  (dir: number) => ({ x: dir > 0 ? '-60%' : '60%', opacity: 0 }),
+                    }}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{ duration: 0.28, ease: [0.32, 0, 0.68, 1] }}
+                    className="text-white font-black uppercase tracking-widest text-[13px] capitalize whitespace-nowrap"
+                  >
+                    {format(currentMonth, 'MMMM yyyy', { locale: fr })}
+                  </motion.h4>
+                </AnimatePresence>
+              </div>
               <motion.button
                 onClick={goNext}
                 whileTap={{ scale: 0.88 }}
