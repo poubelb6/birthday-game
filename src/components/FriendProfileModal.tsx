@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatZodiac } from '../utils/zodiac';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Phone, Edit2, ExternalLink } from 'lucide-react';
 import { Birthday } from '../types';
@@ -223,7 +224,7 @@ export function FriendProfileModal({ friend, hasAccount, onClose, onEdit }: Prop
                     {format(parseISO(friend.birthDate), 'd MMMM yyyy', { locale: fr })}
                   </p>
                   <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                    <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-rose-50 text-rose-500 border border-rose-100">{friend.zodiac}</span>
+                    <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-rose-50 text-rose-500 border border-rose-100">{formatZodiac(friend.zodiac)}</span>
                     {hasAccount && <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100">🎮 Sur l'appli</span>}
                   </div>
                 </div>

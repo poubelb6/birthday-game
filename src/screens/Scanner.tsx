@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { ZODIAC_EMOJI } from '../utils/zodiac';
 import { Html5QrcodeScanner, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { motion, AnimatePresence } from 'motion/react';
 import { AlertCircle, UserPlus, X, Check } from 'lucide-react';
@@ -27,11 +28,6 @@ const VALID_ZODIACS: ZodiacSign[] = [
   'Balance','Scorpion','Sagittaire','Capricorne','Verseau','Poissons',
 ];
 
-const ZODIAC_EMOJI: Record<ZodiacSign, string> = {
-  'Bélier':'♈','Taureau':'♉','Gémeaux':'♊','Cancer':'♋',
-  'Lion':'♌','Vierge':'♍','Balance':'♎','Scorpion':'♏',
-  'Sagittaire':'♐','Capricorne':'♑','Verseau':'♒','Poissons':'♓',
-};
 
 const SOCIAL_LABELS: Record<string, string> = {
   instagram: '📸 Instagram',

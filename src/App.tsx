@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { formatZodiac } from './utils/zodiac';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   QrCode,
@@ -405,7 +406,7 @@ function AppContent() {
                   <span style={{ color: '#FF4B4B' }}>{celebrationFriend.name}</span>
                   <br />a été ajouté à tes amis !
                 </p>
-                <p className="text-sm text-slate-500 font-medium">{celebrationFriend.zodiac}</p>
+                <p className="text-sm text-slate-500 font-medium">{formatZodiac(celebrationFriend.zodiac)}</p>
               </div>
 
               <div

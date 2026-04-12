@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useEffect } from 'react';
+import { ZODIAC_EMOJI, formatZodiac } from '../utils/zodiac';
 import { Star, Calendar as CalendarIcon, X, Trophy, Users, Search } from 'lucide-react';
 import { Birthday, UserProfile } from '../types';
 import { format, differenceInDays, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, startOfDay } from 'date-fns';
@@ -10,11 +11,6 @@ import { FriendEditModal } from '../components/FriendEditModal';
 import { FriendProfileModal } from '../components/FriendProfileModal';
 import { checkUnlockedCards } from '../utils/gameLogic';
 
-const ZODIAC_EMOJI: Record<string, string> = {
-  'Bélier': '♈', 'Taureau': '♉', 'Gémeaux': '♊', 'Cancer': '♋',
-  'Lion': '♌', 'Vierge': '♍', 'Balance': '♎', 'Scorpion': '♏',
-  'Sagittaire': '♐', 'Capricorne': '♑', 'Verseau': '♒', 'Poissons': '♓',
-};
 
 export function Dashboard({ birthdays, user, onUpdateBirthday, onDeleteBirthday }: {
   birthdays: Birthday[],
@@ -357,7 +353,7 @@ export function Dashboard({ birthdays, user, onUpdateBirthday, onDeleteBirthday 
                             {hasAccount && <span className="text-[8px] font-black text-emerald-600 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded-full shrink-0">🎮</span>}
                           </div>
                           <p className="text-[11px] text-slate-600 font-medium">
-                            {format(parseISO(b.birthDate), 'd MMM', { locale: fr })} · {b.zodiac}
+                            {format(parseISO(b.birthDate), 'd MMM', { locale: fr })} · {formatZodiac(b.zodiac)}
                           </p>
                           {filledSocials.length > 0 && (
                             <div className="flex gap-1 mt-0.5">

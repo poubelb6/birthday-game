@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { formatZodiac } from '../utils/zodiac';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronLeft, ChevronRight, ChevronDown, X, Camera, ImageIcon, Phone, Instagram, Twitter, Facebook, Plus, Trash2, Gift, Save, Lightbulb } from 'lucide-react';
 import { FriendEditModal } from '../components/FriendEditModal';
@@ -316,7 +317,7 @@ export function Calendar({ birthdays, onAddBirthday, onUpdateBirthday, onDeleteB
                 }
                 <div className="flex-1">
                   <p className="font-black text-slate-900 text-sm">{b.name}</p>
-                  <p className="text-[10px] text-slate-600 font-bold uppercase tracking-wider">{b.zodiac}</p>
+                  <p className="text-[10px] text-slate-600 font-bold uppercase tracking-wider">{formatZodiac(b.zodiac)}</p>
                 </div>
                 <button
                   type="button"

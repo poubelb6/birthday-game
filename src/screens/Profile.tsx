@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { ZODIAC_EMOJI } from '../utils/zodiac';
 import { QRCodeSVG } from 'qrcode.react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Share2, Settings, Instagram, Gift, ChevronRight, Sparkles, Users, Trophy, ExternalLink, Copy, Twitter, Facebook, Save, X, Smartphone, LogOut, Ghost, Camera, Plus, Trash2 } from 'lucide-react';
@@ -206,13 +207,7 @@ export function Profile({ user, onUpdate, birthdays = [], challenges = [] }: { u
   };
 
 const getZodiacEmoji = (zodiac: string) => {
-  const emojis: Record<string, string> = {
-    'Bélier': '♈', 'Taureau': '♉', 'Gémeaux': '♊',
-    'Cancer': '♋', 'Lion': '♌', 'Vierge': '♍',
-    'Balance': '♎', 'Scorpion': '♏', 'Sagittaire': '♐',
-    'Capricorne': '♑', 'Verseau': '♒', 'Poissons': '♓'
-  };
-  return emojis[zodiac] || '⭐';
+  return ZODIAC_EMOJI[zodiac] || '⭐';
 };
   return (
     <div className="pb-24">

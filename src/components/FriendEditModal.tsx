@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { formatZodiac } from '../utils/zodiac';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Camera, Phone, Instagram, Twitter, Facebook, ChevronDown, Plus, Trash2, ImageIcon } from 'lucide-react';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -190,7 +191,7 @@ export function FriendEditModal({ friend, onClose, onSave, onDelete }: Props) {
               <div className="bg-slate-50 border border-black/60 rounded-2xl p-4 text-center">
                 <p className="font-black text-slate-900">{friend.name}</p>
                 <p className="text-sm text-slate-500 mt-0.5">
-                  {format(parseISO(friend.birthDate), 'd MMMM yyyy', { locale: fr })} · {friend.zodiac}
+                  {format(parseISO(friend.birthDate), 'd MMMM yyyy', { locale: fr })} · {formatZodiac(friend.zodiac)}
                 </p>
               </div>
 
