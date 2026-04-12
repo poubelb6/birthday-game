@@ -156,7 +156,7 @@ function AppContent() {
     return (
       <div className="min-h-screen bg-slate-100 flex flex-col max-w-md mx-auto shadow-2xl overflow-hidden">
         {/* Header skeleton */}
-        <div className="bg-white px-6 pt-6 pb-3 flex justify-between items-center border-b-2 border-slate-900">
+        <div className="bg-white px-6 pt-4 pb-2 flex justify-between items-center border-b-2 border-slate-900">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-xl bg-slate-200 animate-pulse" />
             <div className="space-y-1.5">
@@ -298,17 +298,20 @@ function AppContent() {
           </motion.div>
         )}
       </AnimatePresence>
-      <header className="bg-white px-6 pt-6 pb-3 flex justify-between items-center border-b-2 border-slate-900 shadow-sm">
-        <div className="flex items-center gap-3">
-          <Logo size={32} />
-          <div>
-            <h1 className="text-xl font-black text-slate-900 tracking-tight">
+      <header className="bg-white px-6 pt-4 pb-2 flex justify-between items-center border-b-2 border-slate-900 shadow-sm">
+        <div className="flex items-center gap-2.5">
+          <Logo size={28} />
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg font-black text-slate-900 tracking-tight">
               {activeScreen === 'dashboard' ? 'Birthday Game' :
                activeScreen.charAt(0).toUpperCase() + activeScreen.slice(1)}
             </h1>
-            <p className="text-[12px] font-black uppercase tracking-widest" style={{ color: '#FF4B4B', fontFamily: "'Press Start 2P', monospace" }}>
-              Niv.{user.level} • {user.xp} XP
-            </p>
+            <span
+              className="text-[8px] font-black px-1.5 py-0.5 rounded-full"
+              style={{ color: '#FF4B4B', background: 'rgba(255,75,75,0.08)', fontFamily: "'Press Start 2P', monospace" }}
+            >
+              Niv.{user.level}
+            </span>
           </div>
         </div>
         <div className="flex items-center gap-2">
