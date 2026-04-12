@@ -335,9 +335,9 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
             {upcoming.slice(0, 3).map((b, i) => (
               <motion.div
                 key={b.id}
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
+                transition={{ delay: i * 0.12, type: 'spring', stiffness: 280, damping: 22 }}
                 onClick={() => setViewingFriend(b)}
                 className="flex flex-col items-center gap-1.5 cursor-pointer flex-1"
               >

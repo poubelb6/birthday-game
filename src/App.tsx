@@ -50,6 +50,7 @@ const SCREEN_ORDER: Screen[] = ['dashboard', 'calendar', 'collection', 'profile'
 function AppContent() {
   const { user, birthdays, challenges, inbox, sentMessages, loading, firebaseUser, setUser, addBirthday, updateBirthday, deleteBirthday, incrementScansCount, unlockCard, sendMessage, markConversationRead } = useAppState();
   const [activeScreen, setActiveScreen] = useState<Screen>('dashboard');
+  const [slideDirection, setSlideDirection] = useState(0);
   const [showSplash, setShowSplash] = useState(true);
   const [pendingDeepLink, setPendingDeepLink] = useState<string | null>(null);
   const [triggerAddFriend, setTriggerAddFriend] = useState(false);
@@ -105,11 +106,14 @@ function AppContent() {
   }, [pendingDeepLink, user, firebaseUser, loading]);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowSplash(false), 2500);
+    const timer = setTimeout(() => setShowSplash(false), 1200);
     return () => clearTimeout(timer);
   }, []);
 
   const navigateTo = (screen: Screen) => {
+    const currentIndex = SCREEN_ORDER.indexOf(activeScreen);
+    const nextIndex = SCREEN_ORDER.indexOf(screen);
+    setSlideDirection(currentIndex === -1 || nextIndex === -1 ? 0 : nextIndex > currentIndex ? 1 : -1);
     setActiveScreen(screen);
   };
 
@@ -131,22 +135,32 @@ function AppContent() {
         className="min-h-screen flex flex-col items-center justify-center gap-6"
         style={{ background: 'linear-gradient(160deg, #fff5f5 0%, #ffffff 100%)' }}
       >
-        <Logo size={96} />
+        <motion.div
+          initial={{ scale: 0.7, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 320, damping: 22 }}
+        >
+          <Logo size={96} />
+        </motion.div>
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="flex flex-col items-center gap-2"
+          transition={{ delay: 0.2 }}
+          className="flex flex-col items-center gap-3"
         >
           <h1 className="text-4xl font-black text-slate-900 uppercase tracking-tight">
             Birthday Game
           </h1>
-          <motion.div
-            className="h-1.5 bg-red-500 rounded-full mt-1"
-            animate={{ width: [0, 48, 0] }}
-            initial={{ width: 0 }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          />
+          <div className="flex gap-2 mt-1">
+            {[0, 1, 2].map(i => (
+              <motion.div
+                key={i}
+                className="w-1.5 h-1.5 rounded-full bg-red-500"
+                animate={{ opacity: [0.25, 1, 0.25] }}
+                transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.18, ease: 'easeInOut' }}
+              />
+            ))}
+          </div>
         </motion.div>
       </motion.div>
     );
@@ -346,7 +360,7 @@ function AppContent() {
 
           {/* QR scan button */}
           <motion.button
-            onClick={() => setActiveScreen('scanner')}
+            onClick={() => navigateTo('scanner')}
             aria-label="Scanner un QR code"
             whileHover={{ scale: 1.15, rotate: 5 }}
             whileTap={{ scale: 0.9 }}
@@ -359,13 +373,19 @@ function AppContent() {
       </header>
 
       <main className={activeScreen === 'scanner' ? 'flex-1 overflow-hidden flex flex-col pb-24' : 'flex-1 overflow-y-auto pb-24'}>
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="wait" custom={slideDirection}>
           <motion.div
             key={activeScreen}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
+            custom={slideDirection}
+            variants={{
+              enter: (dir: number) => ({ x: dir * 48, opacity: 0 }),
+              center: { x: 0, opacity: 1 },
+              exit: (dir: number) => ({ x: -dir * 32, opacity: 0 }),
+            }}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.26, ease: [0.32, 0, 0.68, 1] }}
             className={activeScreen === 'scanner' ? 'flex-1 flex flex-col' : 'h-full'}
           >
             {renderScreen()}
@@ -502,10 +522,12 @@ export default function App() {
 
 function NavButton({ active, onClick, icon, label, ariaLabel, activeBg = 'bg-red-50' }: { active: boolean, onClick: () => void, icon: React.ReactNode, label: string, ariaLabel: string, activeBg?: string }) {
   return (
-    <button
+    <motion.button
       onClick={onClick}
       aria-label={ariaLabel}
       aria-current={active ? 'page' : undefined}
+      whileTap={{ scale: 0.86 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 20 }}
       className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${active ? 'scale-110' : 'opacity-40 hover:opacity-70'}`}
     >
       <motion.div
@@ -522,6 +544,6 @@ function NavButton({ active, onClick, icon, label, ariaLabel, activeBg = 'bg-red
       <span className={`text-[10px] font-black uppercase tracking-[0.15em] ${active ? 'text-red-500' : ''}`}>
         {label}
       </span>
-    </button>
+    </motion.button>
   );
 }
