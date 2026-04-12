@@ -187,68 +187,6 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
 
       <section className="space-y-4 relative">
 
-        {/* ── Le saviez-vous ? ─── carte compacte au-dessus du calendrier */}
-        {celebOfDay && (
-          <div className="bg-[#FFFDF7] border border-amber-100/60 rounded-2xl px-4 py-3 overflow-hidden">
-            {/* Partie haute — toujours visible */}
-            <div className="flex items-center gap-3">
-              <span className="text-xl shrink-0">{celebOfDay.emoji}</span>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5 mb-0.5">
-                  <Sparkles size={9} className="text-amber-400 shrink-0" />
-                  <span className="text-[9px] font-bold text-amber-500 uppercase tracking-wider">Né(e) aujourd'hui</span>
-                </div>
-                <h4 className="font-display font-black text-slate-800 text-[13px] leading-tight truncate">
-                  {celebOfDay.name}
-                </h4>
-                <p className="text-[11px] text-slate-400 font-medium leading-tight mt-0.5 truncate">
-                  {celebOfDay.title}
-                </p>
-              </div>
-              <motion.button
-                onClick={() => setCelebExpanded(v => !v)}
-                whileTap={{ scale: 0.88 }}
-                className="w-7 h-7 rounded-lg bg-amber-50 flex items-center justify-center shrink-0"
-              >
-                <motion.div
-                  animate={{ rotate: celebExpanded ? 180 : 0 }}
-                  transition={{ duration: 0.25 }}
-                >
-                  <ChevronDown size={14} className="text-amber-500" strokeWidth={2.5} />
-                </motion.div>
-              </motion.button>
-            </div>
-
-            {/* Partie basse — dépliable */}
-            <AnimatePresence initial={false}>
-              {celebExpanded && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.28, ease: 'easeInOut' }}
-                  className="overflow-hidden"
-                >
-                  <div className="pt-3 mt-3 border-t border-amber-100/60 space-y-2.5">
-                    <p className="text-[12px] text-slate-600 leading-relaxed">
-                      {celebOfDay.description}
-                    </p>
-                    <a
-                      href={celebOfDay.wikipedia}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-100 rounded-xl px-3 py-1.5 active:scale-95 transition-transform"
-                    >
-                      <Globe2 size={11} className="text-amber-600" />
-                      <span className="text-[11px] font-black text-amber-600">Wikipedia</span>
-                    </a>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        )}
-
         <div className="relative pt-4">
           <div className="absolute top-0 left-0 right-0 flex justify-around px-8 z-20">
             {[...Array(6)].map((_, i) => (
@@ -391,10 +329,58 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
       </section>
 
       <section className="space-y-3">
-        {upcoming.length > 0 && (
-          <div className="flex flex-col items-center justify-center text-center">
-            <h3 className="font-display text-lg font-black text-slate-900">Prochains anniversaires</h3>
-            <span className="text-xs font-bold text-rose-400 uppercase tracking-wider">À venir</span>
+        {/* ── Le saviez-vous ? ─── remplace le titre "Prochains anniversaires" */}
+        {celebOfDay && (
+          <div className="bg-amber-50 border border-amber-100 rounded-2xl px-4 py-3 overflow-hidden">
+            <div className="flex items-center gap-3">
+              <span className="text-xl shrink-0">{celebOfDay.emoji}</span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <Sparkles size={9} className="text-amber-400 shrink-0" />
+                  <span className="text-[9px] font-bold text-amber-500 uppercase tracking-wider">Né(e) aujourd'hui</span>
+                </div>
+                <h4 className="font-display font-black text-slate-800 text-[13px] leading-tight truncate">
+                  {celebOfDay.name}
+                </h4>
+                <p className="text-[11px] text-slate-400 font-medium leading-tight mt-0.5 truncate">
+                  {celebOfDay.title}
+                </p>
+              </div>
+              <motion.button
+                onClick={() => setCelebExpanded(v => !v)}
+                whileTap={{ scale: 0.88 }}
+                className="w-7 h-7 rounded-lg bg-amber-100 flex items-center justify-center shrink-0"
+              >
+                <motion.div animate={{ rotate: celebExpanded ? 180 : 0 }} transition={{ duration: 0.25 }}>
+                  <ChevronDown size={14} className="text-amber-500" strokeWidth={2.5} />
+                </motion.div>
+              </motion.button>
+            </div>
+
+            <AnimatePresence initial={false}>
+              {celebExpanded && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.28, ease: 'easeInOut' }}
+                  className="overflow-hidden"
+                >
+                  <div className="pt-3 mt-3 border-t border-amber-100 space-y-2.5">
+                    <p className="text-[12px] text-slate-600 leading-relaxed">{celebOfDay.description}</p>
+                    <a
+                      href={celebOfDay.wikipedia}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 bg-amber-100 border border-amber-200 rounded-xl px-3 py-1.5 active:scale-95 transition-transform"
+                    >
+                      <Globe2 size={11} className="text-amber-600" />
+                      <span className="text-[11px] font-black text-amber-600">Wikipedia</span>
+                    </a>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         )}
         {upcoming.length > 0 ? (
