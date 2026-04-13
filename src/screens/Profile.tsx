@@ -237,28 +237,28 @@ const getZodiacEmoji = (zodiac: string) => {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-[2.5rem] p-6 shadow-xl shadow-slate-200/50 border border-black/60"
+          className="bg-white rounded-[var(--radius-pill)] p-6 shadow-token-lg border border-black/60"
         >
           <div className="flex flex-col items-center text-center -mt-16">
             <div className="relative">
               <button
                 type="button"
                 onClick={() => photoInputRef.current?.click()}
-                className="w-28 h-28 bg-white p-2 rounded-[2rem] shadow-xl overflow-hidden relative group"
+                className="w-28 h-28 bg-white p-2 rounded-[var(--radius-card)] shadow-token-lg overflow-hidden relative group"
               >
                 {user.photoUrl ? (
                   <img
                     src={user.photoUrl}
                     alt={user.name}
-                    className="w-full h-full object-cover rounded-[1.5rem]"
+                    className="w-full h-full object-cover rounded-[var(--radius-xxl)]"
                   />
                 ) : (
-                  <div className="w-full h-full bg-rose-400 rounded-[1.5rem] flex items-center justify-center text-white text-4xl font-black shadow-inner">
+                  <div className="w-full h-full bg-rose-400 rounded-[var(--radius-xxl)] flex items-center justify-center text-white text-4xl font-black shadow-inner">
                     {user.name.charAt(0)}
                   </div>
                 )}
                 {/* Hover overlay */}
-                <div className="absolute inset-2 rounded-[1.5rem] bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <div className="absolute inset-2 rounded-[var(--radius-xxl)] bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                   {photoUploading
                     ? <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }} className="w-6 h-6 rounded-full border-2 border-white/40 border-t-white" />
                     : <Camera size={22} className="text-white" />
@@ -329,7 +329,7 @@ const getZodiacEmoji = (zodiac: string) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white rounded-[2.5rem] p-8 border border-slate-50 shadow-lg shadow-slate-100/50 flex flex-col items-center space-y-6"
+          className="bg-white rounded-[var(--radius-pill)] p-8 border border-slate-50 shadow-token-md flex flex-col items-center space-y-6"
         >
           <div className="text-center space-y-1">
             <h3 className="text-lg font-black text-slate-900">Mon QR Code</h3>
@@ -339,7 +339,7 @@ const getZodiacEmoji = (zodiac: string) => {
           </div>
 
           <div className="relative group">
-            <div className="relative p-4 bg-white rounded-[2rem] shadow-sm border border-slate-100">
+            <div className="relative p-4 bg-white rounded-[var(--radius-card)] shadow-sm border border-slate-100">
               <QRCodeSVG
                 value={profileData}
                 size={160}
@@ -543,13 +543,13 @@ const getZodiacEmoji = (zodiac: string) => {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="bg-white rounded-[2rem] p-6 border border-black/60 space-y-4 overflow-hidden"
+                className="bg-white rounded-[var(--radius-card)] p-6 border border-black/60 space-y-4 overflow-hidden"
               >
                 <div className="space-y-3">
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Instagram</label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       placeholder="@pseudo"
                       className="w-full bg-slate-50 border border-slate-100 rounded-xl p-3 text-slate-900 font-bold focus:outline-none focus:border-rose-300 transition-colors"
                       value={socials.instagram || ''}
@@ -557,9 +557,29 @@ const getZodiacEmoji = (zodiac: string) => {
                     />
                   </div>
                   <div className="space-y-1">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">TikTok</label>
+                    <input
+                      type="text"
+                      placeholder="@pseudo"
+                      className="w-full bg-slate-50 border border-slate-100 rounded-xl p-3 text-slate-900 font-bold focus:outline-none focus:border-black transition-colors"
+                      value={socials.tiktok || ''}
+                      onChange={e => setSocials({ ...socials, tiktok: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Snapchat</label>
+                    <input
+                      type="text"
+                      placeholder="pseudo"
+                      className="w-full bg-slate-50 border border-slate-100 rounded-xl p-3 text-slate-900 font-bold focus:outline-none focus:border-amber-300 transition-colors"
+                      value={socials.snapchat || ''}
+                      onChange={e => setSocials({ ...socials, snapchat: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-1">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Twitter / X</label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       placeholder="@pseudo"
                       className="w-full bg-slate-50 border border-slate-100 rounded-xl p-3 text-slate-900 font-bold focus:outline-none focus:border-sky-300 transition-colors"
                       value={socials.twitter || ''}
@@ -568,32 +588,12 @@ const getZodiacEmoji = (zodiac: string) => {
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Facebook</label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       placeholder="Nom complet"
                       className="w-full bg-slate-50 border border-slate-100 rounded-xl p-3 text-slate-900 font-bold focus:outline-none focus:border-blue-300 transition-colors"
                       value={socials.facebook || ''}
                       onChange={e => setSocials({ ...socials, facebook: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Snapchat</label>
-                    <input 
-                      type="text" 
-                      placeholder="pseudo"
-                      className="w-full bg-slate-50 border border-slate-100 rounded-xl p-3 text-slate-900 font-bold focus:outline-none focus:border-amber-300 transition-colors"
-                      value={socials.snapchat || ''}
-                      onChange={e => setSocials({ ...socials, snapchat: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">TikTok</label>
-                    <input 
-                      type="text" 
-                      placeholder="@pseudo"
-                      className="w-full bg-slate-50 border border-slate-100 rounded-xl p-3 text-slate-900 font-bold focus:outline-none focus:border-black transition-colors"
-                      value={socials.tiktok || ''}
-                      onChange={e => setSocials({ ...socials, tiktok: e.target.value })}
                     />
                   </div>
                 </div>
@@ -619,7 +619,7 @@ const getZodiacEmoji = (zodiac: string) => {
                 className="space-y-2"
               >
                 {user.socials.instagram && (
-                  <a href={SOCIAL_URL.instagram(user.socials.instagram)} target="_blank" rel="noopener noreferrer" className="w-full bg-white p-5 rounded-[2rem] border border-slate-50 shadow-sm flex items-center justify-between group hover:border-rose-200 transition-colors">
+                  <a href={SOCIAL_URL.instagram(user.socials.instagram)} target="_blank" rel="noopener noreferrer" className="w-full bg-white p-5 rounded-[var(--radius-card)] border border-slate-50 shadow-sm flex items-center justify-between group hover:border-rose-200 transition-colors">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-gradient-to-tr from-amber-400 via-rose-500 to-purple-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-rose-100">
                         <Instagram size={24} />
@@ -633,8 +633,38 @@ const getZodiacEmoji = (zodiac: string) => {
                   </a>
                 )}
 
+                {user.socials.tiktok && (
+                  <a href={SOCIAL_URL.tiktok(user.socials.tiktok)} target="_blank" rel="noopener noreferrer" className="w-full bg-white p-5 rounded-[var(--radius-card)] border border-slate-50 shadow-sm flex items-center justify-between group hover:border-slate-400 transition-colors">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-black rounded-2xl flex items-center justify-center text-white shadow-lg shadow-slate-200">
+                        <Smartphone size={24} />
+                      </div>
+                      <div className="text-left">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">TikTok</p>
+                        <p className="font-bold text-slate-900">@{user.socials.tiktok}</p>
+                      </div>
+                    </div>
+                    <ExternalLink size={18} className="text-slate-300 group-hover:text-slate-900 transition-colors" />
+                  </a>
+                )}
+
+                {user.socials.snapchat && (
+                  <a href={SOCIAL_URL.snapchat(user.socials.snapchat)} target="_blank" rel="noopener noreferrer" className="w-full bg-white p-5 rounded-[var(--radius-card)] border border-slate-50 shadow-sm flex items-center justify-between group hover:border-amber-200 transition-colors">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-amber-400 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-amber-100">
+                        <Ghost size={24} />
+                      </div>
+                      <div className="text-left">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Snapchat</p>
+                        <p className="font-bold text-slate-900">{user.socials.snapchat}</p>
+                      </div>
+                    </div>
+                    <ExternalLink size={18} className="text-slate-300 group-hover:text-amber-400 transition-colors" />
+                  </a>
+                )}
+
                 {user.socials.twitter && (
-                  <a href={SOCIAL_URL.twitter(user.socials.twitter)} target="_blank" rel="noopener noreferrer" className="w-full bg-white p-5 rounded-[2rem] border border-slate-50 shadow-sm flex items-center justify-between group hover:border-sky-200 transition-colors">
+                  <a href={SOCIAL_URL.twitter(user.socials.twitter)} target="_blank" rel="noopener noreferrer" className="w-full bg-white p-5 rounded-[var(--radius-card)] border border-slate-50 shadow-sm flex items-center justify-between group hover:border-sky-200 transition-colors">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-sky-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-sky-100">
                         <Twitter size={24} />
@@ -649,7 +679,7 @@ const getZodiacEmoji = (zodiac: string) => {
                 )}
 
                 {user.socials.facebook && (
-                  <a href={SOCIAL_URL.facebook(user.socials.facebook)} target="_blank" rel="noopener noreferrer" className="w-full bg-white p-5 rounded-[2rem] border border-slate-50 shadow-sm flex items-center justify-between group hover:border-blue-200 transition-colors">
+                  <a href={SOCIAL_URL.facebook(user.socials.facebook)} target="_blank" rel="noopener noreferrer" className="w-full bg-white p-5 rounded-[var(--radius-card)] border border-slate-50 shadow-sm flex items-center justify-between group hover:border-blue-200 transition-colors">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-100">
                         <Facebook size={24} />
@@ -662,38 +692,8 @@ const getZodiacEmoji = (zodiac: string) => {
                     <ExternalLink size={18} className="text-slate-300 group-hover:text-blue-400 transition-colors" />
                   </a>
                 )}
-
-                {user.socials.snapchat && (
-                  <a href={SOCIAL_URL.snapchat(user.socials.snapchat)} target="_blank" rel="noopener noreferrer" className="w-full bg-white p-5 rounded-[2rem] border border-slate-50 shadow-sm flex items-center justify-between group hover:border-amber-200 transition-colors">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-amber-400 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-amber-100">
-                        <Ghost size={24} />
-                      </div>
-                      <div className="text-left">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Snapchat</p>
-                        <p className="font-bold text-slate-900">{user.socials.snapchat}</p>
-                      </div>
-                    </div>
-                    <ExternalLink size={18} className="text-slate-300 group-hover:text-amber-400 transition-colors" />
-                  </a>
-                )}
-
-                {user.socials.tiktok && (
-                  <a href={SOCIAL_URL.tiktok(user.socials.tiktok)} target="_blank" rel="noopener noreferrer" className="w-full bg-white p-5 rounded-[2rem] border border-slate-50 shadow-sm flex items-center justify-between group hover:border-slate-400 transition-colors">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-black rounded-2xl flex items-center justify-center text-white shadow-lg shadow-slate-200">
-                        <Smartphone size={24} />
-                      </div>
-                      <div className="text-left">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">TikTok</p>
-                        <p className="font-bold text-slate-900">@{user.socials.tiktok}</p>
-                      </div>
-                    </div>
-                    <ExternalLink size={18} className="text-slate-300 group-hover:text-slate-900 transition-colors" />
-                  </a>
-                )}
                 
-                <button className="w-full bg-slate-900 p-5 rounded-[2rem] flex items-center justify-between group hover:bg-slate-800 transition-colors">
+                <button className="w-full bg-slate-900 p-5 rounded-[var(--radius-card)] flex items-center justify-between group hover:bg-slate-800 transition-colors">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-white">
                       <Settings size={24} />
@@ -706,7 +706,7 @@ const getZodiacEmoji = (zodiac: string) => {
                   <ChevronRight size={18} className="text-white/20 group-hover:text-white transition-colors" />
                 </button>
 
-                <div className="w-full bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex items-center justify-between gap-3">
+                <div className="w-full bg-white p-5 rounded-[var(--radius-card)] border border-slate-100 shadow-sm flex items-center justify-between gap-3">
                   <button
                     onClick={() => { setBgPassword(''); setBgStatus(null); setShowBgModal(true); }}
                     className="flex items-center gap-4 flex-1 text-left group"
@@ -736,7 +736,7 @@ const getZodiacEmoji = (zodiac: string) => {
                 </div>
 
                 {/* Dark mode toggle */}
-                <div className="w-full bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex items-center justify-between">
+                <div className="w-full bg-white p-5 rounded-[var(--radius-card)] border border-slate-100 shadow-sm flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border border-slate-100 shadow-sm"
                       style={{ background: darkModeActive ? '#1e293b' : '#f8fafc' }}>

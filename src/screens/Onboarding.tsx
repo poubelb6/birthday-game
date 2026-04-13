@@ -6,11 +6,34 @@ import { getZodiacSign } from '../utils/gameLogic';
 import { auth } from '../firebase';
 import { Logo } from '../components/Logo';
 
+const STEP_COLORS = [
+  { bg: '#fb7185', btnText: 'text-rose-400',   subText: 'text-rose-100'   }, // Step 1 — rose
+  { bg: '#8b5cf6', btnText: 'text-violet-500', subText: 'text-violet-100' }, // Step 2 — violet
+  { bg: '#f59e0b', btnText: 'text-amber-500',  subText: 'text-amber-100'  }, // Step 3 — amber
+];
+
+const MONTHS = [
+  'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+  'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre',
+];
+
+const CURRENT_YEAR = new Date().getFullYear();
+const YEARS = Array.from({ length: CURRENT_YEAR - 1929 }, (_, i) => CURRENT_YEAR - i);
+
+const SELECT_CLASS = 'bg-white/10 border-2 border-white/20 rounded-2xl p-4 text-white appearance-none focus:outline-none focus:border-white transition-colors cursor-pointer';
+const SELECT_ERROR_CLASS = 'bg-white/10 border-2 border-white rounded-2xl p-4 text-white appearance-none focus:outline-none focus:border-white transition-colors cursor-pointer';
+
 export function Onboarding({ onComplete }: { onComplete: (user: UserProfile) => void }) {
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
   const [wishlistInput, setWishlistInput] = useState('');
+
+  // Date selects state
+  const [birthDay, setBirthDay] = useState('');
+  const [birthMonth, setBirthMonth] = useState('');
+  const [birthYear, setBirthYear] = useState('');
+
   const [formData, setFormData] = useState({
     name: '',
     birthDate: '',
@@ -21,6 +44,17 @@ export function Onboarding({ onComplete }: { onComplete: (user: UserProfile) => 
     tiktok: '',
     wishlist: [] as string[],
   });
+
+  const handleDateChange = (day: string, month: string, year: string) => {
+    if (day && month && year) {
+      const paddedDay = day.padStart(2, '0');
+      const paddedMonth = month.padStart(2, '0');
+      setFormData(prev => ({ ...prev, birthDate: `${year}-${paddedMonth}-${paddedDay}` }));
+    } else {
+      setFormData(prev => ({ ...prev, birthDate: '' }));
+    }
+    setShowErrors(false);
+  };
 
   const handleNext = async () => {
     if (step === 1 && (!formData.name || !formData.birthDate)) {
@@ -37,7 +71,7 @@ export function Onboarding({ onComplete }: { onComplete: (user: UserProfile) => 
           id: auth.currentUser?.uid || Math.random().toString(36).substr(2, 9),
           name: formData.name,
           birthDate: formData.birthDate,
-          socials: { 
+          socials: {
             instagram: formData.instagram,
             twitter: formData.twitter,
             facebook: formData.facebook,
@@ -59,10 +93,15 @@ export function Onboarding({ onComplete }: { onComplete: (user: UserProfile) => 
 
   const TOTAL_STEPS = 3;
   const stepLabels = ['Ton profil', 'Tes réseaux', 'Ta wishlist'];
+  const color = STEP_COLORS[step - 1];
+  const dateInvalid = showErrors && !formData.birthDate;
 
   return (
-    <div className="min-h-screen bg-rose-400 flex flex-col max-w-md mx-auto text-white p-8">
-
+    <motion.div
+      className="min-h-screen flex flex-col max-w-md mx-auto text-white p-8"
+      animate={{ backgroundColor: color.bg }}
+      transition={{ duration: 0.5, ease: 'easeInOut' }}
+    >
       {/* Barre de progression */}
       <div className="pt-10 pb-6 space-y-2">
         <div className="flex justify-between items-center">
@@ -95,7 +134,7 @@ export function Onboarding({ onComplete }: { onComplete: (user: UserProfile) => 
               <div className="space-y-2">
                 <Logo size={64} className="mb-4" />
                 <h2 className="font-display text-4xl font-black tracking-tight leading-none">BIENVENUE DANS LE JEU.</h2>
-                <p className="text-rose-100 text-lg">Crée ton profil pour commencer à collectionner les anniversaires.</p>
+                <p className={`${color.subText} text-lg`}>Crée ton profil pour commencer à collectionner les anniversaires.</p>
               </div>
               <div className="space-y-4">
                 <div className="space-y-1">
@@ -110,15 +149,43 @@ export function Onboarding({ onComplete }: { onComplete: (user: UserProfile) => 
                     <p className="text-white/80 text-xs font-bold px-1">Champ requis</p>
                   )}
                 </div>
+
+                {/* Sélecteur de date custom */}
                 <div className="space-y-1">
-                  <input
-                    type="date"
-                    className={`w-full bg-white/10 border-2 rounded-2xl p-4 text-white focus:outline-none focus:border-white transition-colors ${showErrors && !formData.birthDate ? 'border-white' : 'border-white/20'}`}
-                    value={formData.birthDate}
-                    onChange={e => { setFormData({ ...formData, birthDate: e.target.value }); setShowErrors(false); }}
-                  />
-                  {showErrors && !formData.birthDate && (
-                    <p className="text-white/80 text-xs font-bold px-1">Champ requis</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    <select
+                      className={dateInvalid ? SELECT_ERROR_CLASS : SELECT_CLASS}
+                      value={birthDay}
+                      onChange={e => { setBirthDay(e.target.value); handleDateChange(e.target.value, birthMonth, birthYear); }}
+                    >
+                      <option value="" className="text-slate-800">Jour</option>
+                      {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
+                        <option key={d} value={String(d)} className="text-slate-800">{d}</option>
+                      ))}
+                    </select>
+                    <select
+                      className={dateInvalid ? SELECT_ERROR_CLASS : SELECT_CLASS}
+                      value={birthMonth}
+                      onChange={e => { setBirthMonth(e.target.value); handleDateChange(birthDay, e.target.value, birthYear); }}
+                    >
+                      <option value="" className="text-slate-800">Mois</option>
+                      {MONTHS.map((m, i) => (
+                        <option key={i} value={String(i + 1)} className="text-slate-800">{m}</option>
+                      ))}
+                    </select>
+                    <select
+                      className={dateInvalid ? SELECT_ERROR_CLASS : SELECT_CLASS}
+                      value={birthYear}
+                      onChange={e => { setBirthYear(e.target.value); handleDateChange(birthDay, birthMonth, e.target.value); }}
+                    >
+                      <option value="" className="text-slate-800">Année</option>
+                      {YEARS.map(y => (
+                        <option key={y} value={String(y)} className="text-slate-800">{y}</option>
+                      ))}
+                    </select>
+                  </div>
+                  {dateInvalid && (
+                    <p className="text-white/80 text-xs font-bold px-1">Date de naissance requise</p>
                   )}
                 </div>
               </div>
@@ -129,7 +196,7 @@ export function Onboarding({ onComplete }: { onComplete: (user: UserProfile) => 
             <>
               <div className="space-y-2">
                 <h2 className="text-4xl font-black tracking-tight leading-none">TES RÉSEAUX.</h2>
-                <p className="text-rose-100 text-lg">Permets à tes amis de te retrouver facilement.</p>
+                <p className={`${color.subText} text-lg`}>Permets à tes amis de te retrouver facilement.</p>
                 <p className="text-white/50 text-sm">Tous les champs sont optionnels — tu pourras les ajouter plus tard.</p>
               </div>
               <div className="space-y-4">
@@ -176,7 +243,7 @@ export function Onboarding({ onComplete }: { onComplete: (user: UserProfile) => 
             <>
               <div className="space-y-2">
                 <h2 className="text-4xl font-black tracking-tight leading-none">TA WISHLIST.</h2>
-                <p className="text-rose-100 text-lg">Qu'est-ce qui te ferait plaisir ?</p>
+                <p className={`${color.subText} text-lg`}>Qu'est-ce qui te ferait plaisir ?</p>
                 <p className="text-white/50 text-sm">Optionnel — tu pourras la compléter plus tard.</p>
               </div>
               <div className="space-y-3">
@@ -230,14 +297,15 @@ export function Onboarding({ onComplete }: { onComplete: (user: UserProfile) => 
         </motion.div>
       </div>
 
-      <button 
+      <motion.button
         onClick={handleNext}
         disabled={submitting}
-        className="w-full bg-white text-rose-400 font-bold py-5 rounded-2xl flex items-center justify-center gap-2 hover:bg-rose-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-rose-500/20"
+        whileTap={{ scale: 0.97 }}
+        className={`w-full bg-white font-bold py-5 rounded-2xl flex items-center justify-center gap-2 hover:bg-white/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-black/10 ${color.btnText}`}
       >
         {submitting ? 'CHARGEMENT...' : step === 3 ? 'TERMINER' : 'CONTINUER'}
         {!submitting && <ArrowRight size={20} />}
-      </button>
-    </div>
+      </motion.button>
+    </motion.div>
   );
 }

@@ -7,6 +7,9 @@ import {
   X,
   MessageCircle,
   Heart,
+  Home,
+  LayoutGrid,
+  User,
 } from 'lucide-react';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from './firebase';
@@ -197,7 +200,7 @@ function AppContent() {
         </div>
 
         {/* Nav skeleton */}
-        <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto px-6 py-4 flex justify-between items-center rounded-t-[2.5rem]" style={{ background: 'var(--surface-card)', borderTop: '2px solid var(--border-accent)' }}>
+        <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto px-6 py-4 flex justify-between items-center rounded-t-[var(--radius-pill)]" style={{ background: 'var(--surface-card)', borderTop: '2px solid var(--border-accent)' }}>
           {[...Array(5)].map((_, i) => (
             <div key={i} className="flex flex-col items-center gap-1.5">
               <div className="w-10 h-10 rounded-xl bg-slate-200 animate-pulse" />
@@ -486,14 +489,14 @@ function AppContent() {
 
       <nav
         aria-label="Navigation principale"
-        className="fixed bottom-0 left-0 right-0 max-w-md mx-auto backdrop-blur-2xl px-2 py-4 flex items-center z-50 rounded-t-[2.5rem] shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.05)]"
+        className="fixed bottom-0 left-0 right-0 max-w-md mx-auto backdrop-blur-2xl px-2 py-4 flex items-center z-50 rounded-t-[var(--radius-pill)] shadow-token-nav"
         style={{ background: 'var(--surface-card-translucent)', borderTop: '2px solid var(--border-accent)' }}
       >
         <div className="flex-1 flex justify-center">
-          <NavButton active={activeScreen === 'dashboard'} onClick={() => navigateTo('dashboard')} icon="🏠" label="Accueil" ariaLabel="Accueil" />
+          <NavButton active={activeScreen === 'dashboard'} onClick={() => navigateTo('dashboard')} icon={<Home size={22} strokeWidth={2.5} />} label="Accueil" ariaLabel="Accueil" />
         </div>
         <div className="flex-1 flex justify-center">
-          <NavButton active={activeScreen === 'calendar'} onClick={() => navigateTo('calendar')} icon={<Heart size={22} className="text-pink-400" strokeWidth={2.5} />} label="Amis" ariaLabel="Mes amis" activeBg="bg-pink-50" />
+          <NavButton active={activeScreen === 'calendar'} onClick={() => navigateTo('calendar')} icon={<Heart size={22} strokeWidth={2.5} />} label="Amis" ariaLabel="Mes amis" activeBg="bg-pink-50" activeColor="text-pink-400" />
         </div>
         <div className="flex-1 flex justify-center">
           <motion.button
@@ -508,10 +511,10 @@ function AppContent() {
           </motion.button>
         </div>
         <div className="flex-1 flex justify-center">
-          <NavButton active={activeScreen === 'collection'} onClick={() => navigateTo('collection')} icon="🃏" label="Cartes" ariaLabel="Ma collection de cartes" />
+          <NavButton active={activeScreen === 'collection'} onClick={() => navigateTo('collection')} icon={<LayoutGrid size={22} strokeWidth={2.5} />} label="Cartes" ariaLabel="Ma collection de cartes" />
         </div>
         <div className="flex-1 flex justify-center">
-          <NavButton active={activeScreen === 'profile'} onClick={() => navigateTo('profile')} icon="👤" label="Profil" ariaLabel="Mon profil" />
+          <NavButton active={activeScreen === 'profile'} onClick={() => navigateTo('profile')} icon={<User size={22} strokeWidth={2.5} />} label="Profil" ariaLabel="Mon profil" />
         </div>
       </nav>
     </div>
@@ -526,7 +529,7 @@ export default function App() {
   );
 }
 
-function NavButton({ active, onClick, icon, label, ariaLabel, activeBg = 'bg-red-50' }: { active: boolean, onClick: () => void, icon: React.ReactNode, label: string, ariaLabel: string, activeBg?: string }) {
+function NavButton({ active, onClick, icon, label, ariaLabel, activeBg = 'bg-red-50', activeColor = 'text-red-500' }: { active: boolean, onClick: () => void, icon: React.ReactNode, label: string, ariaLabel: string, activeBg?: string, activeColor?: string }) {
   return (
     <motion.button
       onClick={onClick}
@@ -543,11 +546,11 @@ function NavButton({ active, onClick, icon, label, ariaLabel, activeBg = 'bg-red
           active ? activeBg : 'bg-transparent'
         }`}
       >
-        <div className={`text-2xl transition-all duration-300 ${active ? 'scale-110' : 'scale-90'}`}>
+        <div className={`transition-all duration-300 ${active ? `scale-110 ${activeColor}` : 'scale-90'}`}>
           {icon}
         </div>
       </motion.div>
-      <span className={`text-[10px] font-black uppercase tracking-[0.15em] ${active ? 'text-red-500' : ''}`}>
+      <span className={`text-[10px] font-black uppercase tracking-[0.15em] ${active ? activeColor : ''}`}>
         {label}
       </span>
     </motion.button>

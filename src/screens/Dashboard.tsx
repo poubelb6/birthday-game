@@ -195,7 +195,7 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
           </div>
 
           <div
-            className="rounded-[28px] shadow-[0_24px_60px_rgba(0,0,0,0.18),0_8px_20px_rgba(0,0,0,0.08)] overflow-hidden relative"
+            className="rounded-[var(--radius-card-sm)] shadow-token-lg overflow-hidden relative"
             style={{ background: 'var(--calendar-warm-bg)', border: '1px solid var(--border-mid)' }}
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
@@ -283,7 +283,7 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
                           ? 'border-[0.5px] border-rose-500 text-rose-500'
                           : hasBirthdays
                           ? 'border-[0.5px] border-green-400 text-green-600'
-                          : 'bg-white text-slate-800 shadow-[0_2px_6px_rgba(0,0,0,0.10),0_1px_2px_rgba(0,0,0,0.05)] [outline:0.5px_solid_rgba(0,0,0,0.12)]'
+                          : 'bg-white text-slate-800 shadow-token-sm [outline:0.5px_solid_rgba(0,0,0,0.12)]'
                       }`}
                     >
                       {!hasBirthdays && !isToday && (
