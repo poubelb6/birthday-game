@@ -213,17 +213,27 @@ export function MessagesModal({ open, onClose, inbox, sentMessages, friends, cur
               {view === 'list' && (
                 <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 overflow-y-auto">
                   {conversations.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full gap-3 pb-10">
+                    <div className="flex flex-col items-center justify-center h-full gap-3 pb-10 px-6 text-center">
                       <div className="text-5xl">💌</div>
-                      <p className="font-bold text-slate-500 text-sm">Aucune conversation</p>
-                      <p className="text-xs text-slate-400 text-center px-6">Démarre une discussion avec un ami qui a l'app</p>
-                      <button
-                        onClick={() => setView('newConv')}
-                        className="mt-2 px-5 py-3 rounded-2xl font-black text-white text-sm"
-                        style={{ background: '#FF4B4B', boxShadow: '0 4px 0 #CC2E2E' }}
-                      >
-                        Nouveau message
-                      </button>
+                      <p className="font-black text-slate-700 text-base">Aucune conversation</p>
+                      {messageable.length === 0 ? (
+                        <p className="text-sm text-slate-400 leading-relaxed">
+                          Tes amis doivent aussi utiliser <span className="font-bold text-slate-600">Birthday Game</span> pour que tu puisses leur écrire. Partage ton QR code pour les inviter !
+                        </p>
+                      ) : (
+                        <p className="text-sm text-slate-400 leading-relaxed">
+                          Démarre une discussion avec un de tes amis sur l'app.
+                        </p>
+                      )}
+                      {messageable.length > 0 && (
+                        <button
+                          onClick={() => setView('newConv')}
+                          className="mt-2 px-5 py-3 rounded-2xl font-black text-white text-sm"
+                          style={{ background: '#FF4B4B', boxShadow: '0 4px 0 #CC2E2E' }}
+                        >
+                          Nouveau message
+                        </button>
+                      )}
                     </div>
                   ) : (
                     <div className="divide-y divide-slate-100">

@@ -9,6 +9,8 @@ import { Logo } from '../components/Logo';
 export function Onboarding({ onComplete }: { onComplete: (user: UserProfile) => void }) {
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
+  const [showErrors, setShowErrors] = useState(false);
+  const [wishlistInput, setWishlistInput] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     birthDate: '',
@@ -17,10 +19,15 @@ export function Onboarding({ onComplete }: { onComplete: (user: UserProfile) => 
     facebook: '',
     snapchat: '',
     tiktok: '',
-    wishlist: '',
+    wishlist: [] as string[],
   });
 
   const handleNext = async () => {
+    if (step === 1 && (!formData.name || !formData.birthDate)) {
+      setShowErrors(true);
+      return;
+    }
+    setShowErrors(false);
     if (step < 3) setStep(step + 1);
     else {
       setSubmitting(true);
@@ -37,7 +44,7 @@ export function Onboarding({ onComplete }: { onComplete: (user: UserProfile) => 
             snapchat: formData.snapchat,
             tiktok: formData.tiktok,
           },
-          wishlist: formData.wishlist.split(',').map(s => s.trim()),
+          wishlist: formData.wishlist,
           zodiac: getZodiacSign(birthDate),
           xp: 0,
           level: 1,
@@ -91,19 +98,29 @@ export function Onboarding({ onComplete }: { onComplete: (user: UserProfile) => 
                 <p className="text-rose-100 text-lg">Crée ton profil pour commencer à collectionner les anniversaires.</p>
               </div>
               <div className="space-y-4">
-                <input 
-                  type="text" 
-                  placeholder="Ton nom"
-                  className="w-full bg-white/10 border-2 border-white/20 rounded-2xl p-4 text-white placeholder:text-white/50 focus:outline-none focus:border-white transition-colors"
-                  value={formData.name}
-                  onChange={e => setFormData({ ...formData, name: e.target.value })}
-                />
-                <input 
-                  type="date" 
-                  className="w-full bg-white/10 border-2 border-white/20 rounded-2xl p-4 text-white focus:outline-none focus:border-white transition-colors"
-                  value={formData.birthDate}
-                  onChange={e => setFormData({ ...formData, birthDate: e.target.value })}
-                />
+                <div className="space-y-1">
+                  <input
+                    type="text"
+                    placeholder="Ton nom"
+                    className={`w-full bg-white/10 border-2 rounded-2xl p-4 text-white placeholder:text-white/50 focus:outline-none focus:border-white transition-colors ${showErrors && !formData.name ? 'border-white' : 'border-white/20'}`}
+                    value={formData.name}
+                    onChange={e => { setFormData({ ...formData, name: e.target.value }); setShowErrors(false); }}
+                  />
+                  {showErrors && !formData.name && (
+                    <p className="text-white/80 text-xs font-bold px-1">Champ requis</p>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <input
+                    type="date"
+                    className={`w-full bg-white/10 border-2 rounded-2xl p-4 text-white focus:outline-none focus:border-white transition-colors ${showErrors && !formData.birthDate ? 'border-white' : 'border-white/20'}`}
+                    value={formData.birthDate}
+                    onChange={e => { setFormData({ ...formData, birthDate: e.target.value }); setShowErrors(false); }}
+                  />
+                  {showErrors && !formData.birthDate && (
+                    <p className="text-white/80 text-xs font-bold px-1">Champ requis</p>
+                  )}
+                </div>
               </div>
             </>
           )}
@@ -113,42 +130,43 @@ export function Onboarding({ onComplete }: { onComplete: (user: UserProfile) => 
               <div className="space-y-2">
                 <h2 className="text-4xl font-black tracking-tight leading-none">TES RÉSEAUX.</h2>
                 <p className="text-rose-100 text-lg">Permets à tes amis de te retrouver facilement.</p>
+                <p className="text-white/50 text-sm">Tous les champs sont optionnels — tu pourras les ajouter plus tard.</p>
               </div>
               <div className="space-y-4">
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder="Instagram (ex: @tonpseudo)"
                   className="w-full bg-white/10 border-2 border-white/20 rounded-2xl p-4 text-white placeholder:text-white/50 focus:outline-none focus:border-white transition-colors"
                   value={formData.instagram}
                   onChange={e => setFormData({ ...formData, instagram: e.target.value })}
                 />
-                <input 
-                  type="text" 
-                  placeholder="Twitter / X (ex: @tonpseudo)"
+                <input
+                  type="text"
+                  placeholder="TikTok (ex: @tonpseudo)"
                   className="w-full bg-white/10 border-2 border-white/20 rounded-2xl p-4 text-white placeholder:text-white/50 focus:outline-none focus:border-white transition-colors"
-                  value={formData.twitter}
-                  onChange={e => setFormData({ ...formData, twitter: e.target.value })}
+                  value={formData.tiktok}
+                  onChange={e => setFormData({ ...formData, tiktok: e.target.value })}
                 />
-                <input 
-                  type="text" 
-                  placeholder="Facebook (ex: Ton Nom)"
-                  className="w-full bg-white/10 border-2 border-white/20 rounded-2xl p-4 text-white placeholder:text-white/50 focus:outline-none focus:border-white transition-colors"
-                  value={formData.facebook}
-                  onChange={e => setFormData({ ...formData, facebook: e.target.value })}
-                />
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder="Snapchat (ex: pseudo)"
                   className="w-full bg-white/10 border-2 border-white/20 rounded-2xl p-4 text-white placeholder:text-white/50 focus:outline-none focus:border-white transition-colors"
                   value={formData.snapchat}
                   onChange={e => setFormData({ ...formData, snapchat: e.target.value })}
                 />
-                <input 
-                  type="text" 
-                  placeholder="TikTok (ex: @tonpseudo)"
+                <input
+                  type="text"
+                  placeholder="Twitter / X (ex: @tonpseudo)"
                   className="w-full bg-white/10 border-2 border-white/20 rounded-2xl p-4 text-white placeholder:text-white/50 focus:outline-none focus:border-white transition-colors"
-                  value={formData.tiktok}
-                  onChange={e => setFormData({ ...formData, tiktok: e.target.value })}
+                  value={formData.twitter}
+                  onChange={e => setFormData({ ...formData, twitter: e.target.value })}
+                />
+                <input
+                  type="text"
+                  placeholder="Facebook (ex: Ton Nom)"
+                  className="w-full bg-white/10 border-2 border-white/20 rounded-2xl p-4 text-white placeholder:text-white/50 focus:outline-none focus:border-white transition-colors"
+                  value={formData.facebook}
+                  onChange={e => setFormData({ ...formData, facebook: e.target.value })}
                 />
               </div>
             </>
@@ -158,15 +176,54 @@ export function Onboarding({ onComplete }: { onComplete: (user: UserProfile) => 
             <>
               <div className="space-y-2">
                 <h2 className="text-4xl font-black tracking-tight leading-none">TA WISHLIST.</h2>
-                <p className="text-rose-100 text-lg">Qu'est-ce qui te ferait plaisir ? (Sépare par des virgules)</p>
+                <p className="text-rose-100 text-lg">Qu'est-ce qui te ferait plaisir ?</p>
+                <p className="text-white/50 text-sm">Optionnel — tu pourras la compléter plus tard.</p>
               </div>
-              <div className="space-y-4">
-                <textarea 
-                  placeholder="Lego, Chocolat, Voyage..."
-                  className="w-full bg-white/10 border-2 border-white/20 rounded-2xl p-4 text-white placeholder:text-white/50 focus:outline-none focus:border-white transition-colors h-32"
-                  value={formData.wishlist}
-                  onChange={e => setFormData({ ...formData, wishlist: e.target.value })}
-                />
+              <div className="space-y-3">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Ex: Lego, Voyage, Chocolat..."
+                    className="flex-1 bg-white/10 border-2 border-white/20 rounded-2xl px-4 py-3 text-white placeholder:text-white/50 focus:outline-none focus:border-white transition-colors"
+                    value={wishlistInput}
+                    onChange={e => setWishlistInput(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' && wishlistInput.trim()) {
+                        e.preventDefault();
+                        setFormData(prev => ({ ...prev, wishlist: [...prev.wishlist, wishlistInput.trim()] }));
+                        setWishlistInput('');
+                      }
+                    }}
+                  />
+                  <motion.button
+                    type="button"
+                    whileTap={{ scale: 0.92 }}
+                    onClick={() => {
+                      if (!wishlistInput.trim()) return;
+                      setFormData(prev => ({ ...prev, wishlist: [...prev.wishlist, wishlistInput.trim()] }));
+                      setWishlistInput('');
+                    }}
+                    className="px-4 py-3 bg-white/20 rounded-2xl text-white font-black text-sm shrink-0"
+                  >
+                    + Ajouter
+                  </motion.button>
+                </div>
+                {formData.wishlist.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {formData.wishlist.map((item, i) => (
+                      <span key={i} className="flex items-center gap-1.5 bg-white/20 text-white text-sm font-bold px-3 py-1.5 rounded-full">
+                        {item}
+                        <button
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, wishlist: prev.wishlist.filter((_, j) => j !== i) }))}
+                          className="text-white/60 hover:text-white text-xs font-black leading-none"
+                        >
+                          ✕
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </>
           )}
@@ -175,7 +232,7 @@ export function Onboarding({ onComplete }: { onComplete: (user: UserProfile) => 
 
       <button 
         onClick={handleNext}
-        disabled={submitting || (step === 1 && (!formData.name || !formData.birthDate))}
+        disabled={submitting}
         className="w-full bg-white text-rose-400 font-bold py-5 rounded-2xl flex items-center justify-center gap-2 hover:bg-rose-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-rose-500/20"
       >
         {submitting ? 'CHARGEMENT...' : step === 3 ? 'TERMINER' : 'CONTINUER'}

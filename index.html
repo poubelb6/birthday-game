@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Birthday Game</title>
     <script>
-      if (localStorage.getItem('darkMode') === 'true') {
+      const saved = localStorage.getItem('darkMode');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (saved === 'true' || (saved === null && prefersDark)) {
         document.documentElement.classList.add('dark');
       }
     </script>
