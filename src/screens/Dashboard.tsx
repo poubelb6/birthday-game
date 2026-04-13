@@ -195,7 +195,8 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
           </div>
 
           <div
-            className="bg-[#FEFFEE] rounded-[28px] shadow-[0_24px_60px_rgba(0,0,0,0.18),0_8px_20px_rgba(0,0,0,0.08)] border border-black/40 overflow-hidden relative"
+            className="rounded-[28px] shadow-[0_24px_60px_rgba(0,0,0,0.18),0_8px_20px_rgba(0,0,0,0.08)] overflow-hidden relative"
+            style={{ background: 'var(--calendar-warm-bg)', border: '1px solid var(--border-mid)' }}
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
           >
@@ -236,7 +237,7 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
               </motion.button>
             </div>
 
-            <div className="p-3 bg-[#FEFFEE]">
+            <div className="p-3" style={{ background: 'var(--calendar-warm-bg)' }}>
               <div className="grid grid-cols-7 gap-1 mb-1.5">
                 {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day, i) => (
                   <div key={`${day}-${i}`} className={`text-center text-[13px] font-bold tracking-wide font-display py-0.5 ${i >= 5 ? 'text-rose-600' : 'text-slate-700'}`}>
@@ -403,10 +404,10 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
                   <Sparkles size={9} className="text-amber-400 shrink-0" />
                   <span className="text-[9px] font-bold text-amber-500 uppercase tracking-wider">Né(e) aujourd'hui</span>
                 </div>
-                <h4 className="font-display font-black text-slate-800 text-[13px] leading-tight truncate">
+                <h4 className="font-display font-black text-[13px] leading-tight truncate" style={{ color: 'var(--text-1)' }}>
                   {celebOfDay.name}
                 </h4>
-                <p className="text-[11px] text-slate-400 font-medium leading-tight mt-0.5 truncate">
+                <p className="text-[11px] font-medium leading-tight mt-0.5 truncate" style={{ color: 'var(--text-2)' }}>
                   {celebOfDay.title}
                 </p>
               </div>

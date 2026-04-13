@@ -146,7 +146,7 @@ function AppContent() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="min-h-screen flex flex-col items-center justify-center gap-6"
-        style={{ background: 'linear-gradient(160deg, #fff5f5 0%, #ffffff 100%)' }}
+        style={{ background: 'var(--gradient-splash)' }}
       >
         <Logo size={96} />
         <motion.div
@@ -172,9 +172,9 @@ function AppContent() {
   // Skeleton screen — Firebase charge les données après le splash
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-100 flex flex-col max-w-md mx-auto shadow-2xl overflow-hidden">
+      <div className="min-h-screen flex flex-col max-w-md mx-auto shadow-2xl overflow-hidden" style={{ background: 'var(--surface-bg)' }}>
         {/* Header skeleton */}
-        <div className="bg-white px-6 pt-4 pb-2 flex justify-between items-center border-b-2 border-slate-900">
+        <div className="px-6 pt-4 pb-2 flex justify-between items-center" style={{ background: 'var(--surface-card)', borderBottom: '2px solid var(--border-accent)' }}>
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-xl bg-slate-200 animate-pulse" />
             <div className="space-y-1.5">
@@ -197,7 +197,7 @@ function AppContent() {
         </div>
 
         {/* Nav skeleton */}
-        <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t-2 border-slate-900 px-6 py-4 flex justify-between items-center rounded-t-[2.5rem]">
+        <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto px-6 py-4 flex justify-between items-center rounded-t-[2.5rem]" style={{ background: 'var(--surface-card)', borderTop: '2px solid var(--border-accent)' }}>
           {[...Array(5)].map((_, i) => (
             <div key={i} className="flex flex-col items-center gap-1.5">
               <div className="w-10 h-10 rounded-xl bg-slate-200 animate-pulse" />
@@ -213,7 +213,7 @@ function AppContent() {
     return (
       <div 
         className="min-h-screen flex flex-col items-center justify-center p-8 text-center"
-        style={{ background: 'linear-gradient(160deg, #fff5f5 0%, #ffffff 60%, #f0fdf4 100%)' }}
+        style={{ background: 'var(--gradient-login)' }}
       >
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -282,7 +282,7 @@ function AppContent() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100/80 flex flex-col max-w-md mx-auto shadow-2xl overflow-hidden relative">
+    <div className="min-h-screen flex flex-col max-w-md mx-auto shadow-2xl overflow-hidden relative" style={{ background: 'var(--surface-bg)' }}>
 
       {/* Easter egg — gigi background */}
       <AnimatePresence>
@@ -316,7 +316,7 @@ function AppContent() {
           </motion.div>
         )}
       </AnimatePresence>
-      <header className="bg-white px-6 pt-4 pb-2 flex justify-between items-center border-b-2 border-slate-900 shadow-sm">
+      <header className="px-6 pt-4 pb-2 flex justify-between items-center shadow-sm" style={{ background: 'var(--surface-card)', borderBottom: '2px solid var(--border-accent)' }}>
         <div className="flex items-center gap-2.5">
           <Logo size={28} />
           <div>
@@ -327,13 +327,13 @@ function AppContent() {
                  activeScreen.charAt(0).toUpperCase() + activeScreen.slice(1)}
               </h1>
               <span
-                className="text-[8px] font-black px-1.5 py-0.5 rounded-full"
+                className="text-[11px] font-black px-1.5 py-0.5 rounded-full"
                 style={{ color: '#FF4B4B', background: 'rgba(255,75,75,0.08)', fontFamily: "'Press Start 2P', monospace" }}
               >
                 Niv.{user.level}
               </span>
             </div>
-            <p className="text-[10px] font-black tracking-widest" style={{ color: '#FF4B4B', fontFamily: "'Press Start 2P', monospace" }}>
+            <p className="text-[11px] font-black tracking-widest" style={{ color: '#FF4B4B', fontFamily: "'Press Start 2P', monospace" }}>
               {user.xp} XP
             </p>
           </div>
@@ -345,8 +345,8 @@ function AppContent() {
             aria-label="Messages"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            className="relative w-10 h-10 rounded-2xl flex items-center justify-center border-2 border-slate-900"
-            style={{ background: '#FEFCE8' }}
+            className="relative w-10 h-10 rounded-2xl flex items-center justify-center border-2"
+            style={{ background: '#FEFCE8', borderColor: 'var(--border-accent)' }}
           >
             <MessageCircle size={18} style={{ color: '#A16207' }} />
             {inbox.filter(m => !m.read).length > 0 && (
@@ -486,7 +486,8 @@ function AppContent() {
 
       <nav
         aria-label="Navigation principale"
-        className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/80 backdrop-blur-2xl border-t-2 border-slate-900 px-2 py-4 flex items-center z-50 rounded-t-[2.5rem] shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.05)]"
+        className="fixed bottom-0 left-0 right-0 max-w-md mx-auto backdrop-blur-2xl px-2 py-4 flex items-center z-50 rounded-t-[2.5rem] shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.05)]"
+        style={{ background: 'var(--surface-card-translucent)', borderTop: '2px solid var(--border-accent)' }}
       >
         <div className="flex-1 flex justify-center">
           <NavButton active={activeScreen === 'dashboard'} onClick={() => navigateTo('dashboard')} icon="🏠" label="Accueil" ariaLabel="Accueil" />

@@ -1,23 +1,19 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Outfit", sans-serif;
-  --color-primary: #FF4B4B;  /* Rouge Birthday Game */
+  --color-primary: #FF4B4B;
   --color-primary-dark: #CC2E2E;
-  --color-success: #58CC02;  /* Vert gamification */
+  --color-success: #58CC02;
   --color-success-dark: #46A302;
   --color-gold: #D4A017;
   --color-background: #f1f5f9;
   --color-surface: #ffffff;
-
-  /* Texte WCAG AA */
   --color-text-primary: #0f172a;
   --color-text-secondary: #475569;
   --color-text-muted: #64748b;
-
-  /* Border radius système */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
@@ -25,15 +21,113 @@
   --radius-xxl: 24px;
 }
 
+/* ===== DESIGN TOKENS — LIGHT ===== */
+:root {
+  /* Surfaces */
+  --surface-bg: #f1f5f9;
+  --surface-card: #ffffff;
+  --surface-alt: #f8fafc;
+  --surface-inset: #f1f5f9;
+  --surface-card-translucent: rgba(255, 255, 255, 0.8);
+
+  /* Borders */
+  --border-soft: rgba(0, 0, 0, 0.06);
+  --border-mid: rgba(0, 0, 0, 0.10);
+  --border-strong: rgba(0, 0, 0, 0.55);
+  --border-accent: #0f172a;
+
+  /* Text */
+  --text-1: #0f172a;
+  --text-2: #475569;
+  --text-3: #94a3b8;
+
+  /* Collection */
+  --card-emoji-bg: #F2EFE7;
+  --progress-bg: #e5e7eb;
+  --filter-btn-bg: #f3f4f6;
+  --filter-btn-color: #555555;
+  --filter-btn-border: #e5e7eb;
+
+  /* Calendar widget */
+  --calendar-warm-bg: #FEFFEE;
+
+  /* Collection */
+  --lock-overlay: rgba(200, 200, 200, 0.52);
+
+  /* Rarity — light */
+  --rarity-commun-border: #1a1a2e;
+  --rarity-commun-footer: #ffffff;
+  --rarity-commun-text: #1a1a2e;
+  --rarity-rare-border: #1A6FC4;
+  --rarity-rare-footer: #EEF5FF;
+  --rarity-rare-text: #1A6FC4;
+  --rarity-epique-border: #7B2FBE;
+  --rarity-epique-footer: #F5EEFF;
+  --rarity-epique-text: #7B2FBE;
+  --rarity-legend-border: #C8861A;
+  --rarity-legend-footer: #FFF8E8;
+  --rarity-legend-text: #C8861A;
+  --rarity-legend-card-bg: linear-gradient(160deg, #fffdf5 0%, #fff8e8 50%, #fffdf5 100%);
+
+  /* Splash / Login */
+  --gradient-splash: linear-gradient(160deg, #fff5f5 0%, #ffffff 100%);
+  --gradient-login: linear-gradient(160deg, #fff5f5 0%, #ffffff 60%, #f0fdf4 100%);
+}
+
+/* ===== DESIGN TOKENS — DARK (GitHub-inspired) ===== */
+html.dark {
+  --surface-bg: #0d1117;
+  --surface-card: #161b22;
+  --surface-alt: #0d1117;
+  --surface-inset: #010409;
+  --surface-card-translucent: rgba(22, 27, 34, 0.85);
+
+  --border-soft: rgba(255, 255, 255, 0.07);
+  --border-mid: rgba(255, 255, 255, 0.10);
+  --border-strong: rgba(255, 255, 255, 0.15);
+  --border-accent: rgba(255, 255, 255, 0.20);
+
+  --text-1: #e6edf3;
+  --text-2: #7d8590;
+  --text-3: #484f58;
+
+  --card-emoji-bg: #1c2128;
+  --progress-bg: #21262d;
+  --filter-btn-bg: #21262d;
+  --filter-btn-color: #8b949e;
+  --filter-btn-border: rgba(255, 255, 255, 0.08);
+
+  --calendar-warm-bg: #1a1814;
+  --lock-overlay: rgba(0, 0, 0, 0.45);
+
+  --rarity-commun-border: #8b949e;
+  --rarity-commun-footer: #1c2128;
+  --rarity-commun-text: #e6edf3;
+  --rarity-rare-border: #58a6ff;
+  --rarity-rare-footer: #0d1c2e;
+  --rarity-rare-text: #58a6ff;
+  --rarity-epique-border: #bc8cff;
+  --rarity-epique-footer: #1b1128;
+  --rarity-epique-text: #bc8cff;
+  --rarity-legend-border: #d29922;
+  --rarity-legend-footer: #1c1500;
+  --rarity-legend-text: #d29922;
+  --rarity-legend-card-bg: linear-gradient(160deg, #1a1400 0%, #231b00 50%, #1a1400 100%);
+
+  --gradient-splash: linear-gradient(160deg, #0d1117 0%, #161b22 100%);
+  --gradient-login: linear-gradient(160deg, #0d1117 0%, #161b22 60%, #0d1117 100%);
+}
+
+/* ===== BASE ===== */
 body {
-  background-color: var(--color-background);
-  color: #0f172a; /* slate-900 for better text contrast */
-  font-family: 'Inter', sans-serif;
+  background-color: var(--surface-bg);
+  color: var(--text-1);
+  font-family: 'Outfit', sans-serif;
 }
 
 .card-soft {
-  background: white;
-  border: 1px solid rgba(0, 0, 0, 0.08); /* Increased border visibility */
+  background: var(--surface-card);
+  border: 1px solid var(--border-soft);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
 
@@ -49,48 +143,94 @@ body {
   box-shadow: 0 10px 15px -3px rgba(251, 191, 36, 0.3);
 }
 
-/* ===== DARK MODE ===== */
+/* ===== DARK MODE — SURFACES ===== */
 html.dark body {
-  background-color: #0f172a;
-  color: #f1f5f9;
+  background-color: var(--surface-bg);
+  color: var(--text-1);
 }
 
 html.dark .card-soft {
-  background: #1e293b;
-  border-color: rgba(255, 255, 255, 0.07);
+  background: var(--surface-card);
+  border-color: var(--border-soft);
 }
 
-/* Surfaces blanches → ardoise foncée */
-html.dark .bg-white { background-color: #1e293b !important; }
-html.dark .bg-white\/80 { background-color: rgba(30,41,59,0.85) !important; }
-html.dark .bg-slate-50 { background-color: #0f172a !important; }
-html.dark .bg-slate-100 { background-color: #1e293b !important; }
-html.dark .bg-slate-100\/80 { background-color: rgba(30,41,59,0.8) !important; }
-html.dark .bg-slate-900 { background-color: #0f172a !important; }
+/* White & slate surfaces → dark equivalents */
+html.dark .bg-white          { background-color: #161b22 !important; }
+html.dark .bg-white\/80      { background-color: rgba(22, 27, 34, 0.85) !important; }
+html.dark .bg-slate-50       { background-color: #0d1117 !important; }
+html.dark .bg-slate-100      { background-color: #21262d !important; }
+html.dark .bg-slate-100\/80  { background-color: rgba(33, 38, 45, 0.85) !important; }
+html.dark .bg-slate-900      { background-color: #0d1117 !important; }
 
-/* Texte */
-html.dark .text-slate-900 { color: #f1f5f9 !important; }
-html.dark .text-slate-800 { color: #e2e8f0 !important; }
-html.dark .text-slate-700 { color: #cbd5e1 !important; }
-html.dark .text-slate-600 { color: #94a3b8 !important; }
-html.dark .text-slate-500 { color: #64748b !important; }
-html.dark .text-slate-400 { color: #475569 !important; }
+/* ===== DARK MODE — TEXT ===== */
+html.dark .text-slate-900 { color: #e6edf3 !important; }
+html.dark .text-slate-800 { color: #cdd9e5 !important; }
+html.dark .text-slate-700 { color: #8b949e !important; }
+html.dark .text-slate-600 { color: #7d8590 !important; }
+html.dark .text-slate-500 { color: #6e7681 !important; }
+html.dark .text-slate-400 { color: #484f58 !important; }
 
-/* Bordures */
-html.dark .border-slate-900 { border-color: rgba(255,255,255,0.12) !important; }
-html.dark .border-slate-100 { border-color: rgba(255,255,255,0.07) !important; }
-html.dark .border-slate-50  { border-color: rgba(255,255,255,0.05) !important; }
-html.dark .border-black\/60 { border-color: rgba(255,255,255,0.12) !important; }
+/* ===== DARK MODE — BORDERS ===== */
+html.dark .border-slate-900  { border-color: rgba(255, 255, 255, 0.20) !important; }
+html.dark .border-slate-100  { border-color: rgba(255, 255, 255, 0.07) !important; }
+html.dark .border-slate-50   { border-color: rgba(255, 255, 255, 0.05) !important; }
+html.dark .border-slate-200  { border-color: rgba(255, 255, 255, 0.08) !important; }
+html.dark .border-black\/60  { border-color: rgba(255, 255, 255, 0.12) !important; }
+html.dark .border-black\/40  { border-color: rgba(255, 255, 255, 0.10) !important; }
+html.dark .border-black\/10  { border-color: rgba(255, 255, 255, 0.07) !important; }
 
-/* Inputs */
+/* ===== DARK MODE — COLORED TINTS ===== */
+/* Rose / pink (Calendar tabs, badges) */
+html.dark .bg-rose-50   { background-color: rgba(244, 63, 94, 0.10) !important; }
+html.dark .bg-rose-100  { background-color: rgba(244, 63, 94, 0.15) !important; }
+html.dark .bg-rose-200  { background-color: rgba(244, 63, 94, 0.22) !important; }
+html.dark .border-rose-200 { border-color: rgba(244, 63, 94, 0.25) !important; }
+html.dark .bg-pink-50   { background-color: rgba(236, 72, 153, 0.10) !important; }
+html.dark .text-rose-500 { color: #fb7185 !important; }
+html.dark .text-rose-600 { color: #fb7185 !important; }
+html.dark .text-rose-700 { color: #fb7185 !important; }
+html.dark .text-rose-400 { color: #fb7185 !important; }
+html.dark .text-pink-400 { color: #f472b6 !important; }
+
+/* Sky / blue */
+html.dark .bg-sky-50   { background-color: rgba(14, 165, 233, 0.10) !important; }
+html.dark .bg-sky-100  { background-color: rgba(14, 165, 233, 0.15) !important; }
+html.dark .bg-sky-200  { background-color: rgba(14, 165, 233, 0.22) !important; }
+html.dark .text-sky-500 { color: #38bdf8 !important; }
+html.dark .text-sky-600 { color: #38bdf8 !important; }
+html.dark .text-sky-700 { color: #38bdf8 !important; }
+
+/* Amber / yellow (Dashboard celebrity card, wishlist) */
+html.dark .bg-amber-50   { background-color: rgba(180, 130, 0, 0.12) !important; }
+html.dark .bg-amber-100  { background-color: rgba(180, 130, 0, 0.18) !important; }
+html.dark .border-amber-200 { border-color: rgba(180, 130, 0, 0.25) !important; }
+html.dark .border-amber-100 { border-color: rgba(180, 130, 0, 0.15) !important; }
+html.dark .text-amber-500   { color: #d29922 !important; }
+html.dark .text-amber-600   { color: #d29922 !important; }
+html.dark .text-amber-400   { color: #d29922 !important; }
+html.dark .text-amber-700   { color: #d29922 !important; }
+
+/* Green */
+html.dark .bg-green-100  { background-color: rgba(88, 204, 2, 0.12) !important; }
+html.dark .text-green-600 { color: #3fb950 !important; }
+html.dark .text-green-700 { color: #3fb950 !important; }
+
+/* Indigo (dark mode toggle) */
+html.dark .bg-indigo-50 { background-color: rgba(99, 102, 241, 0.12) !important; }
+
+/* ===== DARK MODE — INPUTS ===== */
 html.dark input,
 html.dark textarea {
-  background-color: #0f172a !important;
-  color: #f1f5f9 !important;
-  border-color: rgba(255,255,255,0.1) !important;
+  background-color: #0d1117 !important;
+  color: #e6edf3 !important;
+  border-color: rgba(255, 255, 255, 0.10) !important;
 }
-html.dark input::placeholder,
-html.dark textarea::placeholder { color: #475569 !important; }
 
-/* Shadow tweaks */
-html.dark .shadow-slate-200\/50 { box-shadow: 0 20px 40px rgba(0,0,0,0.4) !important; }
+html.dark input::placeholder,
+html.dark textarea::placeholder { color: #484f58 !important; }
+
+/* ===== DARK MODE — SHADOWS ===== */
+html.dark .shadow-slate-200\/50 { box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4) !important; }
+html.dark .shadow-2xl { box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.07), 0 25px 50px rgba(0, 0, 0, 0.5) !important; }
+html.dark .shadow-xl  { box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.07), 0 20px 25px rgba(0, 0, 0, 0.4) !important; }
+html.dark .shadow-sm  { box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05) !important; }

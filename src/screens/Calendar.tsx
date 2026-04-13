@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { formatZodiac, getAvatarColor } from '../utils/zodiac';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronDown, X, Camera, ImageIcon, Phone, Instagram, Twitter, Facebook, Plus, Trash2, Search, Trophy, Heart, Users, UserCircle, Pencil } from 'lucide-react';
+import { ChevronDown, X, Camera, ImageIcon, Phone, Instagram, Twitter, Facebook, Plus, Trash2, Search, Trophy, Heart, Users, UserCircle, Pencil, QrCode } from 'lucide-react';
 import { FriendEditModal } from '../components/FriendEditModal';
 import { FriendProfileModal } from '../components/FriendProfileModal';
 import confetti from 'canvas-confetti';
@@ -32,13 +32,25 @@ function getDaysUntil(birthDate: string): number {
 function getCategoryStyle(category?: string) {
   switch (category) {
     case 'famille':
-      return { borderColor: '#f43f5e', icon: <Heart size={11} className="text-rose-500" strokeWidth={2.5} /> };
+      return {
+        borderColor: '#f43f5e',
+        bgTint: 'rgba(244,63,94,0.04)',
+        icon: <Heart size={11} className="text-rose-500" strokeWidth={2.5} />,
+      };
     case 'ami':
-      return { borderColor: '#0ea5e9', icon: <Users size={11} className="text-sky-500" strokeWidth={2.5} /> };
+      return {
+        borderColor: '#0ea5e9',
+        bgTint: 'rgba(14,165,233,0.04)',
+        icon: <Users size={11} className="text-sky-500" strokeWidth={2.5} />,
+      };
     case 'autre':
-      return { borderColor: '#94a3b8', icon: <UserCircle size={11} className="text-slate-400" strokeWidth={2.5} /> };
+      return {
+        borderColor: '#94a3b8',
+        bgTint: 'rgba(148,163,184,0.04)',
+        icon: <UserCircle size={11} className="text-slate-400" strokeWidth={2.5} />,
+      };
     default:
-      return { borderColor: '#e2e8f0', icon: null };
+      return { borderColor: '#e2e8f0', bgTint: 'var(--surface-card)', icon: null };
   }
 }
 
@@ -71,6 +83,7 @@ function FriendRow({
   onEdit,
   onLongPressStart,
   onLongPressEnd,
+  index = 0,
 }: {
   friend: Birthday;
   hasAccount: boolean;
@@ -78,20 +91,24 @@ function FriendRow({
   onEdit: () => void;
   onLongPressStart: () => void;
   onLongPressEnd: () => void;
+  index?: number;
 }) {
   const days = getDaysUntil(friend.birthDate);
-  const { borderColor, icon: categoryIcon } = getCategoryStyle(friend.category);
+  const { borderColor, bgTint, icon: categoryIcon } = getCategoryStyle(friend.category);
   const zodiacEmoji = ZODIAC_EMOJI[friend.zodiac] ?? '';
 
   return (
     <motion.div
-      whileTap={{ scale: 0.985 }}
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: index * 0.045, type: 'spring', stiffness: 300, damping: 26 }}
+      whileTap={{ scale: 0.975 }}
       onPointerDown={onLongPressStart}
       onPointerUp={onLongPressEnd}
       onPointerLeave={onLongPressEnd}
       onClick={onPress}
-      className="flex items-center gap-3 bg-white rounded-2xl border border-slate-100 p-3 cursor-pointer active:bg-slate-50 transition-colors overflow-hidden"
-      style={{ borderLeftColor: borderColor, borderLeftWidth: 3 }}
+      className="flex items-center gap-3 rounded-2xl px-3 py-2 cursor-pointer transition-colors overflow-hidden"
+      style={{ background: bgTint, border: `2px solid ${borderColor}` }}
     >
       {/* Photo */}
       <div className="relative shrink-0">
@@ -99,24 +116,24 @@ function FriendRow({
           <img
             src={friend.photoUrl}
             alt={friend.name}
-            className="w-14 h-14 rounded-2xl object-cover"
-            style={{ border: `2px solid ${borderColor}` }}
+            className="w-11 h-11 rounded-xl object-cover"
+            style={{ border: `3px solid ${borderColor}` }}
           />
         ) : (
           <div
-            className="w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl text-white"
-            style={{ background: getAvatarColor(friend.name), border: `2px solid ${borderColor}` }}
+            className="w-11 h-11 rounded-xl flex items-center justify-center font-black text-lg text-white"
+            style={{ background: getAvatarColor(friend.name), border: `3px solid ${borderColor}` }}
           >
             {friend.name.charAt(0).toUpperCase()}
           </div>
         )}
         {categoryIcon && (
-          <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded-full border border-slate-100 flex items-center justify-center shadow-sm">
+          <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border border-slate-100 flex items-center justify-center shadow-sm" style={{ background: 'var(--surface-card)' }}>
             {categoryIcon}
           </div>
         )}
         {hasAccount && (
-          <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-400 rounded-full border-2 border-white flex items-center justify-center">
+          <div className="absolute -top-1 -left-1 w-4 h-4 bg-emerald-400 rounded-full border-2 border-white flex items-center justify-center">
             <span className="text-[7px] text-white font-black">✓</span>
           </div>
         )}
@@ -124,8 +141,8 @@ function FriendRow({
 
       {/* Info */}
       <div className="flex-1 min-w-0">
-        <p className="font-black text-slate-900 text-sm truncate">{friend.name}</p>
-        <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+        <p className="font-display font-black text-slate-900 text-base truncate leading-tight">{friend.name}</p>
+        <p className="font-display text-[12px] text-slate-500 font-semibold mt-0.5 truncate">
           {format(parseISO(friend.birthDate), 'd MMM', { locale: fr })}
           {' · '}
           {zodiacEmoji} {formatZodiac(friend.zodiac)}
@@ -136,11 +153,12 @@ function FriendRow({
       <div className="flex items-center gap-2 shrink-0">
         <DaysUntilBadge days={days} />
         <motion.button
-          whileTap={{ scale: 0.85 }}
+          whileTap={{ scale: 0.82 }}
+          whileHover={{ scale: 1.1 }}
           onClick={e => { e.stopPropagation(); onEdit(); }}
           className="w-7 h-7 rounded-xl bg-slate-100 flex items-center justify-center"
         >
-          <Pencil size={13} className="text-slate-400" strokeWidth={2.5} />
+          <Pencil size={12} className="text-slate-400" strokeWidth={2.5} />
         </motion.button>
       </div>
     </motion.div>
@@ -158,8 +176,8 @@ function EmptyState({ tab, onAdd }: { tab: TabId; onAdd: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
       <span className="text-5xl">{emoji}</span>
-      <p className="font-black text-slate-700 text-base">{title}</p>
-      <p className="text-sm text-slate-400 font-medium max-w-[200px]">{sub}</p>
+      <p className="font-display font-black text-slate-700 text-lg">{title}</p>
+      <p className="font-display text-sm text-slate-400 font-semibold max-w-[200px]">{sub}</p>
       {tab === 'tous' && (
         <motion.button
           whileTap={{ scale: 0.95 }}
@@ -193,6 +211,7 @@ export function Calendar({
   onFirstVisit?: () => void;
   openAddModal?: boolean;
   onAddModalOpened?: () => void;
+  onOpenScanner?: () => void;
 }) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>('tous');
@@ -384,55 +403,79 @@ export function Calendar({
     <div className="flex flex-col min-h-full">
       {/* ── Header ─────────────────────────────────────────────── */}
       <div className="px-5 pt-5 pb-3 space-y-3">
-        {/* Title row */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="font-display text-2xl font-black text-slate-900">Mes amis</h2>
-            <p className="text-xs font-bold text-slate-400 mt-0.5">
-              {birthdays.length} contact{birthdays.length !== 1 ? 's' : ''}
-            </p>
+        {/* Search + actions row */}
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.28, ease: 'easeOut' }}
+          className="flex items-center gap-2"
+        >
+          <div className="flex-1 flex items-center gap-2 bg-white border border-black/10 rounded-2xl px-4 py-3">
+            <Search size={15} className="text-slate-400 shrink-0" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Rechercher un ami..."
+              className="flex-1 bg-transparent font-display text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none"
+            />
+            <AnimatePresence>
+              {searchQuery && (
+                <motion.button
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0, opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                  onClick={() => setSearchQuery('')}
+                >
+                  <X size={14} className="text-slate-400" />
+                </motion.button>
+              )}
+            </AnimatePresence>
           </div>
-          <div className="flex gap-2">
-            <motion.button
-              whileTap={{ scale: 0.92 }}
-              onClick={openLeaderboard}
-              className="w-10 h-10 rounded-2xl bg-white border border-slate-200 flex items-center justify-center shadow-sm"
-            >
-              <Trophy size={18} className="text-slate-600" />
-            </motion.button>
-            <motion.button
-              whileTap={{ scale: 0.92 }}
-              onClick={() => setShowAddModal(true)}
-              className="w-10 h-10 rounded-2xl flex items-center justify-center text-white"
-              style={{ background: '#FF4B4B', boxShadow: '0 3px 0 #CC2E2E' }}
-            >
-              <Plus size={20} strokeWidth={3} />
-            </motion.button>
-          </div>
-        </div>
-
-        {/* Search */}
-        <div className="flex items-center gap-2 bg-slate-50 border border-black/10 rounded-2xl px-4 py-2.5">
-          <Search size={14} className="text-slate-400 shrink-0" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Rechercher..."
-            className="flex-1 bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
-          />
-          {searchQuery && (
-            <button onClick={() => setSearchQuery('')}><X size={14} className="text-slate-400" /></button>
-          )}
-        </div>
+          <motion.button
+            whileTap={{ scale: 0.88 }}
+            whileHover={{ scale: 1.08, rotate: -8 }}
+            onClick={openLeaderboard}
+            className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0"
+            style={{ background: '#FFFBEB', border: '1.5px solid #D4A017' }}
+          >
+            <Trophy size={18} style={{ color: '#D4A017' }} />
+          </motion.button>
+          <motion.button
+            whileTap={{ scale: 0.88 }}
+            whileHover={{ scale: 1.05 }}
+            onClick={() => setShowAddModal(true)}
+            className="w-11 h-11 rounded-2xl flex items-center justify-center text-white shrink-0"
+            style={{ background: '#FF4B4B', boxShadow: '0 3px 0 #CC2E2E' }}
+          >
+            <Plus size={20} strokeWidth={3} />
+          </motion.button>
+        </motion.div>
 
         {/* Tabs */}
-        <div className="flex bg-slate-100 rounded-2xl p-1 gap-1">
+        <div className="relative flex bg-slate-100 rounded-2xl p-1 gap-1">
           {([
-            { id: 'tous'    as TabId, label: 'Tous',    icon: null,                                             active: 'bg-white shadow-sm text-slate-800',       badge: 'bg-slate-100 text-slate-500',    iconCls: '' },
-            { id: 'famille' as TabId, label: 'Famille', icon: <Heart size={11} strokeWidth={2.5} />,            active: 'bg-rose-100 shadow-sm text-rose-700',     badge: 'bg-rose-200 text-rose-600',      iconCls: 'text-rose-500' },
-            { id: 'ami'     as TabId, label: 'Amis',    icon: <Users size={11} strokeWidth={2.5} />,            active: 'bg-sky-100 shadow-sm text-sky-700',       badge: 'bg-sky-200 text-sky-600',        iconCls: 'text-sky-500' },
-            { id: 'autre'   as TabId, label: 'Autre',   icon: <UserCircle size={11} strokeWidth={2.5} />,      active: 'bg-slate-200 shadow-sm text-slate-700',   badge: 'bg-slate-300 text-slate-500',    iconCls: 'text-slate-500' },
+            {
+              id: 'tous' as TabId, label: 'Tous', icon: null,
+              color: '#64748b', activeColor: '#0f172a',
+              activeBg: 'white', badgeBg: '#e2e8f0', badgeColor: '#475569',
+            },
+            {
+              id: 'famille' as TabId, label: 'Famille', icon: <Heart size={12} strokeWidth={2.5} />,
+              color: '#f43f5e', activeColor: '#be123c',
+              activeBg: '#ffe4e6', badgeBg: '#fecdd3', badgeColor: '#be123c',
+            },
+            {
+              id: 'ami' as TabId, label: 'Amis', icon: <Users size={12} strokeWidth={2.5} />,
+              color: '#0ea5e9', activeColor: '#0369a1',
+              activeBg: '#e0f2fe', badgeBg: '#bae6fd', badgeColor: '#0369a1',
+            },
+            {
+              id: 'autre' as TabId, label: 'Autre', icon: <UserCircle size={12} strokeWidth={2.5} />,
+              color: '#94a3b8', activeColor: '#475569',
+              activeBg: '#f1f5f9', badgeBg: '#e2e8f0', badgeColor: '#475569',
+            },
           ] as const).map(tab => {
             const isActive = activeTab === tab.id;
             const count = tabCounts[tab.id];
@@ -440,21 +483,30 @@ export function Calendar({
               <motion.button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                whileTap={{ scale: 0.95 }}
-                className={`flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[11px] font-black transition-all ${
-                  isActive ? tab.active : 'text-slate-500'
-                }`}
+                whileTap={{ scale: 0.94 }}
+                className="relative flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-display text-[13px] font-black z-10"
+                style={{ color: isActive ? tab.activeColor : tab.color }}
               >
-                {tab.icon && (
-                  <span className={isActive ? tab.iconCls : 'text-slate-400'}>
-                    {tab.icon}
-                  </span>
+                {isActive && (
+                  <motion.div
+                    layoutId="activeTabPill"
+                    className="absolute inset-0 rounded-xl shadow-sm"
+                    style={{ background: tab.activeBg }}
+                    transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                  />
                 )}
-                <span>{tab.label}</span>
+                {tab.icon && (
+                  <span className="relative z-10">{tab.icon}</span>
+                )}
+                <span className="relative z-10">{tab.label}</span>
                 {count > 0 && (
-                  <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${
-                    isActive ? tab.badge : 'bg-slate-200/60 text-slate-400'
-                  }`}>
+                  <span
+                    className="relative z-10 text-[9px] font-black px-1.5 py-0.5 rounded-full"
+                    style={{
+                      background: isActive ? tab.badgeBg : 'rgba(148,163,184,0.2)',
+                      color: isActive ? tab.badgeColor : '#94a3b8',
+                    }}
+                  >
                     {count}
                   </span>
                 )}
@@ -465,48 +517,70 @@ export function Calendar({
       </div>
 
       {/* ── List ───────────────────────────────────────────────── */}
-      <div className="flex-1 bg-slate-50 rounded-t-3xl px-5 pb-28 pt-4">
-        {filtered.length === 0 ? (
-          <EmptyState tab={activeTab} onAdd={() => setShowAddModal(true)} />
-        ) : activeTab === 'tous' ? (
-          <div className="space-y-5">
-            {groupedByMonth.map(({ month, friends }) => (
-              <div key={month}>
-                <div className="flex items-center gap-2 mb-2.5 px-1">
-                  <span className="text-[11px] font-black text-slate-700 uppercase tracking-widest">{month}</span>
-                  <span className="text-[9px] font-black bg-slate-200 text-slate-500 px-1.5 py-0.5 rounded-full">{friends.length}</span>
-                </div>
-                <div className="space-y-2">
-                  {friends.map(friend => (
-                    <FriendRow
-                      key={friend.id}
-                      friend={friend}
-                      hasAccount={friendsWithAccount.has(friend.id)}
-                      onPress={() => setViewingFriend(friend)}
-                      onEdit={() => setEditingFriend(friend)}
-                      onLongPressStart={() => handleLongPressStart(friend)}
-                      onLongPressEnd={handleLongPressEnd}
-                    />
-                  ))}
-                </div>
+      <div className="flex-1 bg-slate-50 rounded-t-3xl px-5 pb-28 pt-4 overflow-hidden">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
+          >
+            {filtered.length === 0 ? (
+              <EmptyState tab={activeTab} onAdd={() => setShowAddModal(true)} />
+            ) : activeTab === 'tous' ? (
+              <div className="space-y-5">
+                {groupedByMonth.map(({ month, friends }, groupIdx) => (
+                  <motion.div
+                    key={month}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: groupIdx * 0.06, duration: 0.28 }}
+                  >
+                    {/* Month header — centered with decorative lines */}
+                    <div className="flex items-center gap-3 mb-3 px-1">
+                      <div className="h-px flex-1 rounded-full" style={{ background: 'linear-gradient(to right, transparent, #cbd5e1)' }} />
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="font-display text-[13px] font-black text-slate-700 uppercase tracking-widest">{month}</span>
+                        <span className="font-display text-[10px] font-black bg-slate-200 text-slate-500 px-2 py-0.5 rounded-full">{friends.length}</span>
+                      </div>
+                      <div className="h-px flex-1 rounded-full" style={{ background: 'linear-gradient(to left, transparent, #cbd5e1)' }} />
+                    </div>
+                    <div className="space-y-2">
+                      {friends.map((friend, i) => (
+                        <FriendRow
+                          key={friend.id}
+                          friend={friend}
+                          index={i}
+                          hasAccount={friendsWithAccount.has(friend.id)}
+                          onPress={() => setViewingFriend(friend)}
+                          onEdit={() => setEditingFriend(friend)}
+                          onLongPressStart={() => handleLongPressStart(friend)}
+                          onLongPressEnd={handleLongPressEnd}
+                        />
+                      ))}
+                    </div>
+                  </motion.div>
+                ))}
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="space-y-2 pt-1">
-            {sortedFlat.map(friend => (
-              <FriendRow
-                key={friend.id}
-                friend={friend}
-                hasAccount={friendsWithAccount.has(friend.id)}
-                onPress={() => setViewingFriend(friend)}
-                onEdit={() => setEditingFriend(friend)}
-                onLongPressStart={() => handleLongPressStart(friend)}
-                onLongPressEnd={handleLongPressEnd}
-              />
-            ))}
-          </div>
-        )}
+            ) : (
+              <div className="space-y-2 pt-1">
+                {sortedFlat.map((friend, i) => (
+                  <FriendRow
+                    key={friend.id}
+                    friend={friend}
+                    index={i}
+                    hasAccount={friendsWithAccount.has(friend.id)}
+                    onPress={() => setViewingFriend(friend)}
+                    onEdit={() => setEditingFriend(friend)}
+                    onLongPressStart={() => handleLongPressStart(friend)}
+                    onLongPressEnd={handleLongPressEnd}
+                  />
+                ))}
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       {/* ── Classification bottom sheet ─────────────────────────── */}

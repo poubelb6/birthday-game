@@ -4,6 +4,7 @@ import { X, Send, ArrowLeft, MessageCircle, Plus } from 'lucide-react';
 import { Birthday, Message, UserProfile } from '../types';
 import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { getAvatarColor } from '../utils/zodiac';
 
 interface Props {
   open: boolean;
@@ -33,7 +34,7 @@ function Avatar({ photoUrl, name, size = 'md' }: { photoUrl?: string; name: stri
       {photoUrl ? (
         <img src={photoUrl} alt={name} className="w-full h-full object-cover" />
       ) : (
-        <div className="w-full h-full bg-rose-400 flex items-center justify-center text-white font-black">
+        <div className="w-full h-full flex items-center justify-center text-white font-black" style={{ background: getAvatarColor(name) }}>
           {name.charAt(0).toUpperCase()}
         </div>
       )}
@@ -149,8 +150,8 @@ export function MessagesModal({ open, onClose, inbox, sentMessages, friends, cur
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 60 }}
             transition={{ type: 'spring', stiffness: 400, damping: 32 }}
-            className="relative w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden"
-            style={{ border: '2px solid #0f172a', height: '85vh' }}
+            className="relative w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden"
+            style={{ background: 'var(--surface-card)', border: '2px solid var(--border-accent)', height: '85vh' }}
           >
             {/* Header */}
             <div className="flex items-center justify-between px-5 pt-5 pb-4 shrink-0 border-b border-slate-100">
@@ -334,7 +335,7 @@ export function MessagesModal({ open, onClose, inbox, sentMessages, friends, cur
                   </div>
 
                   {/* Input bar */}
-                  <div className="px-4 py-3 border-t border-slate-100 flex items-end gap-2 shrink-0 bg-white">
+                  <div className="px-4 py-3 flex items-end gap-2 shrink-0" style={{ background: 'var(--surface-card)', borderTop: '1px solid var(--border-soft)' }}>
                     <textarea
                       ref={textareaRef}
                       value={text}

@@ -112,7 +112,7 @@ export function Onboarding({ onComplete }: { onComplete: (user: UserProfile) => 
             <>
               <div className="space-y-2">
                 <h2 className="text-4xl font-black tracking-tight leading-none">TES RÉSEAUX.</h2>
-                <p className="text-indigo-100 text-lg">Permets à tes amis de te retrouver facilement.</p>
+                <p className="text-rose-100 text-lg">Permets à tes amis de te retrouver facilement.</p>
               </div>
               <div className="space-y-4">
                 <input 
@@ -158,7 +158,7 @@ export function Onboarding({ onComplete }: { onComplete: (user: UserProfile) => 
             <>
               <div className="space-y-2">
                 <h2 className="text-4xl font-black tracking-tight leading-none">TA WISHLIST.</h2>
-                <p className="text-indigo-100 text-lg">Qu'est-ce qui te ferait plaisir ? (Sépare par des virgules)</p>
+                <p className="text-rose-100 text-lg">Qu'est-ce qui te ferait plaisir ? (Sépare par des virgules)</p>
               </div>
               <div className="space-y-4">
                 <textarea 

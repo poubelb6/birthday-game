@@ -5,17 +5,17 @@ import { UserProfile, Birthday, CardRarity } from '../types';
 import { CARDS, checkUnlockedCards } from '../utils/gameLogic';
 
 const RARITY_STYLES: Record<CardRarity, { border: string; footer: string; cornerColor: string }> = {
-  Commun:     { border: '#1a1a2e', footer: '#ffffff',  cornerColor: '#1a1a2e' },
-  Rare:       { border: '#1A6FC4', footer: '#EEF5FF',  cornerColor: '#1A6FC4' },
-  Épique:     { border: '#7B2FBE', footer: '#F5EEFF',  cornerColor: '#7B2FBE' },
-  Légendaire: { border: '#C8861A', footer: '#FFF8E8',  cornerColor: '#D4A017' },
+  Commun:     { border: 'var(--rarity-commun-border)', footer: 'var(--rarity-commun-footer)', cornerColor: 'var(--rarity-commun-border)' },
+  Rare:       { border: 'var(--rarity-rare-border)',   footer: 'var(--rarity-rare-footer)',   cornerColor: 'var(--rarity-rare-border)'   },
+  Épique:     { border: 'var(--rarity-epique-border)', footer: 'var(--rarity-epique-footer)', cornerColor: 'var(--rarity-epique-border)' },
+  Légendaire: { border: 'var(--rarity-legend-border)', footer: 'var(--rarity-legend-footer)', cornerColor: 'var(--rarity-legend-border)' },
 };
 
 const RARITY_LABEL_COLOR: Record<CardRarity, string> = {
-  Commun:     '#1a1a2e',
-  Rare:       '#1A6FC4',
-  Épique:     '#7B2FBE',
-  Légendaire: '#C8861A',
+  Commun:     'var(--rarity-commun-text)',
+  Rare:       'var(--rarity-rare-text)',
+  Épique:     'var(--rarity-epique-text)',
+  Légendaire: 'var(--rarity-legend-text)',
 };
 
 const RARITIES: CardRarity[] = ['Commun', 'Rare', 'Épique', 'Légendaire'];
@@ -54,14 +54,14 @@ export function Collection({ user, birthdays }: CollectionProps) {
   };
 
   return (
-    <div ref={topRef} className="p-4 space-y-5 pb-32" style={{ background: '#f8f9fa', minHeight: '100vh' }}>
+    <div ref={topRef} className="p-4 space-y-5 pb-32" style={{ background: 'var(--surface-bg)', minHeight: '100vh' }}>
 
       {/* Header stats */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         className="rounded-2xl p-5 flex items-center gap-4"
-        style={{ background: '#ffffff', border: '1px solid #e5e7eb' }}
+        style={{ background: 'var(--surface-card)', border: '1px solid var(--border-mid)' }}
       >
         <div className="w-12 h-12 rounded-xl flex items-center justify-center"
           style={{ background: '#FF4B4B22' }}>
@@ -70,17 +70,17 @@ export function Collection({ user, birthdays }: CollectionProps) {
         <div className="flex-1">
           <p style={{
             fontFamily: "'Press Start 2P', monospace",
-            fontSize: '11px', color: '#64748b',
+            fontSize: '11px', color: 'var(--text-2)',
             letterSpacing: 1, marginBottom: 4,
           }}>
             TA COLLECTION
           </p>
-          <p className="font-black text-2xl" style={{ color: '#1a1a2e' }}>
+          <p className="font-black text-2xl" style={{ color: 'var(--text-1)' }}>
             {unlockedIds.length}
-            <span className="text-sm" style={{ color: '#94a3b8' }}>/{CARDS.length}</span>
+            <span className="text-sm" style={{ color: 'var(--text-3)' }}>/{CARDS.length}</span>
           </p>
           <div className="w-full h-1.5 rounded-full mt-2 overflow-hidden"
-            style={{ background: '#e5e7eb' }}>
+            style={{ background: 'var(--progress-bg)' }}>
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${(unlockedIds.length / CARDS.length) * 100}%` }}
@@ -104,9 +104,9 @@ export function Collection({ user, birthdays }: CollectionProps) {
               fontSize: '11px',
               padding: '6px 12px',
               borderRadius: 20,
-              color: filter === f ? '#fff' : '#555',
-              background: filter === f ? '#FF4B4B' : '#f3f4f6',
-              border: `1px solid ${filter === f ? '#FF4B4B' : '#e5e7eb'}`,
+              color: filter === f ? '#fff' : 'var(--filter-btn-color)',
+              background: filter === f ? '#FF4B4B' : 'var(--filter-btn-bg)',
+              border: `1px solid ${filter === f ? '#FF4B4B' : 'var(--filter-btn-border)'}`,
             }}
           >
             {f}
@@ -132,7 +132,7 @@ export function Collection({ user, birthdays }: CollectionProps) {
                 </span>
                 <div style={{ height: 2, flex: 1, background: color, opacity: 0.3, borderRadius: 2 }} />
               </div>
-              <p style={{ textAlign: 'center', fontSize: 12, color: '#64748b' }}>
+              <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-2)' }}>
                 {rarityCards.length} cartes • {rarityUnlocked} débloquée{rarityUnlocked !== 1 ? 's' : ''}
               </p>
             </div>
@@ -181,8 +181,8 @@ export function Collection({ user, birthdays }: CollectionProps) {
                   borderRadius: 16,
                   border: `3px solid ${styles.border}`,
                   background: isLegend
-                    ? 'linear-gradient(160deg, #fffdf5 0%, #fff8e8 50%, #fffdf5 100%)'
-                    : '#ffffff',
+                    ? 'var(--rarity-legend-card-bg)'
+                    : 'var(--surface-card)',
                   animation: isEpic   ? 'epicPulse 2.2s ease-in-out infinite'
                            : isLegend ? 'legendPulse 3s ease-in-out infinite' : 'none',
                 }}
@@ -262,7 +262,7 @@ export function Collection({ user, birthdays }: CollectionProps) {
                 <div style={{
                   flex: 1, display: 'flex',
                   alignItems: 'center', justifyContent: 'center',
-                  background: '#F2EFE7', position: 'relative',
+                  background: 'var(--card-emoji-bg)', position: 'relative',
                 }}>
                   <span style={{
                     fontSize: 36, display: 'inline-block',
@@ -274,7 +274,7 @@ export function Collection({ user, birthdays }: CollectionProps) {
                   {!unlocked && (
                     <div style={{
                       position: 'absolute', inset: 0,
-                      background: 'rgba(200,200,200,0.52)',
+                      background: 'var(--lock-overlay, rgba(200,200,200,0.52))',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
                       <span style={{ fontSize: 18 }}>🔒</span>
@@ -283,7 +283,7 @@ export function Collection({ user, birthdays }: CollectionProps) {
                 </div>
 
                 {/* Separator */}
-                <div style={{ height: 1, background: `${styles.border}33`, flexShrink: 0 }} />
+                <div style={{ height: 1, background: styles.border, opacity: 0.2, flexShrink: 0 }} />
 
                 {/* Footer */}
                 <div style={{
@@ -293,7 +293,7 @@ export function Collection({ user, birthdays }: CollectionProps) {
                 }}>
                   <p style={{
                     fontFamily: "'Press Start 2P', monospace",
-                    fontSize: '11px', color: '#1a1a2e', lineHeight: 1.8,
+                    fontSize: '11px', color: 'var(--text-1)', lineHeight: 1.8,
                   }}>
                     {card.title}
                   </p>
@@ -338,15 +338,15 @@ export function Collection({ user, birthdays }: CollectionProps) {
                 width: 200, borderRadius: 24,
                 border: `3px solid ${RARITY_STYLES[selected.rarity].border}`,
                 background: selected.rarity === 'Légendaire'
-                  ? 'linear-gradient(160deg, #fffdf5 0%, #fff8e8 50%, #fffdf5 100%)'
-                  : '#ffffff',
+                  ? 'var(--rarity-legend-card-bg)'
+                  : 'var(--surface-card)',
                 overflow: 'hidden',
                 display: 'flex', flexDirection: 'column',
               }}
             >
               {/* Emoji zone */}
               <div style={{
-                height: 160, background: '#F2EFE7',
+                height: 160, background: 'var(--card-emoji-bg)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 position: 'relative',
               }}>
@@ -369,7 +369,7 @@ export function Collection({ user, birthdays }: CollectionProps) {
                 )}
               </div>
 
-              <div style={{ height: 1, background: `${RARITY_STYLES[selected.rarity].border}33` }} />
+              <div style={{ height: 1, background: RARITY_STYLES[selected.rarity].border, opacity: 0.2 }} />
 
               {/* Footer modal */}
               <div style={{
@@ -385,7 +385,7 @@ export function Collection({ user, birthdays }: CollectionProps) {
                 </p>
                 <p style={{
                   fontFamily: "'Press Start 2P', monospace",
-                  fontSize: '11px', color: '#1a1a2e', lineHeight: 1.8, marginBottom: 4,
+                  fontSize: '11px', color: 'var(--text-1)', lineHeight: 1.8, marginBottom: 4,
                 }}>
                   {selected.title}
                 </p>
@@ -395,7 +395,7 @@ export function Collection({ user, birthdays }: CollectionProps) {
                 }}>
                   +{selected.xpReward} XP
                 </p>
-                <p style={{ fontSize: 12, color: '#475569', lineHeight: 1.6 }}>
+                <p style={{ fontSize: 12, color: 'var(--text-2)', lineHeight: 1.6 }}>
                   {isSelectedUnlocked
                     ? `✅ ${selected.description}`
                     : `🎯 ${selected.unlockCondition}`}
