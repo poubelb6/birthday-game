@@ -493,10 +493,10 @@ function AppContent() {
         style={{ background: 'var(--surface-card-translucent)', borderTop: '2px solid var(--border-accent)' }}
       >
         <div className="flex-1 flex justify-center">
-          <NavButton active={activeScreen === 'dashboard'} onClick={() => navigateTo('dashboard')} icon={<Home size={22} strokeWidth={2.5} />} label="Accueil" ariaLabel="Accueil" activeBg="bg-orange-50" activeColor="text-orange-500" activeFill="fill-orange-300" inactiveColor="text-orange-300" inactiveFill="fill-orange-100" />
+          <NavButton active={activeScreen === 'dashboard'} onClick={() => navigateTo('dashboard')} icon={<Home size={22} strokeWidth={2.5} />} label="Accueil" ariaLabel="Accueil" activeBg="bg-orange-50" activeColor="text-orange-500" activeFill="fill-orange-300" inactiveFill="fill-orange-300 dark:fill-transparent" />
         </div>
         <div className="flex-1 flex justify-center">
-          <NavButton active={activeScreen === 'calendar'} onClick={() => navigateTo('calendar')} icon={<Heart size={22} strokeWidth={2.5} />} label="Amis" ariaLabel="Mes amis" activeBg="bg-rose-50" activeColor="text-rose-500" activeFill="fill-rose-300" inactiveColor="text-rose-300" inactiveFill="fill-rose-100" />
+          <NavButton active={activeScreen === 'calendar'} onClick={() => navigateTo('calendar')} icon={<Heart size={22} strokeWidth={2.5} />} label="Amis" ariaLabel="Mes amis" activeBg="bg-rose-50" activeColor="text-rose-500" activeFill="fill-rose-300" inactiveFill="fill-rose-300 dark:fill-transparent" />
         </div>
         <div className="flex-1 flex justify-center">
           <motion.button
@@ -511,10 +511,10 @@ function AppContent() {
           </motion.button>
         </div>
         <div className="flex-1 flex justify-center">
-          <NavButton active={activeScreen === 'collection'} onClick={() => navigateTo('collection')} icon={<LayoutGrid size={22} strokeWidth={2.5} />} label="Cartes" ariaLabel="Ma collection de cartes" activeBg="bg-violet-50" activeColor="text-violet-500" activeFill="fill-violet-300" inactiveColor="text-violet-300" inactiveFill="fill-violet-100" />
+          <NavButton active={activeScreen === 'collection'} onClick={() => navigateTo('collection')} icon={<LayoutGrid size={22} strokeWidth={2.5} />} label="Cartes" ariaLabel="Ma collection de cartes" activeBg="bg-violet-50" activeColor="text-violet-500" activeFill="fill-violet-300" inactiveFill="fill-violet-300 dark:fill-transparent" />
         </div>
         <div className="flex-1 flex justify-center">
-          <NavButton active={activeScreen === 'profile'} onClick={() => navigateTo('profile')} icon={<User size={22} strokeWidth={2.5} />} label="Profil" ariaLabel="Mon profil" activeBg="bg-blue-50" activeColor="text-blue-500" activeFill="fill-blue-300" inactiveColor="text-blue-300" inactiveFill="fill-blue-100" />
+          <NavButton active={activeScreen === 'profile'} onClick={() => navigateTo('profile')} icon={<User size={22} strokeWidth={2.5} />} label="Profil" ariaLabel="Mon profil" activeBg="bg-blue-50" activeColor="text-blue-500" activeFill="fill-blue-300" inactiveFill="fill-blue-300 dark:fill-transparent" />
         </div>
       </nav>
     </div>
@@ -529,7 +529,7 @@ export default function App() {
   );
 }
 
-function NavButton({ active, onClick, icon, label, ariaLabel, activeBg = 'bg-red-50', activeColor = 'text-red-500', activeFill = '', inactiveColor = 'text-slate-400', inactiveFill = '' }: { active: boolean, onClick: () => void, icon: React.ReactNode, label: string, ariaLabel: string, activeBg?: string, activeColor?: string, activeFill?: string, inactiveColor?: string, inactiveFill?: string }) {
+function NavButton({ active, onClick, icon, label, ariaLabel, activeBg = 'bg-red-50', activeColor = 'text-red-500', activeFill = '', inactiveColor = 'text-slate-400 opacity-50', inactiveFill = '' }: { active: boolean, onClick: () => void, icon: React.ReactNode, label: string, ariaLabel: string, activeBg?: string, activeColor?: string, activeFill?: string, inactiveColor?: string, inactiveFill?: string }) {
   return (
     <motion.button
       onClick={onClick}
