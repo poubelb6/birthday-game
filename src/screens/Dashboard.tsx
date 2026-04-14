@@ -73,13 +73,13 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
   const [showStreakToast, setShowStreakToast] = useState(false);
 
   useEffect(() => {
-    if (streak > 0 && !sessionStorage.getItem('streak_shown')) {
+    if (!sessionStorage.getItem('streak_shown')) {
       sessionStorage.setItem('streak_shown', '1');
       setShowStreakToast(true);
       const t = setTimeout(() => setShowStreakToast(false), 2500);
       return () => clearTimeout(t);
     }
-  }, [streak]);
+  }, []);
 
   const todayStart = startOfDay(today);
 
