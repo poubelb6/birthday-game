@@ -547,7 +547,7 @@ function NavButton({ active, onClick, icon, label, ariaLabel, activeBg = 'bg-red
       aria-current={active ? 'page' : undefined}
       whileTap={{ scale: 0.86 }}
       transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-      className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${active ? 'scale-110' : 'opacity-50 hover:opacity-70'}`}
+      className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${active ? 'scale-110' : 'hover:opacity-80'}`}
     >
       <motion.div
         animate={active ? { y: -4 } : { y: 0 }}
