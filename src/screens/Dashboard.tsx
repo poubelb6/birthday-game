@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useEffect, useRef } from 'react';
 import { ZODIAC_EMOJI, formatZodiac, getAvatarColor } from '../utils/zodiac';
-import { Star, X, ChevronLeft, ChevronRight, Camera, ImageIcon, Phone, Instagram, Twitter, Facebook, Plus, Trash2, ChevronDown, Sparkles, Globe2 } from 'lucide-react';
+import { Star, X, ChevronLeft, ChevronRight, Camera, ImageIcon, Phone, Instagram, Twitter, Facebook, Plus, Trash2, ChevronDown, Sparkles, Globe2, Flame } from 'lucide-react';
 import { Birthday, UserProfile } from '../types';
 import { format, differenceInDays, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, startOfDay, addMonths, subMonths } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -12,6 +12,7 @@ import { FriendEditModal } from '../components/FriendEditModal';
 import { FriendProfileModal } from '../components/FriendProfileModal';
 import { checkUnlockedCards, getZodiacSign } from '../utils/gameLogic';
 import { CELEB_BIRTHDAYS } from '../data/celebBirthdays';
+import { useStreak } from '../hooks/useStreak';
 
 
 export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, onDeleteBirthday }: {
@@ -67,6 +68,17 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
       const interval = setInterval(cycle, 8000);
       return () => clearInterval(interval);
     }, []);
+
+  const streak = useStreak();
+  const [showStreakToast, setShowStreakToast] = useState(false);
+
+  useEffect(() => {
+    if (streak > 0) {
+      setShowStreakToast(true);
+      const t = setTimeout(() => setShowStreakToast(false), 2500);
+      return () => clearTimeout(t);
+    }
+  }, [streak]);
 
   const todayStart = startOfDay(today);
 
@@ -184,6 +196,30 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
 
   return (
     <div className="p-6 space-y-8">
+
+      {/* ── Streak toast éphémère ── */}
+      <AnimatePresence>
+        {showStreakToast && (
+          <motion.div
+            initial={{ opacity: 0, y: -16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -16 }}
+            transition={{ duration: 0.35, ease: 'easeInOut' }}
+            className="flex items-center justify-between px-4 py-3 rounded-2xl"
+            style={{ background: 'rgba(251,146,60,0.1)', border: '1.5px solid rgba(251,146,60,0.25)' }}
+          >
+            <div className="flex items-center gap-2.5">
+              <Flame size={18} className="text-orange-500 fill-orange-300" />
+              <span className="text-[13px] font-black" style={{ color: 'var(--text-1)' }}>
+                {streak} jour{streak > 1 ? 's' : ''} de suite
+              </span>
+            </div>
+            <span className="text-[11px] font-bold text-orange-400">
+              {streak >= 7 ? 'En feu !' : streak >= 3 ? 'Continue !' : "C'est parti !"}
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <section className="space-y-4 relative">
 

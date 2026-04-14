@@ -10,10 +10,12 @@ import {
   Home,
   LayoutGrid,
   User,
+  Flame,
 } from 'lucide-react';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from './firebase';
 import { useAppState } from './hooks/useAppState';
+import { useStreak } from './hooks/useStreak';
 import { Onboarding } from './screens/Onboarding';
 import { Dashboard } from './screens/Dashboard';
 import { Scanner } from './screens/Scanner';
@@ -52,6 +54,7 @@ const SCREEN_ORDER: Screen[] = ['dashboard', 'calendar', 'collection', 'profile'
 
 function AppContent() {
   const { user, birthdays, challenges, inbox, sentMessages, loading, firebaseUser, setUser, addBirthday, updateBirthday, deleteBirthday, incrementScansCount, unlockCard, sendMessage, markConversationRead } = useAppState();
+  const streak = useStreak();
   const [activeScreen, setActiveScreen] = useState<Screen>('dashboard');
   const [slideDirection, setSlideDirection] = useState(0);
   const [showSplash, setShowSplash] = useState(true);
@@ -336,8 +339,15 @@ function AppContent() {
                 Niv.{user.level}
               </span>
             </div>
-            <p className="text-[11px] font-black tracking-widest" style={{ color: '#FF4B4B', fontFamily: "'Press Start 2P', monospace" }}>
+            <p className="text-[11px] font-black tracking-widest flex items-center gap-1.5" style={{ color: '#FF4B4B', fontFamily: "'Press Start 2P', monospace" }}>
               {user.xp} XP
+              {streak > 0 && (
+                <>
+                  <span className="opacity-40">/</span>
+                  <Flame size={11} className="text-orange-500 fill-orange-300" />
+                  <span className="text-orange-500">{streak}</span>
+                </>
+              )}
             </p>
           </div>
         </div>
