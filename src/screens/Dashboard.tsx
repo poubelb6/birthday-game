@@ -211,7 +211,7 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
             <div className="flex items-center gap-2.5">
               <Flame size={18} className="text-orange-500 fill-orange-300" />
               <span className="text-[13px] font-black" style={{ color: 'var(--text-1)' }}>
-                {streak} jour{streak > 1 ? 's' : ''} de suite
+                Tu utilises l'app {streak} jour{streak > 1 ? 's' : ''} de suite
               </span>
             </div>
             <span className="text-[11px] font-bold text-orange-400">
