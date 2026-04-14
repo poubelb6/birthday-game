@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useEffect, useRef } from 'react';
 import { ZODIAC_EMOJI, formatZodiac, getAvatarColor } from '../utils/zodiac';
-import { Star, X, ChevronLeft, ChevronRight, Camera, ImageIcon, Phone, Instagram, Twitter, Facebook, Plus, Trash2, ChevronDown, Sparkles, Globe2, Flame } from 'lucide-react';
+import { Star, X, ChevronLeft, ChevronRight, Camera, ImageIcon, Phone, Instagram, Twitter, Facebook, Plus, Trash2, ChevronDown, Sparkles, Globe2 } from 'lucide-react';
 import { Birthday, UserProfile } from '../types';
 import { format, differenceInDays, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, startOfDay, addMonths, subMonths } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -12,7 +12,6 @@ import { FriendEditModal } from '../components/FriendEditModal';
 import { FriendProfileModal } from '../components/FriendProfileModal';
 import { checkUnlockedCards, getZodiacSign } from '../utils/gameLogic';
 import { CELEB_BIRTHDAYS } from '../data/celebBirthdays';
-import { useStreak } from '../hooks/useStreak';
 
 
 export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, onDeleteBirthday }: {
@@ -69,7 +68,6 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
       return () => clearInterval(interval);
     }, []);
 
-  const streak = useStreak();
   const todayStart = startOfDay(today);
 
   const todayMMDD = format(today, 'MM-dd');
@@ -184,47 +182,8 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
     touchStartX.current = null;
   };
 
-  const streakMessage =
-    streak >= 30 ? 'Légendaire 🏆' :
-    streak >= 14 ? 'Impressionnant !' :
-    streak >= 7  ? 'En feu !' :
-    streak >= 3  ? 'Continue comme ça !' :
-    streak === 1 ? 'C\'est parti !' :
-    'Bienvenue !';
-
   return (
     <div className="p-6 space-y-8">
-
-      {/* ── Streak widget ── */}
-      {streak > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between px-5 py-3.5 rounded-2xl"
-          style={{ background: 'rgba(251,146,60,0.08)', border: '1.5px solid rgba(251,146,60,0.2)' }}
-        >
-          <div className="flex items-center gap-3">
-            <motion.div
-              animate={{ scale: [1, 1.15, 1] }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-              className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ background: 'rgba(251,146,60,0.15)' }}
-            >
-              <Flame size={20} className="text-orange-500 fill-orange-300" />
-            </motion.div>
-            <div>
-              <p className="text-[11px] font-bold text-orange-400 uppercase tracking-widest">{streakMessage}</p>
-              <p className="text-[13px] font-black" style={{ color: 'var(--text-1)' }}>
-                {streak} jour{streak > 1 ? 's' : ''} de suite
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-col items-end">
-            <span className="text-3xl font-black text-orange-500 leading-none">{streak}</span>
-            <span className="text-[10px] font-bold text-orange-400 uppercase tracking-wide">streak</span>
-          </div>
-        </motion.div>
-      )}
 
       <section className="space-y-4 relative">
 

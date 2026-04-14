@@ -10,12 +10,10 @@ import {
   Home,
   LayoutGrid,
   User,
-  Flame,
 } from 'lucide-react';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from './firebase';
 import { useAppState } from './hooks/useAppState';
-import { useStreak } from './hooks/useStreak';
 import { Onboarding } from './screens/Onboarding';
 import { Dashboard } from './screens/Dashboard';
 import { Scanner } from './screens/Scanner';
@@ -54,7 +52,6 @@ const SCREEN_ORDER: Screen[] = ['dashboard', 'calendar', 'collection', 'profile'
 
 function AppContent() {
   const { user, birthdays, challenges, inbox, sentMessages, loading, firebaseUser, setUser, addBirthday, updateBirthday, deleteBirthday, incrementScansCount, unlockCard, sendMessage, markConversationRead } = useAppState();
-  const streak = useStreak();
   const [activeScreen, setActiveScreen] = useState<Screen>('dashboard');
   const [slideDirection, setSlideDirection] = useState(0);
   const [showSplash, setShowSplash] = useState(true);
@@ -345,18 +342,6 @@ function AppContent() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {/* Streak badge */}
-          {streak > 0 && (
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-full"
-              style={{ background: 'rgba(251,146,60,0.12)', border: '1.5px solid rgba(251,146,60,0.3)' }}
-            >
-              <Flame size={14} className="text-orange-500" />
-              <span className="text-[12px] font-black text-orange-500">{streak}</span>
-            </motion.div>
-          )}
           {/* Message button */}
           <motion.button
             onClick={() => setShowMessages(true)}
