@@ -12,7 +12,7 @@ import { FriendEditModal } from '../components/FriendEditModal';
 import { FriendProfileModal } from '../components/FriendProfileModal';
 import { checkUnlockedCards, getZodiacSign } from '../utils/gameLogic';
 import { CELEB_BIRTHDAYS } from '../data/celebBirthdays';
-import { useStreak } from '../hooks/useStreak';
+import { useStreak, recordFriendAdd } from '../hooks/useStreak';
 
 
 export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, onDeleteBirthday }: {
@@ -169,6 +169,7 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
       ...(newWishlist.length > 0 && { wishlist: newWishlist }),
     };
     onAddBirthday(birthday);
+    recordFriendAdd();
     const addedName = newName;
     setNewName(''); setNewDate(''); setNewPhone(''); setNewPhotoUrl('');
     setNewPhotoPreview(''); setNewSocials({ instagram: '', snapchat: '', tiktok: '', twitter: '', facebook: '' });
@@ -212,11 +213,11 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
             <div className="flex items-center gap-2.5">
               <Flame size={18} className="text-orange-500 fill-orange-300" />
               <span className="text-[13px] font-black" style={{ color: 'var(--text-1)' }}>
-                Tu utilises l'app {streak} jour{streak > 1 ? 's' : ''} de suite
+                Tu as ajouté {streak} ami{streak > 1 ? 's' : ''} cette semaine !
               </span>
             </div>
             <span className="text-[11px] font-bold text-orange-400">
-              {streak >= 7 ? 'En feu !' : streak >= 3 ? 'Continue !' : "C'est parti !"}
+              {streak >= 7 ? 'En feu !' : streak >= 3 ? 'Super social !' : "C'est parti !"}
             </span>
           </motion.div>
         )}

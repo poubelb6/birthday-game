@@ -1,37 +1,30 @@
 import { useState, useEffect } from 'react';
-import { format, subDays } from 'date-fns';
+import { startOfWeek, endOfWeek, isWithinInterval, parseISO } from 'date-fns';
 
-const KEY_COUNT = 'streak_count';
-const KEY_DATE  = 'streak_last_date';
+const KEY = 'weekly_adds';
 
-function computeStreak(): number {
-  const today     = format(new Date(), 'yyyy-MM-dd');
-  const yesterday = format(subDays(new Date(), 1), 'yyyy-MM-dd');
-  const lastDate  = localStorage.getItem(KEY_DATE);
-  const saved     = parseInt(localStorage.getItem(KEY_COUNT) || '0', 10);
-
-  let next: number;
-  if (!lastDate) {
-    next = 1;
-  } else if (lastDate === today) {
-    return saved;
-  } else if (lastDate === yesterday) {
-    next = saved + 1;
-  } else {
-    next = 1;
-  }
-
-  localStorage.setItem(KEY_COUNT, String(next));
-  localStorage.setItem(KEY_DATE, today);
-  return next;
+/** Enregistre un ajout d'ami (appelé depuis Dashboard lors de handleAddFriend) */
+export function recordFriendAdd() {
+  const existing: string[] = JSON.parse(localStorage.getItem(KEY) || '[]');
+  existing.push(new Date().toISOString());
+  localStorage.setItem(KEY, JSON.stringify(existing));
 }
 
+/** Retourne le nombre d'amis ajoutés cette semaine (lundi → dimanche) */
 export function useStreak() {
-  const [streak, setStreak] = useState<number>(0);
+  const [count, setCount] = useState(0);
 
   useEffect(() => {
-    setStreak(computeStreak());
+    const now = new Date();
+    const weekStart = startOfWeek(now, { weekStartsOn: 1 });
+    const weekEnd   = endOfWeek(now,   { weekStartsOn: 1 });
+
+    const timestamps: string[] = JSON.parse(localStorage.getItem(KEY) || '[]');
+    const thisWeek = timestamps.filter(ts =>
+      isWithinInterval(parseISO(ts), { start: weekStart, end: weekEnd })
+    );
+    setCount(thisWeek.length);
   }, []);
 
-  return streak;
+  return count;
 }
