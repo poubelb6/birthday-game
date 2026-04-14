@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useEffect, useRef } from 'react';
-import { ZODIAC_EMOJI, ZODIAC_PERSONALITY, formatZodiac, getAvatarColor } from '../utils/zodiac';
+import { ZODIAC_EMOJI, formatZodiac, getAvatarColor } from '../utils/zodiac';
 import { Star, X, ChevronLeft, ChevronRight, Camera, ImageIcon, Phone, Instagram, Twitter, Facebook, Plus, Trash2, ChevronDown, Sparkles, Globe2, Flame } from 'lucide-react';
 import { Birthday, UserProfile } from '../types';
 import { format, differenceInDays, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, startOfDay, addMonths, subMonths } from 'date-fns';
@@ -408,11 +408,6 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
                 <span className="text-xs font-bold text-slate-800 truncate max-w-[72px] text-center">
                   {b.name.split(' ')[0]}
                 </span>
-                {ZODIAC_PERSONALITY[b.zodiac] && (
-                  <span className="text-[9px] font-semibold text-center leading-tight max-w-[72px]" style={{ color: 'var(--text-3)' }}>
-                    {ZODIAC_PERSONALITY[b.zodiac]}
-                  </span>
-                )}
               </motion.div>
             ))}
           </div>
