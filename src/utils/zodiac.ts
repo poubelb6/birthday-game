@@ -1,3 +1,18 @@
+export const ZODIAC_PERSONALITY: Record<string, string> = {
+  'Bélier':      'Audacieux·se',
+  'Taureau':     'Loyal·e & doux·ce',
+  'Gémeaux':     'Curieux·se & vif·ve',
+  'Cancer':      'Sensible & intuitif·ve',
+  'Lion':        'Charismatique',
+  'Vierge':      'Précis·e & fiable',
+  'Balance':     'Diplomate & élégant·e',
+  'Scorpion':    'Intense & mystérieux·se',
+  'Sagittaire':  'Aventurier·ère',
+  'Capricorne':  'Ambitieux·se',
+  'Verseau':     'Original·e & libre',
+  'Poissons':    'Rêveur·se & empathique',
+};
+
 export const ZODIAC_EMOJI: Record<string, string> = {
   'Bélier': '♈', 'Taureau': '♉', 'Gémeaux': '♊', 'Cancer': '♋',
   'Lion': '♌', 'Vierge': '♍', 'Balance': '♎', 'Scorpion': '♏',
