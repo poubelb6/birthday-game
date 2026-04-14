@@ -547,7 +547,7 @@ function NavButton({ active, onClick, icon, label, ariaLabel, activeBg = 'bg-red
       aria-current={active ? 'page' : undefined}
       whileTap={{ scale: 0.86 }}
       transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-      className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${active ? 'scale-110' : 'hover:opacity-80'}`}
+      className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${active ? 'scale-110' : 'opacity-70 hover:opacity-90'}`}
     >
       <motion.div
         animate={active ? { y: -4 } : { y: 0 }}
@@ -560,7 +560,7 @@ function NavButton({ active, onClick, icon, label, ariaLabel, activeBg = 'bg-red
           {iconWithFill}
         </div>
       </motion.div>
-      <span className={`text-[10px] font-black uppercase tracking-[0.15em] ${active ? activeColor : ''}`} style={active ? undefined : { color: 'var(--nav-label-inactive)' }}>
+      <span className={`text-[12px] font-black uppercase tracking-[0.15em] ${active ? activeColor : ''}`} style={active ? undefined : { color: 'var(--nav-label-inactive)' }}>
         {label}
       </span>
     </motion.button>
