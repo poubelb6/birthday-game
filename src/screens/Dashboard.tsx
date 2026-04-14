@@ -73,8 +73,8 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
   const [showStreakToast, setShowStreakToast] = useState(false);
 
   useEffect(() => {
-    if (!sessionStorage.getItem('streak_shown')) {
-      sessionStorage.setItem('streak_shown', '1');
+    if (!sessionStorage.getItem('weekly_toast_shown')) {
+      sessionStorage.setItem('weekly_toast_shown', '1');
       setShowStreakToast(true);
       const t = setTimeout(() => setShowStreakToast(false), 2500);
       return () => clearTimeout(t);
