@@ -560,7 +560,7 @@ function NavButton({ active, onClick, icon, label, ariaLabel, activeBg = 'bg-red
           {iconWithFill}
         </div>
       </motion.div>
-      <span className={`text-[10px] font-black uppercase tracking-[0.15em] ${active ? activeColor : ''}`}>
+      <span className={`text-[10px] font-black uppercase tracking-[0.15em] ${active ? activeColor : 'text-slate-800 dark:text-slate-400'}`}>
         {label}
       </span>
     </motion.button>
