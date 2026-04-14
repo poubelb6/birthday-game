@@ -343,7 +343,7 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
                 className="flex flex-col items-center gap-1.5 cursor-pointer flex-1"
               >
                 <div className="relative">
-                  <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-slate-100 shadow-sm">
+                  <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-slate-900 shadow-sm">
                     {b.photoUrl ? (
                       <img src={b.photoUrl} alt={b.name} className="w-full h-full object-cover" />
                     ) : (
