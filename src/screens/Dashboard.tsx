@@ -371,45 +371,54 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
         {/* ── Le saviez-vous ? ─── remplace le titre "Prochains anniversaires" */}
         {upcoming.length > 0 ? (
           <div className="flex justify-between gap-3 px-2">
-            {upcoming.slice(0, 3).map((b, i) => (
-              <motion.div
-                key={b.id}
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.12, type: 'spring', stiffness: 280, damping: 22 }}
-                onClick={() => setViewingFriend(b)}
-                className="flex flex-col items-center gap-1.5 cursor-pointer flex-1"
-              >
-                <div className="relative">
-                  <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-slate-900 shadow-sm">
-                    {b.photoUrl ? (
-                      <img src={b.photoUrl} alt={b.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center font-black text-2xl text-white" style={{ background: getAvatarColor(b.name) }}>
-                        {b.name.charAt(0).toUpperCase()}
-                      </div>
-                    )}
+            {upcoming.slice(0, 3).map((b, i) => {
+              const bMMDD = format(parseISO(b.birthDate), 'MM-dd');
+              const sameDay = CELEB_BIRTHDAYS.find(c => c.date === bMMDD) ?? null;
+              return (
+                <motion.div
+                  key={b.id}
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.12, type: 'spring', stiffness: 280, damping: 22 }}
+                  onClick={() => setViewingFriend(b)}
+                  className="flex flex-col items-center gap-1.5 cursor-pointer flex-1"
+                >
+                  <div className="relative">
+                    <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-slate-900 shadow-sm">
+                      {b.photoUrl ? (
+                        <img src={b.photoUrl} alt={b.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center font-black text-2xl text-white" style={{ background: getAvatarColor(b.name) }}>
+                          {b.name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                    <motion.div
+                      animate={b.daysUntil === 0 ? { scale: [1, 1.1, 1] } : {}}
+                      transition={b.daysUntil === 0 ? { duration: 1.2, repeat: Infinity } : {}}
+                      className={`absolute -top-2 -right-2 px-1.5 py-0.5 rounded-full text-[9px] font-black shadow-sm ${
+                        b.daysUntil === 0 ? 'bg-green-100 text-green-600' :
+                        b.daysUntil <= 7 ? 'bg-red-100 text-red-500' :
+                        'bg-slate-100 text-slate-500'
+                      }`}
+                    >
+                      {b.daysUntil === 0 ? '🎂' : `J-${b.daysUntil}`}
+                    </motion.div>
                   </div>
-                  <motion.div
-                    animate={b.daysUntil === 0 ? { scale: [1, 1.1, 1] } : {}}
-                    transition={b.daysUntil === 0 ? { duration: 1.2, repeat: Infinity } : {}}
-                    className={`absolute -top-2 -right-2 px-1.5 py-0.5 rounded-full text-[9px] font-black shadow-sm ${
-                      b.daysUntil === 0 ? 'bg-green-100 text-green-600' :
-                      b.daysUntil <= 7 ? 'bg-red-100 text-red-500' :
-                      'bg-slate-100 text-slate-500'
-                    }`}
-                  >
-                    {b.daysUntil === 0 ? '🎂' : `J-${b.daysUntil}`}
-                  </motion.div>
-                </div>
-                <span className="text-[11px] font-black text-slate-700 text-center leading-tight">
-                  {format(parseISO(b.birthDate), 'd MMM', { locale: fr })} {ZODIAC_EMOJI[b.zodiac] ?? ''}
-                </span>
-                <span className="text-xs font-bold text-slate-800 truncate max-w-[72px] text-center">
-                  {b.name.split(' ')[0]}
-                </span>
-              </motion.div>
-            ))}
+                  <span className="text-[11px] font-black text-slate-700 text-center leading-tight">
+                    {format(parseISO(b.birthDate), 'd MMM', { locale: fr })} {ZODIAC_EMOJI[b.zodiac] ?? ''}
+                  </span>
+                  <span className="text-xs font-bold text-slate-800 truncate max-w-[72px] text-center">
+                    {b.name.split(' ')[0]}
+                  </span>
+                  {sameDay && (
+                    <span className="text-[9px] font-semibold text-center leading-tight max-w-[72px]" style={{ color: 'var(--text-3)' }}>
+                      {sameDay.emoji} {sameDay.name.split(' ').slice(-1)[0]}
+                    </span>
+                  )}
+                </motion.div>
+              );
+            })}
           </div>
         ) : (
           <div className="bg-slate-50 border border-dashed border-black/60 rounded-3xl p-10 text-center space-y-4">
