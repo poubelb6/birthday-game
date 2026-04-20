@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { ZODIAC_EMOJI } from '../utils/zodiac';
-import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
+import { Html5Qrcode } from 'html5-qrcode';
 import { motion, AnimatePresence } from 'motion/react';
 import { AlertCircle, UserPlus, X, Check } from 'lucide-react';
 import { Birthday, ZodiacSign } from '../types';
@@ -102,7 +102,6 @@ export function Scanner({ onScan, onScanSuccess, existingBirthdays = [] }: {
       {
         fps: 10,
         qrbox: { width: 250, height: 250 },
-        formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
       },
       (decodedText) => {
         if (isPaused.current) return;
