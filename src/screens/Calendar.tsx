@@ -859,9 +859,9 @@ export function Calendar({
                   <label className="block text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">Catégorie <span className="text-slate-400 normal-case font-medium">(optionnel)</span></label>
                   <div className="grid grid-cols-3 gap-2">
                     {([
-                      { cat: 'famille' as const, label: 'Famille', icon: <Heart size={20} strokeWidth={2.5} />, sel: { bg: '#f43f5e', border: '#f43f5e', icon: '#fff' }, unsel: { bg: '#fff1f2', border: '#ffe4e6', icon: '#fda4af', text: '#fb7185' } },
-                      { cat: 'ami'     as const, label: 'Amis',    icon: <Users size={20} strokeWidth={2.5} />, sel: { bg: '#6366f1', border: '#6366f1', icon: '#fff' }, unsel: { bg: '#f0f0ff', border: '#e0e7ff', icon: '#a5b4fc', text: '#818cf8' } },
-                      { cat: 'autre'   as const, label: 'Autre',   icon: <UserCircle size={20} strokeWidth={2.5} />, sel: { bg: '#f59e0b', border: '#f59e0b', icon: '#fff' }, unsel: { bg: '#fffbeb', border: '#fef3c7', icon: '#fcd34d', text: '#f59e0b' } },
+                      { cat: 'famille' as const, label: 'Famille', icon: <Heart size={20} strokeWidth={2.5} />, sel: { bg: '#f43f5e', border: '#f43f5e', icon: '#fff' }, unsel: { bg: '#fff8f8', border: '#f1f5f9', icon: '#fca5a5', text: '#94a3b8' } },
+                      { cat: 'ami'     as const, label: 'Amis',    icon: <Users size={20} strokeWidth={2.5} />, sel: { bg: '#6366f1', border: '#6366f1', icon: '#fff' }, unsel: { bg: '#f8f8ff', border: '#f1f5f9', icon: '#c4b5fd', text: '#94a3b8' } },
+                      { cat: 'autre'   as const, label: 'Autre',   icon: <UserCircle size={20} strokeWidth={2.5} />, sel: { bg: '#f59e0b', border: '#f59e0b', icon: '#fff' }, unsel: { bg: '#fffdf5', border: '#f1f5f9', icon: '#fde68a', text: '#94a3b8' } },
                     ]).map(({ cat, label, icon, sel, unsel }) => {
                       const isSelected = newCategory === cat;
                       const s = isSelected ? sel : unsel;
