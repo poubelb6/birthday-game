@@ -784,39 +784,35 @@ export function Calendar({
               <div className="space-y-4 overflow-y-auto px-8 pb-2">
                 {/* Photo + Contact */}
                 <div className="space-y-2">
-                  <div className="flex justify-center gap-6">
+                  <div className="grid grid-cols-2 gap-3">
                     {/* Bulle Photo */}
-                    <div className="flex flex-col items-center gap-1.5">
-                      <motion.button
-                        type="button"
-                        whileTap={{ scale: 0.92 }}
-                        onClick={() => setShowPhotoMenu(v => !v)}
-                        className="w-16 h-16 rounded-full overflow-hidden"
-                        style={{ border: '2.5px solid', borderColor: showPhotoMenu ? '#FF4B4B' : '#C2185B', background: newPhotoPreview ? 'transparent' : 'linear-gradient(135deg, #FF4B4B 0%, #C2185B 100%)' }}
-                      >
-                        {newPhotoPreview
-                          ? <img src={newPhotoPreview} alt="preview" className="w-full h-full object-cover" />
-                          : <span className="w-full h-full flex items-center justify-center text-2xl">📷</span>
-                        }
-                      </motion.button>
-                      <span className="text-[10px] font-black text-slate-600">Photo</span>
-                      <span className="text-[9px] text-slate-400">(optionnel)</span>
-                    </div>
+                    <motion.button
+                      type="button"
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setShowPhotoMenu(v => !v)}
+                      className="flex flex-col items-center gap-1.5 py-4 rounded-2xl border-2 border-slate-200 bg-slate-50 transition-colors"
+                      style={showPhotoMenu ? { borderColor: '#FF4B4B', background: '#fff5f5' } : {}}
+                    >
+                      {newPhotoPreview
+                        ? <img src={newPhotoPreview} alt="preview" className="w-10 h-10 rounded-full object-cover border-2 border-rose-300" />
+                        : <span className="text-2xl">📷</span>
+                      }
+                      <span className="text-[11px] font-black text-slate-700">Photo</span>
+                      <span className="text-[10px] text-slate-400 font-medium">(optionnel)</span>
+                    </motion.button>
 
                     {/* Bulle Contact */}
-                    <div className="flex flex-col items-center gap-1.5">
-                      <motion.button
-                        type="button"
-                        whileTap={{ scale: 0.92 }}
-                        onClick={'contacts' in navigator ? handleImportContact : undefined}
-                        className="w-16 h-16 rounded-full flex items-center justify-center"
-                        style={{ border: '2.5px solid #C2185B', background: 'linear-gradient(135deg, #FF4B4B 0%, #C2185B 100%)', opacity: 'contacts' in navigator ? 1 : 0.4 }}
-                      >
-                        <span className="text-2xl">👤</span>
-                      </motion.button>
-                      <span className="text-[10px] font-black text-slate-600">Contact</span>
-                      <span className="text-[9px] text-slate-400">(optionnel)</span>
-                    </div>
+                    <motion.button
+                      type="button"
+                      whileTap={{ scale: 0.95 }}
+                      onClick={'contacts' in navigator ? handleImportContact : undefined}
+                      className="flex flex-col items-center gap-1.5 py-4 rounded-2xl border-2 border-slate-200 bg-slate-50 transition-colors"
+                      style={'contacts' in navigator ? {} : { opacity: 0.4, cursor: 'not-allowed' }}
+                    >
+                      <span className="text-2xl">👤</span>
+                      <span className="text-[11px] font-black text-slate-700">Contact</span>
+                      <span className="text-[10px] text-slate-400 font-medium">(optionnel)</span>
+                    </motion.button>
                   </div>
 
                   {/* Menu photo en dessous */}
