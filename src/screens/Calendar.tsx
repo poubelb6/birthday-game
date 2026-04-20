@@ -762,10 +762,14 @@ export function Calendar({
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl flex flex-col max-h-[90vh]"
             >
-              <div className="flex items-center justify-center relative px-8 pt-8 pb-4 shrink-0">
-                <h3 className="font-display text-xl font-black text-slate-900">Ajouter un ami</h3>
-                <button onClick={() => setShowAddModal(false)} className="absolute right-8 text-slate-500 hover:text-slate-700">
-                  <X size={24} />
+              <div className="relative px-6 pt-7 pb-6 shrink-0 rounded-t-3xl" style={{ background: 'linear-gradient(135deg, #FF4B4B 0%, #FF7043 100%)' }}>
+                <div className="text-center">
+                  <div className="text-4xl mb-1.5">🎉</div>
+                  <h3 className="font-display text-xl font-black text-white">Ajouter un ami</h3>
+                  <p className="text-white/70 text-xs mt-1">Capture leurs infos pour ne jamais oublier !</p>
+                </div>
+                <button onClick={() => setShowAddModal(false)} className="absolute right-4 top-4 w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors">
+                  <X size={17} className="text-white" />
                 </button>
               </div>
 
@@ -776,14 +780,19 @@ export function Calendar({
                     Photo <span className="text-slate-400 normal-case font-medium">(optionnel)</span>
                   </label>
                   <div className="flex flex-col items-center gap-2">
-                    <div
-                      onClick={() => setShowPhotoMenu(v => !v)}
-                      className="w-16 h-16 rounded-full bg-slate-50 border border-black/60 flex items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors overflow-hidden"
-                    >
-                      {newPhotoPreview
-                        ? <img src={newPhotoPreview} alt="preview" className="w-full h-full object-cover" />
-                        : <Camera size={20} className="text-slate-400" />
-                      }
+                    <div className="relative" onClick={() => setShowPhotoMenu(v => !v)}>
+                      <div
+                        className="w-20 h-20 rounded-full flex items-center justify-center cursor-pointer overflow-hidden transition-transform active:scale-95"
+                        style={newPhotoPreview ? {} : { background: 'linear-gradient(135deg, #f43f5e 0%, #fb923c 100%)' }}
+                      >
+                        {newPhotoPreview
+                          ? <img src={newPhotoPreview} alt="preview" className="w-full h-full object-cover" />
+                          : <Camera size={26} className="text-white" />
+                        }
+                      </div>
+                      <div className="absolute -bottom-0.5 -right-0.5 w-6 h-6 rounded-full flex items-center justify-center border-2 border-white shadow-sm" style={{ background: '#FF4B4B' }}>
+                        <span className="text-white text-[11px] font-black leading-none">+</span>
+                      </div>
                     </div>
                     <AnimatePresence>
                       {showPhotoMenu && (
@@ -818,31 +827,33 @@ export function Calendar({
 
                 {/* Nom */}
                 <div className="space-y-1">
-                  <label className="block text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">Nom</label>
+                  <label className="block text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">✏️ Nom</label>
                   <input
                     type="text"
                     value={newName}
                     onChange={e => setNewName(e.target.value)}
                     placeholder="Ex: Marie"
-                    className="w-full bg-slate-50 border border-black/60 rounded-2xl p-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-sky-500 transition-colors"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-all"
                   />
                 </div>
 
                 {/* Date */}
                 <div className="space-y-1">
-                  <label className="block text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">Date de naissance</label>
+                  <label className="block text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">🎂 Date de naissance</label>
                   <input
                     type="date"
                     value={newDate}
                     onChange={e => setNewDate(e.target.value)}
-                    className="w-full bg-slate-50 border border-black/60 rounded-2xl p-4 text-slate-900 focus:outline-none focus:border-sky-500 transition-colors"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-900 focus:outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-all"
                   />
                   {newDate && (() => {
                     const zodiac = getZodiacSign(parseISO(newDate));
                     return (
-                      <p className="text-center text-sm font-bold text-slate-500 pt-1">
-                        {ZODIAC_EMOJI[zodiac]} {zodiac}
-                      </p>
+                      <div className="flex justify-center pt-1">
+                        <span className="inline-flex items-center gap-1.5 bg-violet-50 border border-violet-100 text-violet-600 text-xs font-black px-3 py-1 rounded-full">
+                          {ZODIAC_EMOJI[zodiac]} {zodiac}
+                        </span>
+                      </div>
                     );
                   })()}
                 </div>
@@ -852,27 +863,24 @@ export function Calendar({
                   <label className="block text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">Catégorie <span className="text-slate-400 normal-case font-medium">(optionnel)</span></label>
                   <div className="grid grid-cols-3 gap-2">
                     {([
-                      { cat: 'famille' as const, label: 'Famille', icon: <Heart size={16} strokeWidth={2} /> },
-                      { cat: 'ami'     as const, label: 'Amis',    icon: <Users size={16} strokeWidth={2} /> },
-                      { cat: 'autre'   as const, label: 'Autre',   icon: <UserCircle size={16} strokeWidth={2} /> },
-                    ]).map(({ cat, label, icon }) => {
+                      { cat: 'famille' as const, label: 'Famille', emoji: '🏠', selectedBg: '#f43f5e', selectedBorder: '#f43f5e', unselBg: '#fff1f2', unselBorder: '#fecdd3', unselText: '#fb7185' },
+                      { cat: 'ami'     as const, label: 'Amis',    emoji: '👯', selectedBg: '#6366f1', selectedBorder: '#6366f1', unselBg: '#eef2ff', unselBorder: '#c7d2fe', unselText: '#818cf8' },
+                      { cat: 'autre'   as const, label: 'Autre',   emoji: '⭐', selectedBg: '#f59e0b', selectedBorder: '#f59e0b', unselBg: '#fffbeb', unselBorder: '#fde68a', unselText: '#fbbf24' },
+                    ]).map(({ cat, label, emoji, selectedBg, selectedBorder, unselBg, unselBorder, unselText }) => {
                       const isSelected = newCategory === cat;
-                      const styles = {
-                        famille: { on: 'bg-rose-50 border-rose-300 text-rose-600', icon: 'text-rose-500' },
-                        ami:     { on: 'bg-sky-50 border-sky-300 text-sky-600',    icon: 'text-sky-500' },
-                        autre:   { on: 'bg-slate-100 border-slate-300 text-slate-600', icon: 'text-slate-500' },
-                      }[cat];
                       return (
                         <motion.button
                           key={cat}
                           type="button"
                           whileTap={{ scale: 0.93 }}
                           onClick={() => setNewCategory(isSelected ? undefined : cat)}
-                          className={`flex flex-col items-center gap-1.5 py-3 rounded-2xl border text-[11px] font-black transition-all ${
-                            isSelected ? styles.on : 'bg-slate-50 border-black/10 text-slate-400'
-                          }`}
+                          className="flex flex-col items-center gap-2 py-4 rounded-2xl border-2 text-[11px] font-black transition-all"
+                          style={isSelected
+                            ? { background: selectedBg, borderColor: selectedBorder, color: '#fff', boxShadow: `0 4px 12px ${selectedBg}55` }
+                            : { background: unselBg, borderColor: unselBorder, color: unselText }
+                          }
                         >
-                          <span className={isSelected ? styles.icon : 'text-slate-300'}>{icon}</span>
+                          <span className="text-2xl leading-none">{emoji}</span>
                           {label}
                         </motion.button>
                       );
@@ -902,7 +910,7 @@ export function Calendar({
                     className="w-full flex items-center justify-between px-4 py-3 bg-slate-50 hover:bg-slate-100 transition-colors"
                   >
                     <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                      Réseaux sociaux <span className="text-slate-400 normal-case font-medium">(optionnel)</span>
+                      🌐 Réseaux sociaux <span className="text-slate-400 normal-case font-medium">(optionnel)</span>
                     </span>
                     <motion.span animate={{ rotate: showSocials ? 180 : 0 }} transition={{ duration: 0.25 }}>
                       <ChevronDown size={16} className="text-slate-400" />
