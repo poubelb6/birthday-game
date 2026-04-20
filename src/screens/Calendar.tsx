@@ -859,9 +859,9 @@ export function Calendar({
                   <label className="block text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">Catégorie <span className="text-slate-400 normal-case font-medium">(optionnel)</span></label>
                   <div className="grid grid-cols-3 gap-2">
                     {([
-                      { cat: 'famille' as const, label: 'Famille', icon: <Heart size={20} strokeWidth={2.5} />, sel: { bg: '#f43f5e', border: '#f43f5e', icon: '#fff' }, unsel: { bg: '#fff', border: '#e2e8f0', icon: '#cbd5e1', text: '#94a3b8' } },
-                      { cat: 'ami'     as const, label: 'Amis',    icon: <Users size={20} strokeWidth={2.5} />, sel: { bg: '#6366f1', border: '#6366f1', icon: '#fff' }, unsel: { bg: '#fff', border: '#e2e8f0', icon: '#cbd5e1', text: '#94a3b8' } },
-                      { cat: 'autre'   as const, label: 'Autre',   icon: <UserCircle size={20} strokeWidth={2.5} />, sel: { bg: '#f59e0b', border: '#f59e0b', icon: '#fff' }, unsel: { bg: '#fff', border: '#e2e8f0', icon: '#cbd5e1', text: '#94a3b8' } },
+                      { cat: 'famille' as const, label: 'Famille', icon: <Heart size={20} strokeWidth={2.5} />, sel: { bg: '#f43f5e', border: '#f43f5e', icon: '#fff' }, unsel: { bg: '#fff1f2', border: '#ffe4e6', icon: '#fda4af', text: '#fb7185' } },
+                      { cat: 'ami'     as const, label: 'Amis',    icon: <Users size={20} strokeWidth={2.5} />, sel: { bg: '#6366f1', border: '#6366f1', icon: '#fff' }, unsel: { bg: '#f0f0ff', border: '#e0e7ff', icon: '#a5b4fc', text: '#818cf8' } },
+                      { cat: 'autre'   as const, label: 'Autre',   icon: <UserCircle size={20} strokeWidth={2.5} />, sel: { bg: '#f59e0b', border: '#f59e0b', icon: '#fff' }, unsel: { bg: '#fffbeb', border: '#fef3c7', icon: '#fcd34d', text: '#f59e0b' } },
                     ]).map(({ cat, label, icon, sel, unsel }) => {
                       const isSelected = newCategory === cat;
                       const s = isSelected ? sel : unsel;
@@ -869,9 +869,11 @@ export function Calendar({
                         <motion.button
                           key={cat}
                           type="button"
-                          whileTap={{ scale: 0.93 }}
+                          whileHover={{ scale: 1.04 }}
+                          whileTap={{ scale: 0.88, rotate: isSelected ? 0 : -3 }}
+                          transition={{ type: 'spring', stiffness: 400, damping: 17 }}
                           onClick={() => setNewCategory(isSelected ? undefined : cat)}
-                          className="flex flex-col items-center gap-1 py-2 rounded-2xl border-2 text-[11px] font-black transition-all"
+                          className="flex flex-col items-center gap-1 py-2 rounded-2xl border-2 text-[11px] font-black"
                           style={{ background: s.bg, borderColor: s.border, color: isSelected ? '#fff' : (unsel as typeof sel & { text: string }).text, ...(isSelected && { boxShadow: `0 4px 12px ${sel.bg}55` }) }}
                         >
                           <span style={{ color: s.icon }}>{icon}</span>
