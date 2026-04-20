@@ -774,79 +774,74 @@ export function Calendar({
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl flex flex-col max-h-[90vh]"
             >
-              <div className="relative flex items-center justify-center px-10 py-3 shrink-0 rounded-t-3xl" style={{ background: 'linear-gradient(135deg, #FF4B4B 0%, #C2185B 100%)' }}>
+              <div className="relative flex items-center justify-between px-5 py-3 shrink-0 rounded-t-3xl" style={{ background: 'linear-gradient(135deg, #FF4B4B 0%, #C2185B 100%)' }}>
                 <h3 className="font-display text-sm font-black text-white tracking-wide">🎉 Ajouter un ami</h3>
-                <button onClick={() => setShowAddModal(false)} className="absolute right-3 w-7 h-7 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors">
+                <button onClick={() => setShowAddModal(false)} className="w-7 h-7 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors">
                   <X size={15} className="text-white" />
                 </button>
               </div>
 
               <div className="space-y-4 overflow-y-auto px-8 pb-2">
-                {/* Photo + Contact */}
+                {/* Photo */}
                 <div className="space-y-2">
-                  <div className="grid grid-cols-2 gap-3">
-                    {/* Bulle Photo */}
-                    <motion.button
-                      type="button"
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setShowPhotoMenu(v => !v)}
-                      className="flex flex-col items-center gap-1.5 py-4 rounded-2xl border-2 border-slate-200 bg-slate-50 transition-colors"
-                      style={showPhotoMenu ? { borderColor: '#FF4B4B', background: '#fff5f5' } : {}}
-                    >
-                      {newPhotoPreview
-                        ? <img src={newPhotoPreview} alt="preview" className="w-10 h-10 rounded-full object-cover border-2 border-rose-300" />
-                        : <span className="text-2xl">📷</span>
-                      }
-                      <span className="text-[11px] font-black text-slate-700">Photo</span>
-                      <span className="text-[10px] text-slate-400 font-medium">(optionnel)</span>
-                    </motion.button>
-
-                    {/* Bulle Contact */}
-                    <motion.button
-                      type="button"
-                      whileTap={{ scale: 0.95 }}
-                      onClick={'contacts' in navigator ? handleImportContact : undefined}
-                      className="flex flex-col items-center gap-1.5 py-4 rounded-2xl border-2 border-slate-200 bg-slate-50 transition-colors"
-                      style={'contacts' in navigator ? {} : { opacity: 0.4, cursor: 'not-allowed' }}
-                    >
-                      <span className="text-2xl">👤</span>
-                      <span className="text-[11px] font-black text-slate-700">Contact</span>
-                      <span className="text-[10px] text-slate-400 font-medium">(optionnel)</span>
-                    </motion.button>
-                  </div>
-
-                  {/* Menu photo en dessous */}
-                  <AnimatePresence>
-                    {showPhotoMenu && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -6, height: 0 }}
-                        animate={{ opacity: 1, y: 0, height: 'auto' }}
-                        exit={{ opacity: 0, y: -6, height: 0 }}
-                        transition={{ duration: 0.2, ease: 'easeInOut' }}
-                        className="overflow-hidden"
+                  <label className="block text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                    Photo <span className="text-slate-400 normal-case font-medium">(optionnel)</span>
+                  </label>
+                  <div className="flex items-center justify-center gap-4">
+                    <div className="relative" onClick={() => setShowPhotoMenu(v => !v)}>
+                      <div
+                        className="w-20 h-20 rounded-full flex items-center justify-center cursor-pointer overflow-hidden transition-transform active:scale-95"
+                        style={newPhotoPreview ? {} : { background: 'linear-gradient(135deg, #f43f5e 0%, #fb923c 100%)' }}
                       >
-                        <div className="grid grid-cols-2 gap-3 pt-1">
+                        {newPhotoPreview
+                          ? <img src={newPhotoPreview} alt="preview" className="w-full h-full object-cover" />
+                          : <Camera size={26} className="text-white" />
+                        }
+                      </div>
+                      <div className="absolute -bottom-0.5 -right-0.5 w-6 h-6 rounded-full flex items-center justify-center border-2 border-white shadow-sm" style={{ background: '#FF4B4B' }}>
+                        <span className="text-white text-[11px] font-black leading-none">+</span>
+                      </div>
+                    </div>
+                    {'contacts' in navigator && (
+                      <motion.button
+                        type="button"
+                        whileTap={{ scale: 0.93 }}
+                        onClick={handleImportContact}
+                        className="flex flex-col items-center gap-1.5 px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-2xl text-[11px] font-black text-slate-600 hover:bg-slate-100 transition-colors"
+                      >
+                        <BookUser size={20} className="text-slate-500" />
+                        Contacts
+                      </motion.button>
+                    )}
+                    <AnimatePresence>
+                      {showPhotoMenu && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -6, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: -6, scale: 0.95 }}
+                          transition={{ duration: 0.18 }}
+                          className="flex gap-2"
+                        >
                           <button
                             type="button"
                             onClick={() => { cameraInputRef.current?.click(); setShowPhotoMenu(false); }}
-                            className="flex items-center justify-center gap-2 py-2.5 bg-white border-2 border-slate-200 rounded-2xl text-[11px] font-bold text-slate-700 hover:border-rose-300 transition-colors"
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-black/60 rounded-xl text-[11px] font-bold text-slate-700"
                           >
-                            <Camera size={14} className="text-rose-400" /> Appareil photo
+                            <Camera size={13} /> Appareil photo
                           </button>
                           <button
                             type="button"
                             onClick={() => { fileInputRef.current?.click(); setShowPhotoMenu(false); }}
-                            className="flex items-center justify-center gap-2 py-2.5 bg-white border-2 border-slate-200 rounded-2xl text-[11px] font-bold text-slate-700 hover:border-rose-300 transition-colors"
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-black/60 rounded-xl text-[11px] font-bold text-slate-700"
                           >
-                            <ImageIcon size={14} className="text-rose-400" /> Galerie
+                            <ImageIcon size={13} /> Galerie
                           </button>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-
-                  <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handlePhotoFile} className="hidden" />
-                  <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoFile} className="hidden" />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                    <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handlePhotoFile} className="hidden" />
+                    <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoFile} className="hidden" />
+                  </div>
                 </div>
 
                 {/* Nom */}
