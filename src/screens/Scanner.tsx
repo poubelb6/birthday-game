@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { ZODIAC_EMOJI } from '../utils/zodiac';
-import { Html5QrcodeScanner, Html5QrcodeSupportedFormats } from 'html5-qrcode';
+import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { motion, AnimatePresence } from 'motion/react';
 import { AlertCircle, UserPlus, X, Check } from 'lucide-react';
 import { Birthday, ZodiacSign } from '../types';
@@ -85,7 +85,7 @@ export function Scanner({ onScan, onScanSuccess, existingBirthdays = [] }: {
   const [error, setError]     = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [pending, setPending] = useState<ScannedProfile | null>(null);
-  const scannerRef = useRef<Html5QrcodeScanner | null>(null);
+  const scannerRef = useRef<Html5Qrcode | null>(null);
   const isPaused   = useRef(false);
 
   const showError = (msg: string) => {
@@ -94,17 +94,16 @@ export function Scanner({ onScan, onScanSuccess, existingBirthdays = [] }: {
   };
 
   useEffect(() => {
-    const scanner = new Html5QrcodeScanner(
-      'reader',
+    const html5Qrcode = new Html5Qrcode('reader');
+    scannerRef.current = html5Qrcode;
+
+    html5Qrcode.start(
+      { facingMode: 'environment' },
       {
         fps: 10,
         qrbox: { width: 250, height: 250 },
         formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
       },
-      false
-    );
-
-    scanner.render(
       (decodedText) => {
         if (isPaused.current) return;
 
@@ -133,11 +132,13 @@ export function Scanner({ onScan, onScanSuccess, existingBirthdays = [] }: {
         setPending(profile);
       },
       () => {}
-    );
+    ).catch((err) => {
+      showError('Impossible d\'accéder à la caméra. Vérifie les permissions.');
+      console.error('Camera error:', err);
+    });
 
-    scannerRef.current = scanner;
     return () => {
-      scannerRef.current?.clear().catch(() => {});
+      html5Qrcode.stop().then(() => html5Qrcode.clear()).catch(() => {});
     };
   }, []);
 
@@ -182,7 +183,7 @@ export function Scanner({ onScan, onScanSuccess, existingBirthdays = [] }: {
   return (
     <div className="flex-1 bg-slate-900 relative flex flex-col overflow-hidden">
 
-      {/* Force html5-qrcode video to fill its container, remove all library chrome */}
+      {/* Style the html5-qrcode video element to fill the container */}
       <style>{`
         #reader {
           position: relative !important;
@@ -191,7 +192,6 @@ export function Scanner({ onScan, onScanSuccess, existingBirthdays = [] }: {
           padding: 0 !important;
           margin: 0 !important;
         }
-        #reader > * { margin: 0 !important; padding: 0 !important; }
         #reader video {
           width: 100% !important;
           height: 100% !important;
@@ -208,9 +208,6 @@ export function Scanner({ onScan, onScanSuccess, existingBirthdays = [] }: {
           min-height: unset !important;
         }
         #reader__scan_region img { display: none !important; }
-        #reader__dashboard { display: none !important; }
-        #reader__header_message { display: none !important; }
-        #reader__status_span { display: none !important; }
       `}</style>
 
       {/* Scanner */}
