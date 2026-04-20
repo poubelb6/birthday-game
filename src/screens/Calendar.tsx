@@ -829,7 +829,7 @@ export function Calendar({
                     value={newName}
                     onChange={e => setNewName(e.target.value)}
                     placeholder="Ex: Marie"
-                    className="w-full bg-white border-2 border-slate-900 rounded-2xl p-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-rose-500 transition-all"
+                    className="w-full bg-white border-2 border-slate-900 rounded-2xl py-2.5 px-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-rose-500 transition-all"
                   />
                 </div>
 
@@ -840,7 +840,7 @@ export function Calendar({
                     type="date"
                     value={newDate}
                     onChange={e => setNewDate(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-900 focus:outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-all"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-2.5 px-4 text-slate-900 focus:outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-all"
                   />
                   {newDate && (() => {
                     const zodiac = getZodiacSign(parseISO(newDate));
@@ -871,7 +871,7 @@ export function Calendar({
                           type="button"
                           whileTap={{ scale: 0.93 }}
                           onClick={() => setNewCategory(isSelected ? undefined : cat)}
-                          className="flex flex-col items-center gap-1.5 py-3 rounded-2xl border-2 text-[11px] font-black transition-all"
+                          className="flex flex-col items-center gap-1 py-2 rounded-2xl border-2 text-[11px] font-black transition-all"
                           style={{ background: s.bg, borderColor: s.border, color: isSelected ? '#fff' : (unsel as typeof sel & { text: string }).text, ...(isSelected && { boxShadow: `0 4px 12px ${sel.bg}55` }) }}
                         >
                           <span style={{ color: s.icon }}>{icon}</span>
@@ -892,7 +892,7 @@ export function Calendar({
                     value={newPhone}
                     onChange={e => setNewPhone(e.target.value)}
                     placeholder="Ex: +33 6 12 34 56 78"
-                    className="w-full bg-white border-2 border-slate-900 rounded-2xl p-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-rose-500 transition-all"
+                    className="w-full bg-white border-2 border-slate-900 rounded-2xl py-2.5 px-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-rose-500 transition-all"
                   />
                 </div>
 
