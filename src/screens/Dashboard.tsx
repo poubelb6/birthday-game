@@ -371,6 +371,11 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
         {upcoming.length > 0 ? (() => {
           const [hero, ...rest] = upcoming;
 
+          const catBorder = (cat?: string) =>
+            cat === 'famille' ? '#f43f5e' :
+            cat === 'ami'     ? '#6366f1' :
+            cat === 'autre'   ? '#f59e0b' : '#0f172a';
+
           // Urgency level
           const isToday   = hero.daysUntil === 0;
           const isUrgent  = hero.daysUntil >= 1 && hero.daysUntil <= 3;
@@ -415,7 +420,7 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
                         style={{ background: 'rgba(255,255,255,0.4)', margin: -4, borderRadius: 20 }}
                       />
                     )}
-                    <div className="w-20 h-20 rounded-2xl overflow-hidden" style={{ border: (isToday || isUrgent || isWeek) ? '2px solid rgba(255,255,255,0.5)' : '2px solid #0f172a' }}>
+                    <div className="w-20 h-20 rounded-2xl overflow-hidden" style={{ border: (isToday || isUrgent || isWeek) ? '3px solid rgba(255,255,255,0.6)' : `3px solid ${catBorder(hero.category)}` }}>
                       {hero.photoUrl ? (
                         <img src={hero.photoUrl} alt={hero.name} className="w-full h-full object-cover" />
                       ) : (
@@ -485,7 +490,7 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
                         style={{ background: 'var(--surface-card)' }}
                       >
                         <div className="relative shrink-0">
-                          <div className="w-11 h-11 rounded-xl overflow-hidden border-2 border-slate-900">
+                          <div className="w-11 h-11 rounded-xl overflow-hidden" style={{ border: `2px solid ${catBorder(b.category)}` }}>
                             {b.photoUrl ? (
                               <img src={b.photoUrl} alt={b.name} className="w-full h-full object-cover" />
                             ) : (
