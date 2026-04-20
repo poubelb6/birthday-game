@@ -18,7 +18,7 @@ import { useStreak, recordFriendAdd } from '../hooks/useStreak';
 export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, onDeleteBirthday }: {
   birthdays: Birthday[],
   user: UserProfile | null,
-  onAddBirthday?: (b: Birthday) => void,
+  onAddBirthday?: (b: Birthday) => Promise<void> | void,
   onUpdateBirthday?: (id: string, updates: Partial<Birthday>) => Promise<void>,
   onDeleteBirthday?: (id: string) => void,
 }) {
@@ -151,7 +151,7 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
     e.target.value = '';
   };
 
-  const handleAddFriend = () => {
+  const handleAddFriend = async () => {
     if (!newName || !newDate || !onAddBirthday) return;
     const birthDate = parseISO(newDate);
     const socials = Object.fromEntries(
@@ -168,7 +168,7 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
       ...(Object.keys(socials ?? {}).length > 0 && { socials }),
       ...(newWishlist.length > 0 && { wishlist: newWishlist }),
     };
-    onAddBirthday(birthday);
+    await onAddBirthday(birthday);
     recordFriendAdd();
     const addedName = newName;
     setNewName(''); setNewDate(''); setNewPhone(''); setNewPhotoUrl('');

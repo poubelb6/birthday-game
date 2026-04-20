@@ -205,7 +205,7 @@ export function Calendar({
 }: {
   birthdays: Birthday[];
   user?: UserProfile | null;
-  onAddBirthday?: (b: Birthday) => void;
+  onAddBirthday?: (b: Birthday) => Promise<void> | void;
   onUpdateBirthday?: (id: string, updates: Partial<Birthday>) => Promise<void>;
   onDeleteBirthday?: (id: string) => void;
   onFirstVisit?: () => void;
@@ -336,7 +336,7 @@ export function Calendar({
     e.target.value = '';
   };
 
-  const handleAddFriend = () => {
+  const handleAddFriend = async () => {
     if (!newName || !newDate || !onAddBirthday) return;
     const birthDate = parseISO(newDate);
     const socials = Object.fromEntries(
@@ -354,7 +354,7 @@ export function Calendar({
       ...(newWishlist.length > 0 && { wishlist: newWishlist }),
       ...(newCategory && { category: newCategory }),
     };
-    onAddBirthday(birthday);
+    await onAddBirthday(birthday);
     const addedName = newName;
     setNewName(''); setNewDate(''); setNewPhone(''); setNewCategory(undefined);
     setNewPhotoUrl(''); setNewPhotoPreview('');
