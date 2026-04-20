@@ -367,60 +367,6 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
         </div>
       </section>
 
-      {/* ── Célébrité du jour ── */}
-      {celebOfDay && (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 overflow-hidden shadow-sm">
-          <div className="flex items-center gap-3">
-            <span className="text-xl shrink-0">{celebOfDay.emoji}</span>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5 mb-0.5">
-                <Sparkles size={9} className="text-amber-400 shrink-0" />
-                <span className="text-[9px] font-bold text-amber-500 uppercase tracking-wider">Né(e) aujourd'hui</span>
-              </div>
-              <h4 className="font-display font-black text-[13px] leading-tight truncate" style={{ color: 'var(--text-1)' }}>
-                {celebOfDay.name}
-              </h4>
-              <p className="text-[11px] font-medium leading-tight mt-0.5 truncate" style={{ color: 'var(--text-2)' }}>
-                {celebOfDay.title}
-              </p>
-            </div>
-            <motion.button
-              onClick={() => setCelebExpanded(v => !v)}
-              whileTap={{ scale: 0.88 }}
-              className="w-7 h-7 rounded-lg bg-amber-100 flex items-center justify-center shrink-0"
-            >
-              <motion.div animate={{ rotate: celebExpanded ? 180 : 0 }} transition={{ duration: 0.25 }}>
-                <ChevronDown size={14} className="text-amber-500" strokeWidth={2.5} />
-              </motion.div>
-            </motion.button>
-          </div>
-          <AnimatePresence initial={false}>
-            {celebExpanded && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.28, ease: 'easeInOut' }}
-                className="overflow-hidden"
-              >
-                <div className="pt-3 mt-3 border-t border-amber-100 space-y-2.5">
-                  <p className="text-[12px] text-slate-600 leading-relaxed">{celebOfDay.description}</p>
-                  <a
-                    href={celebOfDay.wikipedia}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 bg-amber-100 border border-amber-200 rounded-xl px-3 py-1.5 active:scale-95 transition-transform"
-                  >
-                    <Globe2 size={11} className="text-amber-600" />
-                    <span className="text-[11px] font-black text-amber-600">Wikipedia</span>
-                  </a>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      )}
-
       <section className="space-y-3">
         {upcoming.length > 0 ? (() => {
           const [hero, ...rest] = upcoming;
@@ -589,6 +535,60 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
             </motion.button>
           </div>
         )}
+
+      {/* ── Célébrité du jour ── */}
+      {celebOfDay && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 overflow-hidden shadow-sm">
+          <div className="flex items-center gap-3">
+            <span className="text-xl shrink-0">{celebOfDay.emoji}</span>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <Sparkles size={9} className="text-amber-400 shrink-0" />
+                <span className="text-[9px] font-bold text-amber-500 uppercase tracking-wider">Né(e) aujourd'hui</span>
+              </div>
+              <h4 className="font-display font-black text-[13px] leading-tight truncate" style={{ color: 'var(--text-1)' }}>
+                {celebOfDay.name}
+              </h4>
+              <p className="text-[11px] font-medium leading-tight mt-0.5 truncate" style={{ color: 'var(--text-2)' }}>
+                {celebOfDay.title}
+              </p>
+            </div>
+            <motion.button
+              onClick={() => setCelebExpanded(v => !v)}
+              whileTap={{ scale: 0.88 }}
+              className="w-7 h-7 rounded-lg bg-amber-100 flex items-center justify-center shrink-0"
+            >
+              <motion.div animate={{ rotate: celebExpanded ? 180 : 0 }} transition={{ duration: 0.25 }}>
+                <ChevronDown size={14} className="text-amber-500" strokeWidth={2.5} />
+              </motion.div>
+            </motion.button>
+          </div>
+          <AnimatePresence initial={false}>
+            {celebExpanded && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.28, ease: 'easeInOut' }}
+                className="overflow-hidden"
+              >
+                <div className="pt-3 mt-3 border-t border-amber-100 space-y-2.5">
+                  <p className="text-[12px] text-slate-600 leading-relaxed">{celebOfDay.description}</p>
+                  <a
+                    href={celebOfDay.wikipedia}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 bg-amber-100 border border-amber-200 rounded-xl px-3 py-1.5 active:scale-95 transition-transform"
+                  >
+                    <Globe2 size={11} className="text-amber-600" />
+                    <span className="text-[11px] font-black text-amber-600">Wikipedia</span>
+                  </a>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
 
       </section>
 
