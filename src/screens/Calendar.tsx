@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { formatZodiac, getAvatarColor } from '../utils/zodiac';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronDown, X, Camera, ImageIcon, Phone, Instagram, Twitter, Facebook, Plus, Trash2, Search, Trophy, Heart, Users, UserCircle, Pencil, QrCode } from 'lucide-react';
+import { ChevronDown, X, Camera, ImageIcon, Phone, Instagram, Twitter, Facebook, Plus, Trash2, Search, Trophy, Heart, Users, UserCircle, Pencil, QrCode, BookUser } from 'lucide-react';
 import { FriendEditModal } from '../components/FriendEditModal';
 import { FriendProfileModal } from '../components/FriendProfileModal';
 import confetti from 'canvas-confetti';
@@ -279,6 +279,18 @@ export function Calendar({
     } finally {
       setLeaderboardLoading(false);
     }
+  };
+
+  const handleImportContact = async () => {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const contacts = await (navigator as any).contacts.select(['name', 'tel'], { multiple: false });
+      if (contacts.length > 0) {
+        const c = contacts[0];
+        if (c.name?.[0]) setNewName(c.name[0]);
+        if (c.tel?.[0]) setNewPhone(c.tel[0]);
+      }
+    } catch { /* annulé par l'utilisateur */ }
   };
 
   const handlePhotoFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -775,7 +787,7 @@ export function Calendar({
                   <label className="block text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">
                     Photo <span className="text-slate-400 normal-case font-medium">(optionnel)</span>
                   </label>
-                  <div className="flex flex-col items-center gap-2">
+                  <div className="flex items-center justify-center gap-4">
                     <div className="relative" onClick={() => setShowPhotoMenu(v => !v)}>
                       <div
                         className="w-20 h-20 rounded-full flex items-center justify-center cursor-pointer overflow-hidden transition-transform active:scale-95"
@@ -790,6 +802,17 @@ export function Calendar({
                         <span className="text-white text-[11px] font-black leading-none">+</span>
                       </div>
                     </div>
+                    {'contacts' in navigator && (
+                      <motion.button
+                        type="button"
+                        whileTap={{ scale: 0.93 }}
+                        onClick={handleImportContact}
+                        className="flex flex-col items-center gap-1.5 px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-2xl text-[11px] font-black text-slate-600 hover:bg-slate-100 transition-colors"
+                      >
+                        <BookUser size={20} className="text-slate-500" />
+                        Contacts
+                      </motion.button>
+                    )}
                     <AnimatePresence>
                       {showPhotoMenu && (
                         <motion.div
