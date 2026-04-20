@@ -762,16 +762,10 @@ export function Calendar({
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl flex flex-col max-h-[90vh]"
             >
-              <div className="relative flex items-center justify-between px-5 py-3.5 shrink-0 rounded-t-3xl" style={{ background: 'linear-gradient(135deg, #FF4B4B 0%, #FF7043 100%)' }}>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">🎉</span>
-                    <h3 className="font-display text-base font-black text-white">Ajouter un ami</h3>
-                  </div>
-                  <p className="text-white/70 text-[11px] mt-0.5 pl-0.5">Capture leurs infos pour ne jamais oublier !</p>
-                </div>
-                <button onClick={() => setShowAddModal(false)} className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors shrink-0">
-                  <X size={17} className="text-white" />
+              <div className="relative flex items-center justify-between px-5 py-3 shrink-0 rounded-t-3xl" style={{ background: 'linear-gradient(135deg, #FF4B4B 0%, #C2185B 100%)' }}>
+                <h3 className="font-display text-sm font-black text-white tracking-wide">🎉 Ajouter un ami</h3>
+                <button onClick={() => setShowAddModal(false)} className="w-7 h-7 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors">
+                  <X size={15} className="text-white" />
                 </button>
               </div>
 
@@ -835,7 +829,7 @@ export function Calendar({
                     value={newName}
                     onChange={e => setNewName(e.target.value)}
                     placeholder="Ex: Marie"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-all"
+                    className="w-full bg-white border-2 border-slate-900 rounded-2xl p-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-rose-500 transition-all"
                   />
                 </div>
 
@@ -898,7 +892,7 @@ export function Calendar({
                     value={newPhone}
                     onChange={e => setNewPhone(e.target.value)}
                     placeholder="Ex: +33 6 12 34 56 78"
-                    className="w-full bg-slate-50 border border-black/60 rounded-2xl p-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-sky-500 transition-colors"
+                    className="w-full bg-white border-2 border-slate-900 rounded-2xl p-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-rose-500 transition-all"
                   />
                 </div>
 
