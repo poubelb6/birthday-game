@@ -222,6 +222,7 @@ export function Calendar({
   // Add friend form state
   const [newName, setNewName] = useState('');
   const [newDate, setNewDate] = useState('');
+  const [newCategory, setNewCategory] = useState<Birthday['category']>(undefined);
   const [newPhone, setNewPhone] = useState('');
   const [newPhotoUrl, setNewPhotoUrl] = useState('');
   const [newPhotoPreview, setNewPhotoPreview] = useState('');
@@ -339,10 +340,11 @@ export function Calendar({
       ...(newPhone && { phone: newPhone }),
       ...(Object.keys(socials ?? {}).length > 0 && { socials }),
       ...(newWishlist.length > 0 && { wishlist: newWishlist }),
+      ...(newCategory && { category: newCategory }),
     };
     onAddBirthday(birthday);
     const addedName = newName;
-    setNewName(''); setNewDate(''); setNewPhone('');
+    setNewName(''); setNewDate(''); setNewPhone(''); setNewCategory(undefined);
     setNewPhotoUrl(''); setNewPhotoPreview('');
     setNewSocials({ instagram: '', snapchat: '', tiktok: '', twitter: '', facebook: '' });
     setNewWishlist([]); setNewWishInput('');
@@ -835,6 +837,39 @@ export function Calendar({
                     onChange={e => setNewDate(e.target.value)}
                     className="w-full bg-slate-50 border border-black/60 rounded-2xl p-4 text-slate-900 focus:outline-none focus:border-sky-500 transition-colors"
                   />
+                </div>
+
+                {/* Catégorie */}
+                <div className="space-y-2">
+                  <label className="block text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">Catégorie <span className="text-slate-400 normal-case font-medium">(optionnel)</span></label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {([
+                      { cat: 'famille' as const, label: 'Famille', icon: <Heart size={16} strokeWidth={2} /> },
+                      { cat: 'ami'     as const, label: 'Amis',    icon: <Users size={16} strokeWidth={2} /> },
+                      { cat: 'autre'   as const, label: 'Autre',   icon: <UserCircle size={16} strokeWidth={2} /> },
+                    ]).map(({ cat, label, icon }) => {
+                      const isSelected = newCategory === cat;
+                      const styles = {
+                        famille: { on: 'bg-rose-50 border-rose-300 text-rose-600', icon: 'text-rose-500' },
+                        ami:     { on: 'bg-sky-50 border-sky-300 text-sky-600',    icon: 'text-sky-500' },
+                        autre:   { on: 'bg-slate-100 border-slate-300 text-slate-600', icon: 'text-slate-500' },
+                      }[cat];
+                      return (
+                        <motion.button
+                          key={cat}
+                          type="button"
+                          whileTap={{ scale: 0.93 }}
+                          onClick={() => setNewCategory(isSelected ? undefined : cat)}
+                          className={`flex flex-col items-center gap-1.5 py-3 rounded-2xl border text-[11px] font-black transition-all ${
+                            isSelected ? styles.on : 'bg-slate-50 border-black/10 text-slate-400'
+                          }`}
+                        >
+                          <span className={isSelected ? styles.icon : 'text-slate-300'}>{icon}</span>
+                          {label}
+                        </motion.button>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 {/* Téléphone */}
