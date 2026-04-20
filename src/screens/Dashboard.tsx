@@ -372,6 +372,29 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
           const [hero, ...rest] = upcoming;
           const heroMMDD = format(parseISO(hero.birthDate), 'MM-dd');
           const heroSameDay = CELEB_BIRTHDAYS.find(c => c.date === heroMMDD) ?? null;
+
+          // Urgency level
+          const isToday   = hero.daysUntil === 0;
+          const isUrgent  = hero.daysUntil >= 1 && hero.daysUntil <= 3;
+          const isWeek    = hero.daysUntil >= 4 && hero.daysUntil <= 7;
+
+          const heroBg = isToday  ? 'linear-gradient(135deg, #FF4B4B 0%, #ff8566 100%)'
+                       : isUrgent ? 'linear-gradient(135deg, #f97316 0%, #fb923c 100%)'
+                       : isWeek   ? 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)'
+                       : 'var(--surface-card)';
+
+          const heroTextColor  = (isToday || isUrgent || isWeek) ? '#ffffff' : 'var(--text-1)';
+          const heroSubColor   = (isToday || isUrgent || isWeek) ? 'rgba(255,255,255,0.75)' : 'var(--text-2)';
+          const heroBorder     = isToday  ? '2px solid rgba(255,255,255,0.3)'
+                               : isUrgent ? '2px solid rgba(255,255,255,0.25)'
+                               : isWeek   ? '2px solid rgba(255,255,255,0.2)'
+                               : '2px solid #0f172a';
+
+          const urgencyLabel = isToday  ? "C'EST AUJOURD'HUI !"
+                             : isUrgent ? 'Très bientôt'
+                             : isWeek   ? 'Cette semaine'
+                             : 'Prochain anniversaire';
+
           return (
             <div className="space-y-3">
               {/* ── Hero card ── */}
@@ -380,13 +403,21 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ type: 'spring', stiffness: 260, damping: 22 }}
                 onClick={() => setViewingFriend(hero)}
-                className="cursor-pointer rounded-3xl overflow-hidden border-2 border-slate-900 shadow-md"
-                style={{ background: 'var(--surface-card)' }}
+                className="cursor-pointer rounded-3xl overflow-hidden shadow-md"
+                style={{ background: heroBg, border: heroBorder }}
               >
                 <div className="flex items-center gap-4 p-4">
-                  {/* Avatar */}
+                  {/* Avatar avec anneau pulse si aujourd'hui */}
                   <div className="relative shrink-0">
-                    <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-slate-900">
+                    {isToday && (
+                      <motion.div
+                        animate={{ scale: [1, 1.18, 1], opacity: [0.6, 0.2, 0.6] }}
+                        transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+                        className="absolute inset-0 rounded-2xl"
+                        style={{ background: 'rgba(255,255,255,0.4)', margin: -4, borderRadius: 20 }}
+                      />
+                    )}
+                    <div className="w-20 h-20 rounded-2xl overflow-hidden" style={{ border: (isToday || isUrgent || isWeek) ? '2px solid rgba(255,255,255,0.5)' : '2px solid #0f172a' }}>
                       {hero.photoUrl ? (
                         <img src={hero.photoUrl} alt={hero.name} className="w-full h-full object-cover" />
                       ) : (
@@ -396,30 +427,49 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
                       )}
                     </div>
                   </div>
+
                   {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: 'var(--text-3)' }}>Prochain anniversaire</p>
-                    <h3 className="font-black text-lg leading-tight truncate" style={{ color: 'var(--text-1)' }}>{hero.name.split(' ')[0]}</h3>
-                    <p className="text-sm font-semibold mt-0.5" style={{ color: 'var(--text-2)' }}>
+                    {/* Label urgence */}
+                    <motion.p
+                      animate={isToday ? { scale: [1, 1.04, 1] } : {}}
+                      transition={isToday ? { duration: 1.2, repeat: Infinity } : {}}
+                      className="text-[10px] font-black uppercase tracking-widest mb-0.5"
+                      style={{ color: (isToday || isUrgent || isWeek) ? 'rgba(255,255,255,0.85)' : 'var(--text-3)' }}
+                    >
+                      {urgencyLabel}
+                    </motion.p>
+                    <h3 className="font-black text-lg leading-tight truncate" style={{ color: heroTextColor }}>
+                      {hero.name.split(' ')[0]}
+                    </h3>
+                    <p className="text-sm font-semibold mt-0.5" style={{ color: heroSubColor }}>
                       {format(parseISO(hero.birthDate), 'd MMMM', { locale: fr })} {ZODIAC_EMOJI[hero.zodiac] ?? ''}
                     </p>
                     {heroSameDay && (
-                      <p className="text-[10px] font-semibold mt-1" style={{ color: 'var(--text-3)' }}>
+                      <p className="text-[10px] font-semibold mt-1" style={{ color: heroSubColor }}>
                         {heroSameDay.emoji} Comme {heroSameDay.name.split(' ').slice(-1)[0]}
                       </p>
                     )}
                   </div>
+
                   {/* Countdown */}
-                  <div className={`shrink-0 flex flex-col items-center justify-center w-14 h-14 rounded-2xl font-black ${
-                    hero.daysUntil === 0 ? 'bg-green-100 text-green-600' :
-                    hero.daysUntil <= 7 ? 'bg-red-100 text-red-500' :
-                    'bg-slate-100 text-slate-600'
-                  }`}>
-                    {hero.daysUntil === 0 ? (
-                      <span className="text-2xl">🎂</span>
+                  <div className="shrink-0 flex flex-col items-center justify-center w-14 h-14 rounded-2xl font-black"
+                    style={{ background: (isToday || isUrgent || isWeek) ? 'rgba(255,255,255,0.2)' : '#f1f5f9',
+                             color: (isToday || isUrgent || isWeek) ? '#ffffff' : '#475569' }}
+                  >
+                    {isToday ? (
+                      <motion.span
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 1, repeat: Infinity }}
+                        className="text-2xl"
+                      >🎂</motion.span>
                     ) : (
                       <>
-                        <span className="text-xl leading-none">{hero.daysUntil}</span>
+                        <motion.span
+                          animate={isUrgent ? { scale: [1, 1.08, 1] } : {}}
+                          transition={isUrgent ? { duration: 0.8, repeat: Infinity } : {}}
+                          className="text-xl leading-none"
+                        >{hero.daysUntil}</motion.span>
                         <span className="text-[9px] font-bold leading-none mt-0.5">jours</span>
                       </>
                     )}

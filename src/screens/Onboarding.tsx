@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import { motion } from 'motion/react';
-import { Camera, Sparkles, ArrowRight } from 'lucide-react';
+import { Camera, Sparkles, ArrowRight, Check } from 'lucide-react';
 import { UserProfile, ZodiacSign } from '../types';
 import { getZodiacSign } from '../utils/gameLogic';
 import { auth } from '../firebase';
@@ -102,23 +102,52 @@ export function Onboarding({ onComplete }: { onComplete: (user: UserProfile) => 
       animate={{ backgroundColor: color.bg }}
       transition={{ duration: 0.5, ease: 'easeInOut' }}
     >
-      {/* Barre de progression */}
-      <div className="pt-10 pb-6 space-y-2">
-        <div className="flex justify-between items-center">
-          <span className="text-white/70 text-xs font-bold uppercase tracking-widest">
-            {stepLabels[step - 1]}
-          </span>
-          <span className="text-white/70 text-xs font-bold uppercase tracking-widest">
-            {step}/{TOTAL_STEPS}
-          </span>
+      {/* Barre de progression immersive */}
+      <div className="pb-6" style={{ paddingTop: 'max(env(safe-area-inset-top), 2.5rem)' }}>
+        <div className="flex items-center">
+          {stepLabels.map((label, i) => {
+            const stepNum = i + 1;
+            const isCompleted = stepNum < step;
+            const isCurrent = stepNum === step;
+            const isLast = i === stepLabels.length - 1;
+            return (
+              <Fragment key={i}>
+                <motion.div
+                  animate={{ scale: isCurrent ? 1.15 : 1 }}
+                  transition={{ duration: 0.4, ease: 'easeInOut' }}
+                  className={`w-9 h-9 rounded-full flex items-center justify-center font-black text-sm border-2 shrink-0 transition-colors duration-500 ${
+                    isCompleted ? 'bg-white border-white' :
+                    isCurrent  ? 'bg-white/20 border-white' :
+                                 'bg-transparent border-white/30'
+                  }`}
+                  style={{ color: isCompleted ? color.bg : 'white' }}
+                >
+                  {isCompleted ? <Check size={16} strokeWidth={3} /> : stepNum}
+                </motion.div>
+                {!isLast && (
+                  <div className="flex-1 mx-2 h-0.5 bg-white/20 rounded-full overflow-hidden">
+                    <motion.div
+                      className="h-full bg-white rounded-full"
+                      animate={{ width: isCompleted ? '100%' : '0%' }}
+                      transition={{ duration: 0.4, ease: 'easeInOut' }}
+                    />
+                  </div>
+                )}
+              </Fragment>
+            );
+          })}
         </div>
-        <div className="w-full h-1.5 bg-white/20 rounded-full overflow-hidden">
-          <motion.div
-            className="h-full bg-white rounded-full"
-            initial={{ width: `${((step - 1) / TOTAL_STEPS) * 100}%` }}
-            animate={{ width: `${(step / TOTAL_STEPS) * 100}%` }}
-            transition={{ duration: 0.4, ease: 'easeInOut' }}
-          />
+        <div className="flex justify-between mt-2">
+          {stepLabels.map((label, i) => {
+            const stepNum = i + 1;
+            const isActive = stepNum <= step;
+            const align = i === 0 ? 'text-left' : i === stepLabels.length - 1 ? 'text-right' : 'text-center';
+            return (
+              <span key={i} className={`text-[10px] font-bold uppercase tracking-wider transition-colors duration-500 ${isActive ? 'text-white' : 'text-white/35'} ${align}`}>
+                {label}
+              </span>
+            );
+          })}
         </div>
       </div>
 

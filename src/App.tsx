@@ -16,6 +16,7 @@ import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from './firebase';
 import { useAppState } from './hooks/useAppState';
 import { useStreak } from './hooks/useStreak';
+import { useStreakNotification } from './hooks/useStreakNotification';
 import { Onboarding } from './screens/Onboarding';
 import { Dashboard } from './screens/Dashboard';
 import { Scanner } from './screens/Scanner';
@@ -55,6 +56,7 @@ const SCREEN_ORDER: Screen[] = ['dashboard', 'calendar', 'collection', 'profile'
 function AppContent() {
   const { user, birthdays, challenges, inbox, sentMessages, loading, firebaseUser, setUser, addBirthday, updateBirthday, deleteBirthday, incrementScansCount, unlockCard, sendMessage, markConversationRead } = useAppState();
   const streak = useStreak();
+  const { showBanner, dismissBanner } = useStreakNotification(streak);
   const [activeScreen, setActiveScreen] = useState<Screen>('dashboard');
   const [slideDirection, setSlideDirection] = useState(0);
   const [showSplash, setShowSplash] = useState(true);
@@ -322,7 +324,7 @@ function AppContent() {
           </motion.div>
         )}
       </AnimatePresence>
-      <header className="px-6 pt-4 pb-2 flex justify-between items-center shadow-sm" style={{ background: 'var(--surface-card)', borderBottom: '2px solid var(--border-accent)' }}>
+      <header className="px-6 pb-2 flex justify-between items-center shadow-sm" style={{ background: 'var(--surface-card)', borderBottom: '2px solid var(--border-accent)', paddingTop: 'max(env(safe-area-inset-top), 1rem)' }}>
         <div className="flex items-center gap-2.5">
           <Logo size={28} />
           <div>
@@ -387,6 +389,40 @@ function AppContent() {
           </motion.button>
         </div>
       </header>
+
+      {/* Streak reminder banner */}
+      <AnimatePresence>
+        {showBanner && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            className="overflow-hidden"
+          >
+            <div className="flex items-center justify-between gap-3 px-4 py-2.5 bg-orange-50 border-b border-orange-100">
+              <div className="flex items-center gap-2 min-w-0">
+                <Flame size={16} className="text-orange-500 fill-orange-300 shrink-0" />
+                <p className="text-xs font-bold text-orange-700 leading-tight">
+                  N'oublie pas d'ajouter un ami cette semaine pour garder ton streak !
+                </p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => { dismissBanner(); navigateTo('calendar'); setTriggerAddFriend(true); }}
+                  className="text-[11px] font-black text-orange-600 bg-orange-100 px-2.5 py-1 rounded-full whitespace-nowrap"
+                >
+                  + Ajouter
+                </motion.button>
+                <button onClick={dismissBanner} className="text-orange-400 hover:text-orange-600">
+                  <X size={14} />
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <main
         className={activeScreen === 'scanner' ? 'flex-1 overflow-hidden flex flex-col pb-24' : 'flex-1 overflow-y-auto pb-24'}
@@ -499,8 +535,8 @@ function AppContent() {
 
       <nav
         aria-label="Navigation principale"
-        className="fixed bottom-0 left-0 right-0 max-w-md mx-auto backdrop-blur-2xl px-2 py-4 flex items-center z-50 rounded-t-[var(--radius-pill)] shadow-token-nav"
-        style={{ background: 'var(--surface-card-translucent)', borderTop: '2px solid var(--border-accent)' }}
+        className="fixed bottom-0 left-0 right-0 max-w-md mx-auto backdrop-blur-2xl px-2 pt-4 flex items-center z-50 rounded-t-[var(--radius-pill)] shadow-token-nav"
+        style={{ background: 'var(--surface-card-translucent)', borderTop: '2px solid var(--border-accent)', paddingBottom: 'max(env(safe-area-inset-bottom), 1rem)' }}
       >
         <div className="flex-1 flex justify-center">
           <NavButton active={activeScreen === 'dashboard'} onClick={() => navigateTo('dashboard')} icon={<Home size={22} strokeWidth={2.5} />} label="Accueil" ariaLabel="Accueil" activeBg="bg-orange-50" activeColor="text-orange-500" activeFill="fill-orange-300" inactiveFill="fill-orange-300 dark:fill-transparent" />
