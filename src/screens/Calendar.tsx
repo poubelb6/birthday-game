@@ -769,7 +769,7 @@ export function Calendar({
                 </button>
               </div>
 
-              <div className="space-y-4 overflow-y-auto px-8 pb-2 pr-7">
+              <div className="space-y-4 overflow-y-auto px-8 pb-2">
                 {/* Photo */}
                 <div className="space-y-2">
                   <label className="block text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">
@@ -837,6 +837,14 @@ export function Calendar({
                     onChange={e => setNewDate(e.target.value)}
                     className="w-full bg-slate-50 border border-black/60 rounded-2xl p-4 text-slate-900 focus:outline-none focus:border-sky-500 transition-colors"
                   />
+                  {newDate && (() => {
+                    const zodiac = getZodiacSign(parseISO(newDate));
+                    return (
+                      <p className="text-center text-sm font-bold text-slate-500 pt-1">
+                        {ZODIAC_EMOJI[zodiac]} {zodiac}
+                      </p>
+                    );
+                  })()}
                 </div>
 
                 {/* Catégorie */}
@@ -887,7 +895,7 @@ export function Calendar({
                 </div>
 
                 {/* Réseaux sociaux */}
-                <div className="border border-black/60 rounded-2xl overflow-hidden">
+                <div className="border border-black/60 rounded-2xl overflow-hidden w-full">
                   <button
                     type="button"
                     onClick={() => setShowSocials(v => !v)}
@@ -937,7 +945,7 @@ export function Calendar({
                 </div>
 
                 {/* Wishlist */}
-                <div className="border border-black/60 rounded-2xl overflow-hidden">
+                <div className="border border-black/60 rounded-2xl overflow-hidden w-full">
                   <button
                     type="button"
                     onClick={() => setShowWishlist(v => !v)}
@@ -1021,7 +1029,8 @@ export function Calendar({
                   type="button"
                   onClick={handleAddFriend}
                   disabled={!newName || !newDate || photoUploading}
-                  className="w-full bg-sky-500 text-white font-black py-4 rounded-2xl shadow-lg shadow-sky-100 hover:bg-sky-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full text-white font-black py-4 rounded-2xl shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ background: '#FF4B4B', boxShadow: '0 4px 0 #CC2E2E' }}
                 >
                   {photoUploading ? 'Upload en cours...' : "AJOUTER L'AMI"}
                 </button>
