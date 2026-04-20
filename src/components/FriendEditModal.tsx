@@ -3,6 +3,7 @@ import { formatZodiac } from '../utils/zodiac';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Camera, Phone, Instagram, Twitter, Facebook, ChevronDown, Plus, Trash2, ImageIcon, Heart, Users, UserCircle } from 'lucide-react';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { deleteField } from 'firebase/firestore';
 import { auth, storage } from '../firebase';
 import { Birthday } from '../types';
 import { format, parseISO } from 'date-fns';
@@ -11,7 +12,7 @@ import { fr } from 'date-fns/locale';
 interface Props {
   friend: Birthday | null;
   onClose: () => void;
-  onSave: (id: string, updates: Partial<Birthday>) => Promise<void>;
+  onSave: (id: string, updates: Record<string, unknown>) => Promise<void>;
   onDelete: (friend: Birthday) => void;
 }
 
@@ -99,12 +100,12 @@ export function FriendEditModal({ friend, onClose, onSave, onDelete }: Props) {
       const cleanSocials = Object.fromEntries(
         Object.entries(editSocials).filter(([, v]) => v.trim() !== '')
       ) as Birthday['socials'];
-      const updates: Partial<Birthday> = {
-        ...(editPhotoUrl && { photoUrl: editPhotoUrl }),
-        ...(editPhone.trim() && { phone: editPhone.trim() }),
-        ...(Object.keys(cleanSocials ?? {}).length > 0 && { socials: cleanSocials }),
+      const updates: Record<string, unknown> = {
         wishlist: editWishlist,
-        category: editCategory,
+        category: editCategory ?? deleteField(),
+        ...(editPhotoUrl ? { photoUrl: editPhotoUrl } : {}),
+        phone: editPhone.trim() || deleteField(),
+        socials: Object.keys(cleanSocials ?? {}).length > 0 ? cleanSocials : deleteField(),
       };
       await onSave(friend.id, updates);
       onClose();

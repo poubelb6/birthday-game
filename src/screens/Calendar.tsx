@@ -206,7 +206,7 @@ export function Calendar({
   birthdays: Birthday[];
   user?: UserProfile | null;
   onAddBirthday?: (b: Birthday) => Promise<void> | void;
-  onUpdateBirthday?: (id: string, updates: Partial<Birthday>) => Promise<void>;
+  onUpdateBirthday?: (id: string, updates: Record<string, unknown>) => Promise<void>;
   onDeleteBirthday?: (id: string) => void;
   onFirstVisit?: () => void;
   openAddModal?: boolean;

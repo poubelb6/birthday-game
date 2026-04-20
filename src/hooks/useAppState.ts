@@ -334,7 +334,7 @@ export function useAppState() {
     }
   };
 
-  const updateBirthday = async (birthdayId: string, updates: Partial<import('../types').Birthday>) => {
+  const updateBirthday = async (birthdayId: string, updates: Record<string, unknown>) => {
     if (!firebaseUser) return;
     const path = `users/${firebaseUser.uid}/birthdays/${birthdayId}`;
     try {
