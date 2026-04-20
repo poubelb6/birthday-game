@@ -934,7 +934,7 @@ export function Calendar({
                                 value={newSocials[key]}
                                 onChange={e => setNewSocials(s => ({ ...s, [key]: e.target.value }))}
                                 placeholder={placeholder}
-                                className="flex-1 bg-slate-50 border border-black/60 rounded-2xl px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-sky-500 transition-colors"
+                                className="flex-1 min-w-0 bg-slate-50 border border-black/60 rounded-2xl px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-sky-500 transition-colors"
                               />
                             </div>
                           ))}
@@ -985,7 +985,7 @@ export function Calendar({
                                 }
                               }}
                               placeholder="Ex: Roman, parfum, jeu vidéo..."
-                              className="flex-1 bg-slate-50 border border-black/60 rounded-2xl px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-amber-400 transition-colors"
+                              className="flex-1 min-w-0 bg-slate-50 border border-black/60 rounded-2xl px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-amber-400 transition-colors"
                             />
                             <button
                               type="button"
