@@ -762,13 +762,15 @@ export function Calendar({
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl flex flex-col max-h-[90vh]"
             >
-              <div className="relative px-6 pt-7 pb-6 shrink-0 rounded-t-3xl" style={{ background: 'linear-gradient(135deg, #FF4B4B 0%, #FF7043 100%)' }}>
-                <div className="text-center">
-                  <div className="text-4xl mb-1.5">🎉</div>
-                  <h3 className="font-display text-xl font-black text-white">Ajouter un ami</h3>
-                  <p className="text-white/70 text-xs mt-1">Capture leurs infos pour ne jamais oublier !</p>
+              <div className="relative flex items-center justify-between px-5 py-3.5 shrink-0 rounded-t-3xl" style={{ background: 'linear-gradient(135deg, #FF4B4B 0%, #FF7043 100%)' }}>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">🎉</span>
+                    <h3 className="font-display text-base font-black text-white">Ajouter un ami</h3>
+                  </div>
+                  <p className="text-white/70 text-[11px] mt-0.5 pl-0.5">Capture leurs infos pour ne jamais oublier !</p>
                 </div>
-                <button onClick={() => setShowAddModal(false)} className="absolute right-4 top-4 w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors">
+                <button onClick={() => setShowAddModal(false)} className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors shrink-0">
                   <X size={17} className="text-white" />
                 </button>
               </div>
@@ -863,24 +865,22 @@ export function Calendar({
                   <label className="block text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">Catégorie <span className="text-slate-400 normal-case font-medium">(optionnel)</span></label>
                   <div className="grid grid-cols-3 gap-2">
                     {([
-                      { cat: 'famille' as const, label: 'Famille', emoji: '🏠', selectedBg: '#f43f5e', selectedBorder: '#f43f5e', unselBg: '#fff1f2', unselBorder: '#fecdd3', unselText: '#fb7185' },
-                      { cat: 'ami'     as const, label: 'Amis',    emoji: '👯', selectedBg: '#6366f1', selectedBorder: '#6366f1', unselBg: '#eef2ff', unselBorder: '#c7d2fe', unselText: '#818cf8' },
-                      { cat: 'autre'   as const, label: 'Autre',   emoji: '⭐', selectedBg: '#f59e0b', selectedBorder: '#f59e0b', unselBg: '#fffbeb', unselBorder: '#fde68a', unselText: '#fbbf24' },
-                    ]).map(({ cat, label, emoji, selectedBg, selectedBorder, unselBg, unselBorder, unselText }) => {
+                      { cat: 'famille' as const, label: 'Famille', icon: <Heart size={20} strokeWidth={2.5} />, sel: { bg: '#f43f5e', border: '#f43f5e', icon: '#fff' }, unsel: { bg: '#fff1f2', border: '#fecdd3', icon: '#fb7185', text: '#f43f5e' } },
+                      { cat: 'ami'     as const, label: 'Amis',    icon: <Users size={20} strokeWidth={2.5} />, sel: { bg: '#6366f1', border: '#6366f1', icon: '#fff' }, unsel: { bg: '#eef2ff', border: '#c7d2fe', icon: '#818cf8', text: '#6366f1' } },
+                      { cat: 'autre'   as const, label: 'Autre',   icon: <UserCircle size={20} strokeWidth={2.5} />, sel: { bg: '#f59e0b', border: '#f59e0b', icon: '#fff' }, unsel: { bg: '#fffbeb', border: '#fde68a', icon: '#fbbf24', text: '#d97706' } },
+                    ]).map(({ cat, label, icon, sel, unsel }) => {
                       const isSelected = newCategory === cat;
+                      const s = isSelected ? sel : unsel;
                       return (
                         <motion.button
                           key={cat}
                           type="button"
                           whileTap={{ scale: 0.93 }}
                           onClick={() => setNewCategory(isSelected ? undefined : cat)}
-                          className="flex flex-col items-center gap-2 py-4 rounded-2xl border-2 text-[11px] font-black transition-all"
-                          style={isSelected
-                            ? { background: selectedBg, borderColor: selectedBorder, color: '#fff', boxShadow: `0 4px 12px ${selectedBg}55` }
-                            : { background: unselBg, borderColor: unselBorder, color: unselText }
-                          }
+                          className="flex flex-col items-center gap-1.5 py-3 rounded-2xl border-2 text-[11px] font-black transition-all"
+                          style={{ background: s.bg, borderColor: s.border, color: isSelected ? '#fff' : (unsel as typeof sel & { text: string }).text, ...(isSelected && { boxShadow: `0 4px 12px ${sel.bg}55` }) }}
                         >
-                          <span className="text-2xl leading-none">{emoji}</span>
+                          <span style={{ color: s.icon }}>{icon}</span>
                           {label}
                         </motion.button>
                       );
