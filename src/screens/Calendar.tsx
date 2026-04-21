@@ -239,6 +239,7 @@ export function Calendar({
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const socialsRef = useRef<HTMLDivElement>(null);
   const wishlistRef = useRef<HTMLDivElement>(null);
+  const modalScrollRef = useRef<HTMLDivElement>(null);
 
   const [editingFriend, setEditingFriend] = useState<Birthday | null>(null);
   const [viewingFriend, setViewingFriend] = useState<Birthday | null>(null);
@@ -789,7 +790,7 @@ export function Calendar({
                 </button>
               </div>
 
-              <div className="space-y-4 overflow-y-auto px-8 pb-2">
+              <div ref={modalScrollRef} className="space-y-4 overflow-y-auto px-8 pb-2">
                 {/* Photo */}
                 <div className="space-y-2 pt-2">
                   <div className="space-y-2">
@@ -946,7 +947,11 @@ export function Calendar({
                     onClick={() => {
                       const next = !showSocials;
                       setShowSocials(next);
-                      if (next) setTimeout(() => socialsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+                      if (next) setTimeout(() => {
+                        const container = modalScrollRef.current;
+                        const section = socialsRef.current;
+                        if (container && section) container.scrollTo({ top: section.offsetTop, behavior: 'smooth' });
+                      }, 50);
                     }}
                     className="w-full flex items-center justify-between px-4 py-3 bg-slate-50 hover:bg-slate-100 transition-colors"
                   >
@@ -1000,7 +1005,11 @@ export function Calendar({
                     onClick={() => {
                       const next = !showWishlist;
                       setShowWishlist(next);
-                      if (next) setTimeout(() => wishlistRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+                      if (next) setTimeout(() => {
+                        const container = modalScrollRef.current;
+                        const section = wishlistRef.current;
+                        if (container && section) container.scrollTo({ top: section.offsetTop, behavior: 'smooth' });
+                      }, 50);
                     }}
                     className="w-full flex items-center justify-between px-4 py-3 bg-slate-50 hover:bg-slate-100 transition-colors"
                   >
