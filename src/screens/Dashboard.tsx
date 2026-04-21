@@ -373,8 +373,8 @@ export function Dashboard({ birthdays, user, onAddBirthday, onUpdateBirthday, on
 
           const catBorder = (cat?: string) =>
             cat === 'famille' ? '#f43f5e' :
-            cat === 'ami'     ? '#6366f1' :
-            cat === 'autre'   ? '#f59e0b' : '#0f172a';
+            cat === 'ami'     ? '#0ea5e9' :
+            cat === 'autre'   ? '#94a3b8' : '#0f172a';
 
           // Urgency level
           const isToday   = hero.daysUntil === 0;

@@ -783,42 +783,41 @@ export function Calendar({
 
               <div className="space-y-4 overflow-y-auto px-8 pb-2">
                 {/* Photo */}
-                <div className="space-y-2">
+                <div className="space-y-2 pt-2">
                   <div className="space-y-2">
                     {/* Deux bulles */}
                     <div className="flex justify-center gap-4">
                       {/* Bulle Photo */}
-                      <div className="flex flex-col items-center gap-1">
-                        <motion.button
-                          type="button"
-                          whileTap={{ scale: 0.93 }}
-                          onClick={() => setShowPhotoMenu(v => !v)}
-                          className="flex flex-col items-center gap-1.5 px-4 py-3 bg-slate-50 border-2 rounded-2xl text-[11px] font-black text-slate-600 hover:bg-slate-100 transition-colors overflow-hidden"
-                          style={{ borderColor: showPhotoMenu ? '#FF4B4B' : '#e2e8f0', minWidth: 72 }}
-                        >
-                          {newPhotoPreview
-                            ? <img src={newPhotoPreview} alt="preview" className="w-8 h-8 rounded-full object-cover" />
-                            : <span className="text-xl">📷</span>
-                          }
-                          Photo
-                        </motion.button>
-                        <span className="text-[9px] text-slate-400 font-medium">(optionnel)</span>
-                      </div>
+                      <motion.button
+                        type="button"
+                        whileTap={{ scale: 0.93 }}
+                        onClick={() => setShowPhotoMenu(v => !v)}
+                        className="flex flex-col items-center justify-center border-2 rounded-2xl text-[11px] font-black text-slate-600 hover:bg-slate-100 transition-colors overflow-hidden"
+                        style={{ borderColor: showPhotoMenu ? '#FF4B4B' : '#e2e8f0', minWidth: 80, minHeight: 80, background: newPhotoPreview ? 'transparent' : '#f8fafc', padding: newPhotoPreview ? 0 : undefined }}
+                      >
+                        {newPhotoPreview ? (
+                          <img src={newPhotoPreview} alt="preview" className="w-full h-full object-cover" style={{ minHeight: 80 }} />
+                        ) : (
+                          <>
+                            <span className="text-xl mb-0.5">📷</span>
+                            <span>Photo</span>
+                            <span className="text-[9px] text-slate-400 font-medium mt-0.5">(optionnel)</span>
+                          </>
+                        )}
+                      </motion.button>
 
                       {/* Bulle Contact */}
-                      <div className="flex flex-col items-center gap-1">
-                        <motion.button
-                          type="button"
-                          whileTap={{ scale: 0.93 }}
-                          onClick={'contacts' in navigator ? handleImportContact : undefined}
-                          className="flex flex-col items-center gap-1.5 px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-2xl text-[11px] font-black text-slate-600 hover:bg-slate-100 transition-colors"
-                          style={{ minWidth: 72, opacity: 'contacts' in navigator ? 1 : 0.4 }}
-                        >
-                          <span className="text-xl">📞</span>
-                          Contact
-                        </motion.button>
-                        <span className="text-[9px] text-slate-400 font-medium">(optionnel)</span>
-                      </div>
+                      <motion.button
+                        type="button"
+                        whileTap={{ scale: 0.93 }}
+                        onClick={'contacts' in navigator ? handleImportContact : undefined}
+                        className="flex flex-col items-center justify-center gap-0.5 px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-2xl text-[11px] font-black text-slate-600 hover:bg-slate-100 transition-colors"
+                        style={{ minWidth: 80, minHeight: 80, opacity: 'contacts' in navigator ? 1 : 0.4 }}
+                      >
+                        <span className="text-xl mb-0.5">📞</span>
+                        <span>Contact</span>
+                        <span className="text-[9px] text-slate-400 font-medium mt-0.5">(optionnel)</span>
+                      </motion.button>
                     </div>
 
                     {/* Menu appareil photo / galerie en dessous */}
@@ -895,8 +894,8 @@ export function Calendar({
                   <div className="grid grid-cols-3 gap-2">
                     {([
                       { cat: 'famille' as const, label: 'Famille', icon: <Heart size={20} strokeWidth={2.5} />, sel: { bg: '#f43f5e', border: '#f43f5e', icon: '#fff' }, unsel: { bg: '#fff8f8', border: '#f1f5f9', icon: '#fca5a5', text: '#94a3b8' } },
-                      { cat: 'ami'     as const, label: 'Amis',    icon: <Users size={20} strokeWidth={2.5} />, sel: { bg: '#6366f1', border: '#6366f1', icon: '#fff' }, unsel: { bg: '#f8f8ff', border: '#f1f5f9', icon: '#c4b5fd', text: '#94a3b8' } },
-                      { cat: 'autre'   as const, label: 'Autre',   icon: <UserCircle size={20} strokeWidth={2.5} />, sel: { bg: '#f59e0b', border: '#f59e0b', icon: '#fff' }, unsel: { bg: '#fffdf5', border: '#f1f5f9', icon: '#fde68a', text: '#94a3b8' } },
+                      { cat: 'ami'     as const, label: 'Amis',    icon: <Users size={20} strokeWidth={2.5} />, sel: { bg: '#0ea5e9', border: '#0ea5e9', icon: '#fff' }, unsel: { bg: '#f0f9ff', border: '#f1f5f9', icon: '#7dd3fc', text: '#94a3b8' } },
+                      { cat: 'autre'   as const, label: 'Autre',   icon: <UserCircle size={20} strokeWidth={2.5} />, sel: { bg: '#94a3b8', border: '#94a3b8', icon: '#fff' }, unsel: { bg: '#f8fafc', border: '#f1f5f9', icon: '#cbd5e1', text: '#94a3b8' } },
                     ]).map(({ cat, label, icon, sel, unsel }) => {
                       const isSelected = newCategory === cat;
                       const s = isSelected ? sel : unsel;
