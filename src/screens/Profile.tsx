@@ -724,20 +724,7 @@ const getZodiacEmoji = (zodiac: string) => {
                   </a>
                 )}
                 
-                <button className="w-full bg-slate-900 p-5 rounded-[var(--radius-card)] flex items-center justify-between group hover:bg-slate-800 transition-colors">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-white">
-                      <Settings size={24} />
-                    </div>
-                    <div className="text-left">
-                      <p className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">Préférences</p>
-                      <p className="font-bold text-white">Paramètres du compte</p>
-                    </div>
-                  </div>
-                  <ChevronRight size={18} className="text-white/20 group-hover:text-white transition-colors" />
-                </button>
-
-                <div className="w-full bg-white p-5 rounded-[var(--radius-card)] border border-slate-100 shadow-sm flex items-center justify-between gap-3">
+<div className="w-full bg-white p-5 rounded-[var(--radius-card)] border border-slate-100 shadow-sm flex items-center justify-between gap-3">
                   <button
                     onClick={() => { setBgPassword(''); setBgStatus(null); setShowBgModal(true); }}
                     className="flex items-center gap-4 flex-1 text-left group"
