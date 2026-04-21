@@ -342,26 +342,16 @@ export function Calendar({
   useEffect(() => {
     if (!showSocials) return;
     const t = setTimeout(() => {
-      const container = modalScrollRef.current;
-      const section = socialsRef.current;
-      if (!container || !section) return;
-      const top = section.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop;
-      container.scrollTo({ top, behavior: 'smooth' });
-      setTimeout(() => container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' }), 150);
-    }, 150);
+      modalScrollRef.current?.scrollTo({ top: modalScrollRef.current.scrollHeight, behavior: 'smooth' });
+    }, 0);
     return () => clearTimeout(t);
   }, [showSocials]);
 
   useEffect(() => {
     if (!showWishlist) return;
     const t = setTimeout(() => {
-      const container = modalScrollRef.current;
-      const section = wishlistRef.current;
-      if (!container || !section) return;
-      const top = section.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop;
-      container.scrollTo({ top, behavior: 'smooth' });
-      setTimeout(() => container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' }), 150);
-    }, 150);
+      modalScrollRef.current?.scrollTo({ top: modalScrollRef.current.scrollHeight, behavior: 'smooth' });
+    }, 0);
     return () => clearTimeout(t);
   }, [showWishlist]);
 
