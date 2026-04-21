@@ -798,7 +798,7 @@ export function Calendar({
                         type="button"
                         whileTap={{ scale: 0.93 }}
                         onClick={() => setShowPhotoMenu(v => !v)}
-                        className="w-24 h-24 flex flex-col items-center justify-center border border-slate-900 rounded-2xl text-[12px] font-black text-slate-600 transition-colors overflow-hidden bg-slate-50"
+                        className="w-20 h-20 flex flex-col items-center justify-center border border-slate-900 rounded-2xl text-[12px] font-black text-slate-600 transition-colors overflow-hidden bg-slate-50"
                         style={{ borderColor: showPhotoMenu ? '#FF4B4B' : undefined }}
                       >
                         {newPhotoPreview ? (
@@ -817,7 +817,7 @@ export function Calendar({
                         type="button"
                         whileTap={{ scale: 0.93 }}
                         onClick={'contacts' in navigator ? handleImportContact : undefined}
-                        className="w-24 h-24 flex flex-col items-center justify-center border border-slate-900 rounded-2xl text-[12px] font-black text-slate-600 bg-slate-50 transition-colors"
+                        className="w-20 h-20 flex flex-col items-center justify-center border border-slate-900 rounded-2xl text-[12px] font-black text-slate-600 bg-slate-50 transition-colors"
                         style={{ opacity: 'contacts' in navigator ? 1 : 0.4 }}
                       >
                         <span className="text-3xl leading-none">📱</span>
