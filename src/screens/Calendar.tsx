@@ -339,6 +339,30 @@ export function Calendar({
     e.target.value = '';
   };
 
+  useEffect(() => {
+    if (!showSocials) return;
+    const t = setTimeout(() => {
+      const container = modalScrollRef.current;
+      const section = socialsRef.current;
+      if (!container || !section) return;
+      const top = section.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop;
+      container.scrollTo({ top, behavior: 'smooth' });
+    }, 300);
+    return () => clearTimeout(t);
+  }, [showSocials]);
+
+  useEffect(() => {
+    if (!showWishlist) return;
+    const t = setTimeout(() => {
+      const container = modalScrollRef.current;
+      const section = wishlistRef.current;
+      if (!container || !section) return;
+      const top = section.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop;
+      container.scrollTo({ top, behavior: 'smooth' });
+    }, 300);
+    return () => clearTimeout(t);
+  }, [showWishlist]);
+
   const resetAddForm = () => {
     setNewName(''); setNewDate(''); setNewPhone(''); setNewCategory(undefined);
     setNewPhotoUrl(''); setNewPhotoPreview('');
@@ -790,7 +814,7 @@ export function Calendar({
                 </button>
               </div>
 
-              <div ref={modalScrollRef} className="space-y-4 overflow-y-auto px-8 pb-2">
+              <div ref={modalScrollRef} className="flex-1 min-h-0 space-y-4 overflow-y-auto px-8 pb-2">
                 {/* Photo */}
                 <div className="space-y-2 pt-2">
                   <div className="space-y-2">
@@ -944,18 +968,7 @@ export function Calendar({
                 <div ref={socialsRef} className="border border-black/60 rounded-2xl overflow-hidden w-full">
                   <button
                     type="button"
-                    onClick={() => {
-                      const next = !showSocials;
-                      setShowSocials(next);
-                      if (next) setTimeout(() => {
-                        const container = modalScrollRef.current;
-                        const section = socialsRef.current;
-                        if (container && section) {
-                          const top = section.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop;
-                          container.scrollTo({ top, behavior: 'smooth' });
-                        }
-                      }, 0);
-                    }}
+                    onClick={() => setShowSocials(v => !v)}
                     className="w-full flex items-center justify-between px-4 py-3 bg-slate-50 hover:bg-slate-100 transition-colors"
                   >
                     <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
@@ -1005,18 +1018,7 @@ export function Calendar({
                 <div ref={wishlistRef} className="border border-black/60 rounded-2xl overflow-hidden w-full">
                   <button
                     type="button"
-                    onClick={() => {
-                      const next = !showWishlist;
-                      setShowWishlist(next);
-                      if (next) setTimeout(() => {
-                        const container = modalScrollRef.current;
-                        const section = wishlistRef.current;
-                        if (container && section) {
-                          const top = section.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop;
-                          container.scrollTo({ top, behavior: 'smooth' });
-                        }
-                      }, 0);
-                    }}
+                    onClick={() => setShowWishlist(v => !v)}
                     className="w-full flex items-center justify-between px-4 py-3 bg-slate-50 hover:bg-slate-100 transition-colors"
                   >
                     <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
