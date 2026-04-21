@@ -784,61 +784,73 @@ export function Calendar({
               <div className="space-y-4 overflow-y-auto px-8 pb-2">
                 {/* Photo */}
                 <div className="space-y-2">
-                  <label className="block text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                    Photo <span className="text-slate-400 normal-case font-medium">(optionnel)</span>
-                  </label>
-                  <div className="flex items-center justify-center gap-4">
-                    <div className="relative" onClick={() => setShowPhotoMenu(v => !v)}>
-                      <div
-                        className="w-20 h-20 rounded-full flex items-center justify-center cursor-pointer overflow-hidden transition-transform active:scale-95"
-                        style={newPhotoPreview ? {} : { background: 'linear-gradient(135deg, #f43f5e 0%, #fb923c 100%)' }}
-                      >
-                        {newPhotoPreview
-                          ? <img src={newPhotoPreview} alt="preview" className="w-full h-full object-cover" />
-                          : <Camera size={26} className="text-white" />
-                        }
+                  <div className="space-y-2">
+                    {/* Deux bulles */}
+                    <div className="flex justify-center gap-4">
+                      {/* Bulle Photo */}
+                      <div className="flex flex-col items-center gap-1">
+                        <motion.button
+                          type="button"
+                          whileTap={{ scale: 0.93 }}
+                          onClick={() => setShowPhotoMenu(v => !v)}
+                          className="flex flex-col items-center gap-1.5 px-4 py-3 bg-slate-50 border-2 rounded-2xl text-[11px] font-black text-slate-600 hover:bg-slate-100 transition-colors overflow-hidden"
+                          style={{ borderColor: showPhotoMenu ? '#FF4B4B' : '#e2e8f0', minWidth: 72 }}
+                        >
+                          {newPhotoPreview
+                            ? <img src={newPhotoPreview} alt="preview" className="w-8 h-8 rounded-full object-cover" />
+                            : <span className="text-xl">📷</span>
+                          }
+                          Photo
+                        </motion.button>
+                        <span className="text-[9px] text-slate-400 font-medium">(optionnel)</span>
                       </div>
-                      <div className="absolute -bottom-0.5 -right-0.5 w-6 h-6 rounded-full flex items-center justify-center border-2 border-white shadow-sm" style={{ background: '#FF4B4B' }}>
-                        <span className="text-white text-[11px] font-black leading-none">+</span>
+
+                      {/* Bulle Contact */}
+                      <div className="flex flex-col items-center gap-1">
+                        <motion.button
+                          type="button"
+                          whileTap={{ scale: 0.93 }}
+                          onClick={'contacts' in navigator ? handleImportContact : undefined}
+                          className="flex flex-col items-center gap-1.5 px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-2xl text-[11px] font-black text-slate-600 hover:bg-slate-100 transition-colors"
+                          style={{ minWidth: 72, opacity: 'contacts' in navigator ? 1 : 0.4 }}
+                        >
+                          <span className="text-xl">📞</span>
+                          Contact
+                        </motion.button>
+                        <span className="text-[9px] text-slate-400 font-medium">(optionnel)</span>
                       </div>
                     </div>
-                    {'contacts' in navigator && (
-                      <motion.button
-                        type="button"
-                        whileTap={{ scale: 0.93 }}
-                        onClick={handleImportContact}
-                        className="flex flex-col items-center gap-1.5 px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-2xl text-[11px] font-black text-slate-600 hover:bg-slate-100 transition-colors"
-                      >
-                        <BookUser size={20} className="text-slate-500" />
-                        Contacts
-                      </motion.button>
-                    )}
+
+                    {/* Menu appareil photo / galerie en dessous */}
                     <AnimatePresence>
                       {showPhotoMenu && (
                         <motion.div
-                          initial={{ opacity: 0, y: -6, scale: 0.95 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={{ opacity: 0, y: -6, scale: 0.95 }}
-                          transition={{ duration: 0.18 }}
-                          className="flex gap-2"
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.2, ease: 'easeInOut' }}
+                          className="overflow-hidden"
                         >
-                          <button
-                            type="button"
-                            onClick={() => { cameraInputRef.current?.click(); setShowPhotoMenu(false); }}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-black/60 rounded-xl text-[11px] font-bold text-slate-700"
-                          >
-                            <Camera size={13} /> Appareil photo
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => { fileInputRef.current?.click(); setShowPhotoMenu(false); }}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-black/60 rounded-xl text-[11px] font-bold text-slate-700"
-                          >
-                            <ImageIcon size={13} /> Galerie
-                          </button>
+                          <div className="flex gap-3 pt-1">
+                            <button
+                              type="button"
+                              onClick={() => { cameraInputRef.current?.click(); setShowPhotoMenu(false); }}
+                              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-[11px] font-bold text-slate-700 hover:border-rose-300 transition-colors"
+                            >
+                              <Camera size={13} className="text-rose-400" /> Appareil photo
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => { fileInputRef.current?.click(); setShowPhotoMenu(false); }}
+                              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-[11px] font-bold text-slate-700 hover:border-rose-300 transition-colors"
+                            >
+                              <ImageIcon size={13} className="text-rose-400" /> Galerie
+                            </button>
+                          </div>
                         </motion.div>
                       )}
                     </AnimatePresence>
+
                     <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handlePhotoFile} className="hidden" />
                     <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoFile} className="hidden" />
                   </div>
