@@ -347,7 +347,7 @@ export function Calendar({
       if (!container || !section) return;
       const top = section.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop;
       container.scrollTo({ top, behavior: 'smooth' });
-      window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+      setTimeout(() => container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' }), 150);
     }, 150);
     return () => clearTimeout(t);
   }, [showSocials]);
@@ -360,7 +360,7 @@ export function Calendar({
       if (!container || !section) return;
       const top = section.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop;
       container.scrollTo({ top, behavior: 'smooth' });
-      window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+      setTimeout(() => container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' }), 150);
     }, 150);
     return () => clearTimeout(t);
   }, [showWishlist]);
