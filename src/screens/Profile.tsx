@@ -42,6 +42,7 @@ export function Profile({ user, onUpdate, birthdays = [], challenges = [] }: { u
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [showDataModal, setShowDataModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   const toggleEdit = () => {
     if (!isEditingSocials) {
@@ -753,6 +754,22 @@ const getZodiacEmoji = (zodiac: string) => {
                   )}
                 </div>
 
+                <button
+                  onClick={() => setShowSettingsModal(true)}
+                  className="w-full bg-slate-900 p-5 rounded-[var(--radius-card)] flex items-center justify-between group hover:bg-slate-800 transition-colors"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-white shrink-0">
+                      <Settings size={24} />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">Préférences</p>
+                      <p className="font-bold text-white">Paramètres du compte</p>
+                    </div>
+                  </div>
+                  <ChevronRight size={18} className="text-white/20 group-hover:text-white transition-colors" />
+                </button>
+
                 {/* Gestion des données RGPD */}
                 <button
                   onClick={() => setShowDataModal(true)}
@@ -837,6 +854,89 @@ const getZodiacEmoji = (zodiac: string) => {
         </motion.div>
 
       </div>
+
+      {/* Modal — Paramètres du compte */}
+      <AnimatePresence>
+        {showSettingsModal && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[300] flex items-end justify-center">
+            <motion.div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={() => setShowSettingsModal(false)} />
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', stiffness: 340, damping: 32 }}
+              className="relative w-full max-w-lg bg-white rounded-t-3xl p-6 shadow-2xl space-y-4 pb-10"
+            >
+              <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto" />
+              <h3 className="font-black text-slate-900 text-base text-center">Paramètres du compte</h3>
+
+              {/* Dark mode */}
+              <div className="bg-slate-50 rounded-2xl p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: darkModeActive ? '#1e293b' : '#f8fafc' }}>
+                    {darkModeActive ? <Moon size={20} className="text-sky-300" /> : <Sun size={20} className="text-amber-400" />}
+                  </div>
+                  <div>
+                    <p className="font-bold text-slate-900 text-sm">{darkModeActive ? 'Mode sombre' : 'Mode clair'}</p>
+                    <p className="text-[10px] text-slate-400 font-medium">Apparence de l'app</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    const next = !darkModeActive;
+                    localStorage.setItem('darkMode', String(next));
+                    setDarkModeActive(next);
+                    window.dispatchEvent(new CustomEvent('darkModeChange', { detail: next }));
+                  }}
+                  className="relative w-12 h-6 rounded-full transition-colors duration-300 shrink-0"
+                  style={{ background: darkModeActive ? '#6366f1' : '#e2e8f0' }}
+                >
+                  <motion.div animate={{ x: darkModeActive ? 24 : 2 }} transition={{ type: 'spring', stiffness: 400, damping: 26 }} className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm" />
+                </button>
+              </div>
+
+              {/* Fond d'écran */}
+              <div className="bg-slate-50 rounded-2xl p-4 flex items-center justify-between">
+                <button onClick={() => { setShowSettingsModal(false); setTimeout(() => { setBgPassword(''); setBgStatus(null); setShowBgModal(true); }, 200); }} className="flex items-center gap-3 flex-1 text-left">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0 bg-white border border-slate-100">🎨</div>
+                  <div>
+                    <p className="font-bold text-slate-900 text-sm">Fond d'écran {gigiBgActive && <span className="text-[10px] font-black text-emerald-500 ml-1">● ACTIF</span>}</p>
+                    <p className="text-[10px] text-slate-400 font-medium">Personnalisation</p>
+                  </div>
+                </button>
+                {gigiBgActive && (
+                  <button onClick={() => { localStorage.setItem('gigiBg', 'false'); setGigiBgActive(false); window.dispatchEvent(new CustomEvent('gigiBgChange', { detail: false })); }} className="shrink-0 px-3 py-1.5 rounded-xl text-xs font-black text-rose-500 border border-rose-200 bg-rose-50">
+                    Désactiver
+                  </button>
+                )}
+              </div>
+
+              {/* RGPD */}
+              <button onClick={() => { setShowSettingsModal(false); setTimeout(() => setShowDataModal(true), 200); }} className="w-full bg-slate-50 rounded-2xl p-4 flex items-center gap-3 text-left">
+                <div className="w-10 h-10 bg-sky-50 rounded-xl flex items-center justify-center shrink-0">
+                  <ShieldCheck size={20} className="text-sky-500" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-bold text-slate-900 text-sm">Gestion des données</p>
+                  <p className="text-[10px] text-slate-400 font-medium">Confidentialité & RGPD</p>
+                </div>
+                <ChevronRight size={16} className="text-slate-300 shrink-0" />
+              </button>
+
+              {/* Supprimer */}
+              <button onClick={() => { setShowSettingsModal(false); setTimeout(() => { setDeleteConfirmText(''); setDeleteError(null); setShowDeleteModal(true); }, 200); }} className="w-full bg-rose-50 rounded-2xl p-4 flex items-center gap-3 text-left">
+                <div className="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center shrink-0">
+                  <Trash2 size={20} className="text-rose-500" />
+                </div>
+                <div>
+                  <p className="font-bold text-rose-500 text-sm">Supprimer mon compte</p>
+                  <p className="text-[10px] text-rose-400 font-medium">Action irréversible</p>
+                </div>
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Modal — Suppression du compte */}
       <AnimatePresence>
