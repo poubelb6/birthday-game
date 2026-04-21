@@ -478,23 +478,23 @@ export function Calendar({
           {([
             {
               id: 'tous' as TabId, label: 'Tous', icon: null,
-              color: '#64748b', activeColor: '#0f172a',
-              activeBg: 'var(--surface-card)', badgeBg: '#e2e8f0', badgeColor: '#475569',
+              color: '#64748b', activeColor: 'var(--text-1)',
+              activeBg: 'var(--surface-card)', badgeBg: 'rgba(148,163,184,0.25)', badgeColor: 'var(--text-2)',
             },
             {
               id: 'famille' as TabId, label: 'Famille', icon: <Heart size={12} strokeWidth={2.5} />,
-              color: '#f43f5e', activeColor: '#be123c',
-              activeBg: '#ffe4e6', badgeBg: '#fecdd3', badgeColor: '#be123c',
+              color: '#f43f5e', activeColor: '#f43f5e',
+              activeBg: 'rgba(244,63,94,0.12)', badgeBg: 'rgba(244,63,94,0.22)', badgeColor: '#f43f5e',
             },
             {
               id: 'ami' as TabId, label: 'Amis', icon: <Users size={12} strokeWidth={2.5} />,
-              color: '#0ea5e9', activeColor: '#0369a1',
-              activeBg: '#e0f2fe', badgeBg: '#bae6fd', badgeColor: '#0369a1',
+              color: '#0ea5e9', activeColor: '#0ea5e9',
+              activeBg: 'rgba(14,165,233,0.12)', badgeBg: 'rgba(14,165,233,0.22)', badgeColor: '#0ea5e9',
             },
             {
               id: 'autre' as TabId, label: 'Autre', icon: <UserCircle size={12} strokeWidth={2.5} />,
-              color: '#94a3b8', activeColor: '#475569',
-              activeBg: '#f1f5f9', badgeBg: '#e2e8f0', badgeColor: '#475569',
+              color: '#94a3b8', activeColor: '#94a3b8',
+              activeBg: 'rgba(148,163,184,0.15)', badgeBg: 'rgba(148,163,184,0.25)', badgeColor: '#94a3b8',
             },
           ] as const).map(tab => {
             const isActive = activeTab === tab.id;
@@ -798,7 +798,7 @@ export function Calendar({
                         type="button"
                         whileTap={{ scale: 0.93 }}
                         onClick={() => setShowPhotoMenu(v => !v)}
-                        className="w-24 h-24 flex flex-col items-center justify-center border-2 rounded-2xl text-[12px] font-black text-slate-600 transition-colors overflow-hidden bg-slate-50"
+                        className="w-24 h-24 flex flex-col items-center justify-center border border-slate-200 rounded-2xl text-[12px] font-black text-slate-600 transition-colors overflow-hidden bg-slate-50"
                         style={{ borderColor: showPhotoMenu ? '#FF4B4B' : undefined }}
                       >
                         {newPhotoPreview ? (
@@ -817,7 +817,7 @@ export function Calendar({
                         type="button"
                         whileTap={{ scale: 0.93 }}
                         onClick={'contacts' in navigator ? handleImportContact : undefined}
-                        className="w-24 h-24 flex flex-col items-center justify-center border-2 border-slate-200 rounded-2xl text-[12px] font-black text-slate-600 bg-slate-50 transition-colors"
+                        className="w-24 h-24 flex flex-col items-center justify-center border border-slate-200 rounded-2xl text-[12px] font-black text-slate-600 bg-slate-50 transition-colors"
                         style={{ opacity: 'contacts' in navigator ? 1 : 0.4 }}
                       >
                         <span className="text-3xl leading-none">📱</span>
