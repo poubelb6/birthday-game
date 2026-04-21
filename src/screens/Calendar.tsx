@@ -237,6 +237,8 @@ export function Calendar({
   const [photoUploading, setPhotoUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const socialsRef = useRef<HTMLDivElement>(null);
+  const wishlistRef = useRef<HTMLDivElement>(null);
 
   const [editingFriend, setEditingFriend] = useState<Birthday | null>(null);
   const [viewingFriend, setViewingFriend] = useState<Birthday | null>(null);
@@ -938,10 +940,14 @@ export function Calendar({
                 </div>
 
                 {/* Réseaux sociaux */}
-                <div className="border border-black/60 rounded-2xl overflow-hidden w-full">
+                <div ref={socialsRef} className="border border-black/60 rounded-2xl overflow-hidden w-full">
                   <button
                     type="button"
-                    onClick={() => setShowSocials(v => !v)}
+                    onClick={() => {
+                      const next = !showSocials;
+                      setShowSocials(next);
+                      if (next) setTimeout(() => socialsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+                    }}
                     className="w-full flex items-center justify-between px-4 py-3 bg-slate-50 hover:bg-slate-100 transition-colors"
                   >
                     <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
@@ -988,10 +994,14 @@ export function Calendar({
                 </div>
 
                 {/* Wishlist */}
-                <div className="border border-black/60 rounded-2xl overflow-hidden w-full">
+                <div ref={wishlistRef} className="border border-black/60 rounded-2xl overflow-hidden w-full">
                   <button
                     type="button"
-                    onClick={() => setShowWishlist(v => !v)}
+                    onClick={() => {
+                      const next = !showWishlist;
+                      setShowWishlist(next);
+                      if (next) setTimeout(() => wishlistRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+                    }}
                     className="w-full flex items-center justify-between px-4 py-3 bg-slate-50 hover:bg-slate-100 transition-colors"
                   >
                     <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
