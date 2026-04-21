@@ -336,6 +336,16 @@ export function Calendar({
     e.target.value = '';
   };
 
+  const resetAddForm = () => {
+    setNewName(''); setNewDate(''); setNewPhone(''); setNewCategory(undefined);
+    setNewPhotoUrl(''); setNewPhotoPreview('');
+    setNewSocials({ instagram: '', snapchat: '', tiktok: '', twitter: '', facebook: '' });
+    setNewWishlist([]); setNewWishInput('');
+    setShowWishlist(false); setShowPhotoMenu(false);
+  };
+
+  const closeAddModal = () => { setShowAddModal(false); resetAddForm(); };
+
   const handleAddFriend = async () => {
     if (!newName || !newDate || !onAddBirthday) return;
     const birthDate = parseISO(newDate);
@@ -356,11 +366,7 @@ export function Calendar({
     };
     await onAddBirthday(birthday);
     const addedName = newName;
-    setNewName(''); setNewDate(''); setNewPhone(''); setNewCategory(undefined);
-    setNewPhotoUrl(''); setNewPhotoPreview('');
-    setNewSocials({ instagram: '', snapchat: '', tiktok: '', twitter: '', facebook: '' });
-    setNewWishlist([]); setNewWishInput('');
-    setShowWishlist(false); setShowPhotoMenu(false); setShowAddModal(false);
+    closeAddModal();
     setToastName(addedName);
     setTimeout(() => setToastName(null), 5000);
     const colors = ['#FF4B4B', '#58CC02', '#ffffff', '#FEF08A'];
@@ -726,8 +732,8 @@ export function Calendar({
                       transition={{ delay: i * 0.06 }}
                       className="flex items-center gap-3 p-3 rounded-2xl border"
                       style={{
-                        borderColor: i === 0 ? '#FFD700' : i === 1 ? '#C0C0C0' : i === 2 ? '#CD7F32' : '#f1f5f9',
-                        background: i < 3 ? 'rgba(255,75,75,0.04)' : 'white',
+                        borderColor: i === 0 ? '#FFD700' : i === 1 ? '#C0C0C0' : i === 2 ? '#CD7F32' : 'var(--border-soft)',
+                        background: i < 3 ? 'rgba(255,75,75,0.04)' : 'var(--surface-card)',
                       }}
                     >
                       <div className="w-7 text-center shrink-0">
@@ -765,7 +771,7 @@ export function Calendar({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setShowAddModal(false)}
+              onClick={closeAddModal}
               className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
             />
             <motion.div
@@ -776,7 +782,7 @@ export function Calendar({
             >
               <div className="relative flex items-center justify-between px-5 py-3 shrink-0 rounded-t-3xl" style={{ background: 'linear-gradient(135deg, #FF4B4B 0%, #C2185B 100%)' }}>
                 <h3 className="font-display text-sm font-black text-white tracking-wide">🎉 Ajouter un ami</h3>
-                <button onClick={() => setShowAddModal(false)} className="w-7 h-7 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors">
+                <button onClick={closeAddModal} className="w-7 h-7 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors">
                   <X size={15} className="text-white" />
                 </button>
               </div>
@@ -792,16 +798,16 @@ export function Calendar({
                         type="button"
                         whileTap={{ scale: 0.93 }}
                         onClick={() => setShowPhotoMenu(v => !v)}
-                        className="w-16 h-16 flex flex-col items-center justify-center border-2 rounded-xl text-[11px] font-black text-slate-600 transition-colors overflow-hidden bg-slate-50"
+                        className="w-24 h-24 flex flex-col items-center justify-center border-2 rounded-2xl text-[12px] font-black text-slate-600 transition-colors overflow-hidden bg-slate-50"
                         style={{ borderColor: showPhotoMenu ? '#FF4B4B' : undefined }}
                       >
                         {newPhotoPreview ? (
                           <img src={newPhotoPreview} alt="preview" className="w-full h-full object-cover" />
                         ) : (
                           <>
-                            <span className="text-lg leading-none">📷</span>
-                            <span className="mt-0.5">Photo</span>
-                            <span className="text-[8px] text-slate-400 font-medium">(optionnel)</span>
+                            <span className="text-3xl leading-none">📷</span>
+                            <span className="mt-1">Photo</span>
+                            <span className="text-[10px] text-slate-400 font-medium">(optionnel)</span>
                           </>
                         )}
                       </motion.button>
@@ -811,12 +817,12 @@ export function Calendar({
                         type="button"
                         whileTap={{ scale: 0.93 }}
                         onClick={'contacts' in navigator ? handleImportContact : undefined}
-                        className="w-16 h-16 flex flex-col items-center justify-center border-2 border-slate-200 rounded-xl text-[11px] font-black text-slate-600 bg-slate-50 transition-colors"
+                        className="w-24 h-24 flex flex-col items-center justify-center border-2 border-slate-200 rounded-2xl text-[12px] font-black text-slate-600 bg-slate-50 transition-colors"
                         style={{ opacity: 'contacts' in navigator ? 1 : 0.4 }}
                       >
-                        <span className="text-lg leading-none">📱</span>
-                        <span className="mt-0.5">Contact</span>
-                        <span className="text-[8px] text-slate-400 font-medium">(optionnel)</span>
+                        <span className="text-3xl leading-none">📱</span>
+                        <span className="mt-1">Contact</span>
+                        <span className="text-[10px] text-slate-400 font-medium">(optionnel)</span>
                       </motion.button>
                     </div>
 
