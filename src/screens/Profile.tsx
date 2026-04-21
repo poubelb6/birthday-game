@@ -2,10 +2,11 @@ import { useState, useRef } from 'react';
 import { ZODIAC_EMOJI } from '../utils/zodiac';
 import { QRCodeSVG } from 'qrcode.react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Share2, Settings, Instagram, Gift, ChevronRight, Sparkles, Users, Trophy, ExternalLink, Copy, Twitter, Facebook, Save, X, Smartphone, LogOut, Ghost, Camera, Plus, Trash2, Moon, Sun } from 'lucide-react';
-import { signOut } from 'firebase/auth';
+import { Share2, Settings, Instagram, Gift, ChevronRight, Sparkles, Users, Trophy, ExternalLink, Copy, Twitter, Facebook, Save, X, Smartphone, LogOut, Ghost, Camera, Plus, Trash2, Moon, Sun, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { signOut, deleteUser } from 'firebase/auth';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { auth, storage } from '../firebase';
+import { doc, deleteDoc, getDocs, collection, writeBatch } from 'firebase/firestore';
+import { auth, storage, db } from '../firebase';
 import { UserProfile } from '../types';
 import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -36,6 +37,11 @@ export function Profile({ user, onUpdate, birthdays = [], challenges = [] }: { u
   const [bgStatus, setBgStatus] = useState<'success' | 'error' | null>(null);
   const [gigiBgActive, setGigiBgActive] = useState(() => localStorage.getItem('gigiBg') === 'true');
   const [darkModeActive, setDarkModeActive] = useState(() => localStorage.getItem('darkMode') === 'true');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [showDataModal, setShowDataModal] = useState(false);
 
   const toggleEdit = () => {
     if (!isEditingSocials) {
@@ -189,6 +195,31 @@ export function Profile({ user, onUpdate, birthdays = [], challenges = [] }: { u
 
     reader.readAsDataURL(file);
     e.target.value = '';
+  };
+
+  const handleDeleteAccount = async () => {
+    const firebaseUser = auth.currentUser;
+    if (!firebaseUser) return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      const batch = writeBatch(db);
+      const birthdaysSnap = await getDocs(collection(db, 'users', firebaseUser.uid, 'birthdays'));
+      birthdaysSnap.docs.forEach(d => batch.delete(d.ref));
+      const challengesSnap = await getDocs(collection(db, 'users', firebaseUser.uid, 'challenges'));
+      challengesSnap.docs.forEach(d => batch.delete(d.ref));
+      await batch.commit();
+      await deleteDoc(doc(db, 'users', firebaseUser.uid));
+      await deleteUser(firebaseUser);
+    } catch (e: unknown) {
+      const code = (e as { code?: string }).code;
+      if (code === 'auth/requires-recent-login') {
+        setDeleteError('Pour des raisons de sécurité, déconnecte-toi et reconnecte-toi avant de supprimer.');
+      } else {
+        setDeleteError('Une erreur est survenue. Réessaie.');
+      }
+      setDeleting(false);
+    }
   };
 
   const handleBgPassword = () => {
@@ -735,6 +766,23 @@ const getZodiacEmoji = (zodiac: string) => {
                   )}
                 </div>
 
+                {/* Gestion des données RGPD */}
+                <button
+                  onClick={() => setShowDataModal(true)}
+                  className="w-full bg-white p-5 rounded-[var(--radius-card)] border border-slate-100 shadow-sm flex items-center justify-between group hover:border-sky-200 transition-colors"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-sky-50 rounded-2xl flex items-center justify-center text-sky-500 shrink-0">
+                      <ShieldCheck size={24} />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Confidentialité</p>
+                      <p className="font-bold text-slate-900">Gestion des données</p>
+                    </div>
+                  </div>
+                  <ChevronRight size={18} className="text-slate-300 group-hover:text-sky-400 transition-colors" />
+                </button>
+
                 {/* Dark mode toggle */}
                 <div className="w-full bg-white p-5 rounded-[var(--radius-card)] border border-slate-100 shadow-sm flex items-center justify-between">
                   <div className="flex items-center gap-4">
@@ -773,30 +821,152 @@ const getZodiacEmoji = (zodiac: string) => {
           </AnimatePresence>
         </motion.section>
 
-        {/* Sign out */}
+        {/* Sign out + Delete */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="pb-4"
+          className="pb-4 space-y-3"
         >
           <motion.button
             onClick={() => signOut(auth)}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
             className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl font-bold"
-            style={{
-              color: '#FF4B4B',
-              border: '2px solid #FF4B4B',
-              background: 'transparent',
-            }}
+            style={{ color: '#FF4B4B', border: '2px solid #FF4B4B', background: 'transparent' }}
           >
             <LogOut size={20} />
             Se déconnecter
           </motion.button>
+          <motion.button
+            onClick={() => { setDeleteConfirmText(''); setDeleteError(null); setShowDeleteModal(true); }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
+            className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl font-bold text-slate-400 border border-slate-200 bg-transparent hover:border-rose-300 hover:text-rose-400 transition-colors"
+          >
+            <Trash2 size={18} />
+            Supprimer mon compte
+          </motion.button>
         </motion.div>
 
       </div>
+
+      {/* Modal — Suppression du compte */}
+      <AnimatePresence>
+        {showDeleteModal && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[300] flex items-center justify-center p-6">
+            <motion.div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={() => setShowDeleteModal(false)} />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 16 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 16 }}
+              transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+              className="relative w-full max-w-xs bg-white rounded-3xl p-6 shadow-2xl space-y-4"
+            >
+              <button onClick={() => setShowDeleteModal(false)} className="absolute top-4 right-4 w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center">
+                <X size={14} className="text-slate-500" />
+              </button>
+              <div className="text-center space-y-1">
+                <div className="w-14 h-14 bg-rose-50 rounded-2xl flex items-center justify-center mx-auto mb-2">
+                  <AlertTriangle size={28} className="text-rose-500" />
+                </div>
+                <h3 className="font-black text-slate-900 text-base">Supprimer mon compte</h3>
+                <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                  Cette action est <span className="font-black text-rose-500">irréversible</span>. Toutes tes données seront supprimées définitivement : profil, amis, cartes, défis.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Tape SUPPRIMER pour confirmer</p>
+                <input
+                  type="text"
+                  value={deleteConfirmText}
+                  onChange={e => setDeleteConfirmText(e.target.value)}
+                  placeholder="SUPPRIMER"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-slate-900 font-bold text-center focus:outline-none focus:border-rose-400 transition-colors"
+                  autoFocus
+                />
+                {deleteError && <p className="text-xs font-bold text-rose-500 text-center">{deleteError}</p>}
+              </div>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={deleteConfirmText !== 'SUPPRIMER' || deleting}
+                className="w-full py-3 rounded-2xl font-black text-white text-sm disabled:opacity-40 transition-opacity"
+                style={{ background: '#FF4B4B', boxShadow: '0 3px 0 #CC2E2E' }}
+              >
+                {deleting ? 'Suppression...' : 'SUPPRIMER DÉFINITIVEMENT'}
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal — Gestion des données RGPD */}
+      <AnimatePresence>
+        {showDataModal && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[300] flex items-end justify-center">
+            <motion.div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={() => setShowDataModal(false)} />
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', stiffness: 340, damping: 32 }}
+              className="relative w-full max-w-lg bg-white rounded-t-3xl p-6 shadow-2xl space-y-5"
+              style={{ maxHeight: '85vh', overflowY: 'auto' }}
+            >
+              <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto" />
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-sky-50 rounded-xl flex items-center justify-center shrink-0">
+                  <ShieldCheck size={20} className="text-sky-500" />
+                </div>
+                <div>
+                  <h3 className="font-black text-slate-900 text-base">Gestion des données</h3>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Conformité RGPD</p>
+                </div>
+              </div>
+
+              {[
+                {
+                  title: '📦 Données collectées',
+                  content: 'Nom, date de naissance, signe astrologique, photo de profil, réseaux sociaux, wishlist, anniversaires de tes amis, score XP et cartes collectées.',
+                },
+                {
+                  title: '🎯 Pourquoi ces données ?',
+                  content: 'Pour afficher ton profil, générer ton QR Code, permettre à tes amis de t\'ajouter, et faire fonctionner le jeu (défis, cartes, classement).',
+                },
+                {
+                  title: '🔒 Stockage & sécurité',
+                  content: 'Tes données sont stockées sur Firebase (Google Cloud), sécurisées par des règles d\'accès strictes. Seul toi peux lire et modifier tes données.',
+                },
+                {
+                  title: '⏳ Durée de conservation',
+                  content: 'Tes données sont conservées tant que ton compte est actif. En cas de suppression du compte, toutes les données sont effacées immédiatement.',
+                },
+                {
+                  title: '✅ Tes droits',
+                  content: 'Accès, rectification, suppression, portabilité. Tu peux modifier ton profil à tout moment, ou supprimer ton compte depuis cette page.',
+                },
+                {
+                  title: '📬 Contact',
+                  content: 'Pour toute demande relative à tes données : ezzeyadiamine@gmail.com',
+                },
+              ].map(({ title, content }) => (
+                <div key={title} className="bg-slate-50 rounded-2xl p-4 space-y-1">
+                  <p className="font-black text-slate-800 text-sm">{title}</p>
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed">{content}</p>
+                </div>
+              ))}
+
+              <button
+                onClick={() => setShowDataModal(false)}
+                className="w-full py-3 rounded-2xl font-black text-white text-sm"
+                style={{ background: '#0ea5e9' }}
+              >
+                J'ai compris
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Easter egg — Fond d'écran modal */}
       <AnimatePresence>
