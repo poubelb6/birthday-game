@@ -950,7 +950,10 @@ export function Calendar({
                       if (next) setTimeout(() => {
                         const container = modalScrollRef.current;
                         const section = socialsRef.current;
-                        if (container && section) container.scrollTo({ top: section.offsetTop, behavior: 'smooth' });
+                        if (container && section) {
+                          const top = section.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop;
+                          container.scrollTo({ top, behavior: 'smooth' });
+                        }
                       }, 0);
                     }}
                     className="w-full flex items-center justify-between px-4 py-3 bg-slate-50 hover:bg-slate-100 transition-colors"
@@ -1008,7 +1011,10 @@ export function Calendar({
                       if (next) setTimeout(() => {
                         const container = modalScrollRef.current;
                         const section = wishlistRef.current;
-                        if (container && section) container.scrollTo({ top: section.offsetTop, behavior: 'smooth' });
+                        if (container && section) {
+                          const top = section.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop;
+                          container.scrollTo({ top, behavior: 'smooth' });
+                        }
                       }, 0);
                     }}
                     className="w-full flex items-center justify-between px-4 py-3 bg-slate-50 hover:bg-slate-100 transition-colors"
