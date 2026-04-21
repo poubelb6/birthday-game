@@ -724,8 +724,31 @@ const getZodiacEmoji = (zodiac: string) => {
                     <ExternalLink size={18} className="text-slate-300 group-hover:text-blue-400 transition-colors" />
                   </a>
                 )}
-                
-<div className="w-full bg-white p-5 rounded-[var(--radius-card)] border border-slate-100 shadow-sm flex items-center justify-between gap-3">
+
+                {/* ── Séparateur ── */}
+                <div className="flex items-center gap-3 px-1 pt-2">
+                  <div className="h-px flex-1 bg-slate-100 rounded-full" />
+                  <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Paramètres</span>
+                  <div className="h-px flex-1 bg-slate-100 rounded-full" />
+                </div>
+
+                <button
+                  onClick={() => setShowSettingsModal(true)}
+                  className="w-full bg-slate-900 p-5 rounded-[var(--radius-card)] flex items-center justify-between group hover:bg-slate-800 transition-colors"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-white shrink-0">
+                      <Settings size={24} />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">Préférences</p>
+                      <p className="font-bold text-white">Paramètres du compte</p>
+                    </div>
+                  </div>
+                  <ChevronRight size={18} className="text-white/20 group-hover:text-white transition-colors" />
+                </button>
+
+                <div className="w-full bg-white p-5 rounded-[var(--radius-card)] border border-slate-100 shadow-sm flex items-center justify-between gap-3">
                   <button
                     onClick={() => { setBgPassword(''); setBgStatus(null); setShowBgModal(true); }}
                     className="flex items-center gap-4 flex-1 text-left group"
@@ -753,22 +776,6 @@ const getZodiacEmoji = (zodiac: string) => {
                     </button>
                   )}
                 </div>
-
-                <button
-                  onClick={() => setShowSettingsModal(true)}
-                  className="w-full bg-slate-900 p-5 rounded-[var(--radius-card)] flex items-center justify-between group hover:bg-slate-800 transition-colors"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-white shrink-0">
-                      <Settings size={24} />
-                    </div>
-                    <div className="text-left">
-                      <p className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">Préférences</p>
-                      <p className="font-bold text-white">Paramètres du compte</p>
-                    </div>
-                  </div>
-                  <ChevronRight size={18} className="text-white/20 group-hover:text-white transition-colors" />
-                </button>
 
                 {/* Gestion des données RGPD */}
                 <button
@@ -842,15 +849,6 @@ const getZodiacEmoji = (zodiac: string) => {
             <LogOut size={20} />
             Se déconnecter
           </motion.button>
-          <motion.button
-            onClick={() => { setDeleteConfirmText(''); setDeleteError(null); setShowDeleteModal(true); }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
-            className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl font-bold text-slate-400 border border-slate-200 bg-transparent hover:border-rose-300 hover:text-rose-400 transition-colors"
-          >
-            <Trash2 size={18} />
-            Supprimer mon compte
-          </motion.button>
         </motion.div>
 
       </div>
@@ -870,7 +868,7 @@ const getZodiacEmoji = (zodiac: string) => {
               <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto" />
               <h3 className="font-black text-slate-900 text-base text-center">Paramètres du compte</h3>
 
-              {/* Dark mode */}
+              {/* 1. Dark mode */}
               <div className="bg-slate-50 rounded-2xl p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: darkModeActive ? '#1e293b' : '#f8fafc' }}>
@@ -895,7 +893,30 @@ const getZodiacEmoji = (zodiac: string) => {
                 </button>
               </div>
 
-              {/* Fond d'écran */}
+              {/* 2. RGPD */}
+              <button onClick={() => { setShowSettingsModal(false); setTimeout(() => setShowDataModal(true), 200); }} className="w-full bg-slate-50 rounded-2xl p-4 flex items-center gap-3 text-left">
+                <div className="w-10 h-10 bg-sky-50 rounded-xl flex items-center justify-center shrink-0">
+                  <ShieldCheck size={20} className="text-sky-500" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-bold text-slate-900 text-sm">Gestion des données</p>
+                  <p className="text-[10px] text-slate-400 font-medium">Confidentialité & RGPD</p>
+                </div>
+                <ChevronRight size={16} className="text-slate-300 shrink-0" />
+              </button>
+
+              {/* 3. Supprimer */}
+              <button onClick={() => { setShowSettingsModal(false); setTimeout(() => { setDeleteConfirmText(''); setDeleteError(null); setShowDeleteModal(true); }, 200); }} className="w-full bg-rose-50 rounded-2xl p-4 flex items-center gap-3 text-left">
+                <div className="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center shrink-0">
+                  <Trash2 size={20} className="text-rose-500" />
+                </div>
+                <div>
+                  <p className="font-bold text-rose-500 text-sm">Supprimer mon compte</p>
+                  <p className="text-[10px] text-rose-400 font-medium">Action irréversible</p>
+                </div>
+              </button>
+
+              {/* 4. Personnalisation — tout en bas */}
               <div className="bg-slate-50 rounded-2xl p-4 flex items-center justify-between">
                 <button onClick={() => { setShowSettingsModal(false); setTimeout(() => { setBgPassword(''); setBgStatus(null); setShowBgModal(true); }, 200); }} className="flex items-center gap-3 flex-1 text-left">
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0 bg-white border border-slate-100">🎨</div>
@@ -910,29 +931,6 @@ const getZodiacEmoji = (zodiac: string) => {
                   </button>
                 )}
               </div>
-
-              {/* RGPD */}
-              <button onClick={() => { setShowSettingsModal(false); setTimeout(() => setShowDataModal(true), 200); }} className="w-full bg-slate-50 rounded-2xl p-4 flex items-center gap-3 text-left">
-                <div className="w-10 h-10 bg-sky-50 rounded-xl flex items-center justify-center shrink-0">
-                  <ShieldCheck size={20} className="text-sky-500" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-bold text-slate-900 text-sm">Gestion des données</p>
-                  <p className="text-[10px] text-slate-400 font-medium">Confidentialité & RGPD</p>
-                </div>
-                <ChevronRight size={16} className="text-slate-300 shrink-0" />
-              </button>
-
-              {/* Supprimer */}
-              <button onClick={() => { setShowSettingsModal(false); setTimeout(() => { setDeleteConfirmText(''); setDeleteError(null); setShowDeleteModal(true); }, 200); }} className="w-full bg-rose-50 rounded-2xl p-4 flex items-center gap-3 text-left">
-                <div className="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center shrink-0">
-                  <Trash2 size={20} className="text-rose-500" />
-                </div>
-                <div>
-                  <p className="font-bold text-rose-500 text-sm">Supprimer mon compte</p>
-                  <p className="text-[10px] text-rose-400 font-medium">Action irréversible</p>
-                </div>
-              </button>
             </motion.div>
           </motion.div>
         )}
