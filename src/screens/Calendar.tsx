@@ -343,7 +343,7 @@ export function Calendar({
     if (!showSocials) return;
     const t = setTimeout(() => {
       modalScrollRef.current?.scrollTo({ top: modalScrollRef.current.scrollHeight, behavior: 'smooth' });
-    }, 0);
+    }, 300);
     return () => clearTimeout(t);
   }, [showSocials]);
 
@@ -351,7 +351,7 @@ export function Calendar({
     if (!showWishlist) return;
     const t = setTimeout(() => {
       modalScrollRef.current?.scrollTo({ top: modalScrollRef.current.scrollHeight, behavior: 'smooth' });
-    }, 0);
+    }, 300);
     return () => clearTimeout(t);
   }, [showWishlist]);
 
