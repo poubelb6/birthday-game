@@ -951,7 +951,7 @@ export function Calendar({
                         const container = modalScrollRef.current;
                         const section = socialsRef.current;
                         if (container && section) container.scrollTo({ top: section.offsetTop, behavior: 'smooth' });
-                      }, 300);
+                      }, 0);
                     }}
                     className="w-full flex items-center justify-between px-4 py-3 bg-slate-50 hover:bg-slate-100 transition-colors"
                   >
@@ -1009,7 +1009,7 @@ export function Calendar({
                         const container = modalScrollRef.current;
                         const section = wishlistRef.current;
                         if (container && section) container.scrollTo({ top: section.offsetTop, behavior: 'smooth' });
-                      }, 300);
+                      }, 0);
                     }}
                     className="w-full flex items-center justify-between px-4 py-3 bg-slate-50 hover:bg-slate-100 transition-colors"
                   >
