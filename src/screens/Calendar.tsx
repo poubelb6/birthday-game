@@ -473,7 +473,7 @@ export function Calendar({
             {
               id: 'tous' as TabId, label: 'Tous', icon: null,
               color: '#64748b', activeColor: '#0f172a',
-              activeBg: 'white', badgeBg: '#e2e8f0', badgeColor: '#475569',
+              activeBg: 'var(--surface-card)', badgeBg: '#e2e8f0', badgeColor: '#475569',
             },
             {
               id: 'famille' as TabId, label: 'Famille', icon: <Heart size={12} strokeWidth={2.5} />,
@@ -792,16 +792,16 @@ export function Calendar({
                         type="button"
                         whileTap={{ scale: 0.93 }}
                         onClick={() => setShowPhotoMenu(v => !v)}
-                        className="flex flex-col items-center justify-center border-2 rounded-2xl text-[11px] font-black text-slate-600 hover:bg-slate-100 transition-colors overflow-hidden"
-                        style={{ borderColor: showPhotoMenu ? '#FF4B4B' : '#e2e8f0', minWidth: 80, minHeight: 80, background: newPhotoPreview ? 'transparent' : '#f8fafc', padding: newPhotoPreview ? 0 : undefined }}
+                        className="w-16 h-16 flex flex-col items-center justify-center border-2 rounded-xl text-[11px] font-black text-slate-600 transition-colors overflow-hidden bg-slate-50"
+                        style={{ borderColor: showPhotoMenu ? '#FF4B4B' : undefined }}
                       >
                         {newPhotoPreview ? (
-                          <img src={newPhotoPreview} alt="preview" className="w-full h-full object-cover" style={{ minHeight: 80 }} />
+                          <img src={newPhotoPreview} alt="preview" className="w-full h-full object-cover" />
                         ) : (
                           <>
-                            <span className="text-xl mb-0.5">📷</span>
-                            <span>Photo</span>
-                            <span className="text-[9px] text-slate-400 font-medium mt-0.5">(optionnel)</span>
+                            <span className="text-lg leading-none">📷</span>
+                            <span className="mt-0.5">Photo</span>
+                            <span className="text-[8px] text-slate-400 font-medium">(optionnel)</span>
                           </>
                         )}
                       </motion.button>
@@ -811,12 +811,12 @@ export function Calendar({
                         type="button"
                         whileTap={{ scale: 0.93 }}
                         onClick={'contacts' in navigator ? handleImportContact : undefined}
-                        className="flex flex-col items-center justify-center gap-0.5 px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-2xl text-[11px] font-black text-slate-600 hover:bg-slate-100 transition-colors"
-                        style={{ minWidth: 80, minHeight: 80, opacity: 'contacts' in navigator ? 1 : 0.4 }}
+                        className="w-16 h-16 flex flex-col items-center justify-center border-2 border-slate-200 rounded-xl text-[11px] font-black text-slate-600 bg-slate-50 transition-colors"
+                        style={{ opacity: 'contacts' in navigator ? 1 : 0.4 }}
                       >
-                        <span className="text-xl mb-0.5">📞</span>
-                        <span>Contact</span>
-                        <span className="text-[9px] text-slate-400 font-medium mt-0.5">(optionnel)</span>
+                        <span className="text-lg leading-none">📱</span>
+                        <span className="mt-0.5">Contact</span>
+                        <span className="text-[8px] text-slate-400 font-medium">(optionnel)</span>
                       </motion.button>
                     </div>
 
@@ -863,7 +863,7 @@ export function Calendar({
                     value={newName}
                     onChange={e => setNewName(e.target.value)}
                     placeholder="Ex: Marie"
-                    className="w-full bg-white border-2 border-slate-900 rounded-2xl py-2.5 px-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-rose-500 transition-all"
+                    className="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl py-2.5 px-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-rose-500 transition-all"
                   />
                 </div>
 
@@ -893,12 +893,11 @@ export function Calendar({
                   <label className="block text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">Catégorie <span className="text-slate-400 normal-case font-medium">(optionnel)</span></label>
                   <div className="grid grid-cols-3 gap-2">
                     {([
-                      { cat: 'famille' as const, label: 'Famille', icon: <Heart size={20} strokeWidth={2.5} />, sel: { bg: '#f43f5e', border: '#f43f5e', icon: '#fff' }, unsel: { bg: '#fff8f8', border: '#f1f5f9', icon: '#fca5a5', text: '#94a3b8' } },
-                      { cat: 'ami'     as const, label: 'Amis',    icon: <Users size={20} strokeWidth={2.5} />, sel: { bg: '#0ea5e9', border: '#0ea5e9', icon: '#fff' }, unsel: { bg: '#f0f9ff', border: '#f1f5f9', icon: '#7dd3fc', text: '#94a3b8' } },
-                      { cat: 'autre'   as const, label: 'Autre',   icon: <UserCircle size={20} strokeWidth={2.5} />, sel: { bg: '#94a3b8', border: '#94a3b8', icon: '#fff' }, unsel: { bg: '#f8fafc', border: '#f1f5f9', icon: '#cbd5e1', text: '#94a3b8' } },
-                    ]).map(({ cat, label, icon, sel, unsel }) => {
+                      { cat: 'famille' as const, label: 'Famille', icon: <Heart size={20} strokeWidth={2.5} />, sel: { bg: '#f43f5e', border: '#f43f5e' }, unselIconColor: '#fca5a5' },
+                      { cat: 'ami'     as const, label: 'Amis',    icon: <Users size={20} strokeWidth={2.5} />, sel: { bg: '#0ea5e9', border: '#0ea5e9' }, unselIconColor: '#7dd3fc' },
+                      { cat: 'autre'   as const, label: 'Autre',   icon: <UserCircle size={20} strokeWidth={2.5} />, sel: { bg: '#94a3b8', border: '#94a3b8' }, unselIconColor: '#cbd5e1' },
+                    ]).map(({ cat, label, icon, sel, unselIconColor }) => {
                       const isSelected = newCategory === cat;
-                      const s = isSelected ? sel : unsel;
                       return (
                         <motion.button
                           key={cat}
@@ -907,10 +906,10 @@ export function Calendar({
                           whileTap={{ scale: 0.88, rotate: isSelected ? 0 : -3 }}
                           transition={{ type: 'spring', stiffness: 400, damping: 17 }}
                           onClick={() => setNewCategory(isSelected ? undefined : cat)}
-                          className="flex flex-col items-center gap-1 py-2 rounded-2xl border-2 text-[11px] font-black"
-                          style={{ background: s.bg, borderColor: s.border, color: isSelected ? '#fff' : (unsel as typeof sel & { text: string }).text, ...(isSelected && { boxShadow: `0 4px 12px ${sel.bg}55` }) }}
+                          className={`flex flex-col items-center gap-1 py-2 rounded-2xl border-2 text-[11px] font-black ${isSelected ? '' : 'bg-slate-50 border-slate-200 text-slate-400'}`}
+                          style={isSelected ? { background: sel.bg, borderColor: sel.border, color: '#fff', boxShadow: `0 4px 12px ${sel.bg}55` } : {}}
                         >
-                          <span style={{ color: s.icon }}>{icon}</span>
+                          <span style={{ color: isSelected ? '#fff' : unselIconColor }}>{icon}</span>
                           {label}
                         </motion.button>
                       );
@@ -928,7 +927,7 @@ export function Calendar({
                     value={newPhone}
                     onChange={e => setNewPhone(e.target.value)}
                     placeholder="Ex: +33 6 12 34 56 78"
-                    className="w-full bg-white border-2 border-slate-900 rounded-2xl py-2.5 px-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-rose-500 transition-all"
+                    className="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl py-2.5 px-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-rose-500 transition-all"
                   />
                 </div>
 
