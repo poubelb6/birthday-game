@@ -148,11 +148,13 @@ export function Scanner({ onScan, onScanSuccess, existingBirthdays = [] }: {
     };
 
     onScan(birthday);
-    onScanSuccess?.();
     setCelebrating(pending);
-    setTimeout(() => setCelebrating(null), 2800);
     setPending(null);
     isPaused.current = false;
+    setTimeout(() => {
+      setCelebrating(null);
+      onScanSuccess?.();
+    }, 2800);
   };
 
   const handleCancel = () => {
