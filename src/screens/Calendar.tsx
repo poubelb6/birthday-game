@@ -232,6 +232,7 @@ export function Calendar({
   const [newWishlist, setNewWishlist] = useState<string[]>([]);
   const [newWishInput, setNewWishInput] = useState('');
   const [toastName, setToastName] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Birthday | null>(null);
   const [showPhotoMenu, setShowPhotoMenu] = useState(false);
   const [photoUploading, setPhotoUploading] = useState(false);
@@ -361,12 +362,17 @@ export function Calendar({
     setNewSocials({ instagram: '', snapchat: '', tiktok: '', twitter: '', facebook: '' });
     setNewWishlist([]); setNewWishInput('');
     setShowWishlist(false); setShowPhotoMenu(false);
+    setFormError(null);
   };
 
   const closeAddModal = () => { setShowAddModal(false); resetAddForm(); };
 
   const handleAddFriend = async () => {
-    if (!newName || !newDate || !onAddBirthday) return;
+    if (!newName && !newDate) { setFormError('Remplis le nom et la date.'); return; }
+    if (!newName) { setFormError('Le nom est requis.'); return; }
+    if (!newDate) { setFormError('La date de naissance est requise.'); return; }
+    if (!onAddBirthday) return;
+    setFormError(null);
     const birthDate = parseISO(newDate);
     const socials = Object.fromEntries(
       Object.entries(newSocials).filter(([, v]) => v.trim() !== '')
@@ -886,7 +892,7 @@ export function Calendar({
                   <input
                     type="text"
                     value={newName}
-                    onChange={e => setNewName(e.target.value)}
+                    onChange={e => { setNewName(e.target.value); setFormError(null); }}
                     placeholder="Ex: Marie"
                     className="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl py-2.5 px-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-rose-500 transition-all"
                   />
@@ -898,7 +904,7 @@ export function Calendar({
                   <input
                     type="date"
                     value={newDate}
-                    onChange={e => setNewDate(e.target.value)}
+                    onChange={e => { setNewDate(e.target.value); setFormError(null); }}
                     className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-2.5 px-4 text-slate-900 focus:outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-all"
                   />
                   {newDate && (() => {
@@ -1086,16 +1092,29 @@ export function Calendar({
                 </div>
               </div>
 
-              <div className="px-8 py-6 shrink-0">
-                <button
+              <div className="px-8 py-4 pb-6 shrink-0 space-y-3">
+                <AnimatePresence>
+                  {formError && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      className="text-center text-sm font-bold text-rose-500"
+                    >
+                      ⚠️ {formError}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
+                <motion.button
                   type="button"
                   onClick={handleAddFriend}
-                  disabled={!newName || !newDate || photoUploading}
-                  className="w-full text-white font-black py-4 rounded-2xl shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={photoUploading}
+                  whileTap={{ scale: 0.97 }}
+                  className="w-full text-white font-black py-4 rounded-2xl shadow-lg transition-all disabled:opacity-50"
                   style={{ background: '#FF4B4B', boxShadow: '0 4px 0 #CC2E2E' }}
                 >
                   {photoUploading ? 'Upload en cours...' : "AJOUTER L'AMI"}
-                </button>
+                </motion.button>
               </div>
             </motion.div>
           </div>
