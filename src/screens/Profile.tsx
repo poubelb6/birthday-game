@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { ZODIAC_EMOJI } from '../utils/zodiac';
 import { QRCodeSVG } from 'qrcode.react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Share2, Settings, Instagram, Gift, ChevronRight, Sparkles, Users, Trophy, ExternalLink, Copy, Twitter, Facebook, Save, X, Smartphone, LogOut, Ghost, Camera, Plus, Trash2, Moon, Sun, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { Share2, Settings, Instagram, Gift, ChevronRight, Sparkles, Users, Trophy, ExternalLink, Copy, Twitter, Facebook, Save, X, Smartphone, LogOut, Ghost, Camera, Plus, Trash2, Moon, Sun, ShieldCheck, AlertTriangle, Bell } from 'lucide-react';
 import { signOut, deleteUser } from 'firebase/auth';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, deleteDoc, getDocs, collection, writeBatch } from 'firebase/firestore';
@@ -20,7 +20,7 @@ const SOCIAL_URL: Record<string, (u: string) => string> = {
   linkedin:  u => `https://linkedin.com/in/${u.replace(/^@/, '')}`,
 };
 
-export function Profile({ user, onUpdate, birthdays = [], challenges = [] }: { user: UserProfile, onUpdate: (user: UserProfile) => Promise<void>, birthdays?: any[], challenges?: any[] }) {
+export function Profile({ user, onUpdate, birthdays = [], challenges = [], notifEnabled = false, onNotifEnable, onNotifDisable, isOnline = true }: { user: UserProfile, onUpdate: (user: UserProfile) => Promise<void>, birthdays?: any[], challenges?: any[], notifEnabled?: boolean, onNotifEnable?: () => Promise<boolean>, onNotifDisable?: () => void, isOnline?: boolean }) {
   const [isEditingSocials, setIsEditingSocials] = useState(false);
   const [socials, setSocials] = useState(user.socials);
   const [saving, setSaving] = useState(false);
@@ -43,6 +43,7 @@ export function Profile({ user, onUpdate, birthdays = [], challenges = [] }: { u
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [showDataModal, setShowDataModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [notifDenied, setNotifDenied] = useState(false);
 
   const toggleEdit = () => {
     if (!isEditingSocials) {
@@ -136,6 +137,7 @@ export function Profile({ user, onUpdate, birthdays = [], challenges = [] }: { u
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (!isOnline) { setPhotoUploadError('Hors ligne — reconnecte-toi pour changer ta photo'); return; }
     setPhotoUploading(true);
     setPhotoUploadError(null);
 
@@ -893,7 +895,43 @@ const getZodiacEmoji = (zodiac: string) => {
                 </button>
               </div>
 
-              {/* 2. RGPD */}
+              {/* 2. Notifications */}
+              <div className="bg-slate-50 rounded-2xl p-4 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: notifEnabled ? '#FFF7ED' : '#f8fafc' }}>
+                      <Bell size={20} className={notifEnabled ? 'text-orange-500' : 'text-slate-400'} />
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-900 text-sm">Notifications</p>
+                      <p className="text-[10px] text-slate-400 font-medium">Rappels anniversaires & messages</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      setNotifDenied(false);
+                      if (notifEnabled) {
+                        onNotifDisable?.();
+                      } else {
+                        const ok = await onNotifEnable?.();
+                        if (ok === false) setNotifDenied(true);
+                      }
+                    }}
+                    className="relative w-12 h-6 rounded-full transition-colors duration-300 shrink-0"
+                    style={{ background: notifEnabled ? '#f97316' : '#e2e8f0' }}
+                    aria-label="Activer les notifications"
+                  >
+                    <motion.div animate={{ x: notifEnabled ? 24 : 2 }} transition={{ type: 'spring', stiffness: 400, damping: 26 }} className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm" />
+                  </button>
+                </div>
+                {notifDenied && (
+                  <p className="text-[10px] text-rose-500 font-medium pl-1">
+                    Permission refusée — autorise les notifications dans les paramètres de ton téléphone.
+                  </p>
+                )}
+              </div>
+
+              {/* 3. RGPD */}
               <button onClick={() => { setShowSettingsModal(false); setTimeout(() => setShowDataModal(true), 200); }} className="w-full bg-slate-50 rounded-2xl p-4 flex items-center gap-3 text-left">
                 <div className="w-10 h-10 bg-sky-50 rounded-xl flex items-center justify-center shrink-0">
                   <ShieldCheck size={20} className="text-sky-500" />

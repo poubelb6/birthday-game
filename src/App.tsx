@@ -12,11 +12,15 @@ import {
   User,
   Flame,
 } from 'lucide-react';
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { signInWithPopup, signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
+import { Capacitor } from '@capacitor/core';
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 import { auth } from './firebase';
 import { useAppState } from './hooks/useAppState';
 import { useStreak } from './hooks/useStreak';
 import { useStreakNotification } from './hooks/useStreakNotification';
+import { useNotifications } from './hooks/useNotifications';
+import { useNetworkStatus } from './hooks/useNetworkStatus';
 import { Onboarding } from './screens/Onboarding';
 import { Dashboard } from './screens/Dashboard';
 import { Scanner } from './screens/Scanner';
@@ -57,6 +61,16 @@ function AppContent() {
   const { user, birthdays, challenges, inbox, sentMessages, loading, firebaseUser, setUser, addBirthday, updateBirthday, deleteBirthday, incrementScansCount, unlockCard, sendMessage, markConversationRead } = useAppState();
   const streak = useStreak();
   const { showBanner, dismissBanner } = useStreakNotification(streak);
+  const isOnline = useNetworkStatus();
+  const { enabled: notifEnabled, requestAndEnable: notifEnable, disable: notifDisable } = useNotifications(
+    birthdays,
+    user,
+    inbox,
+    (type) => {
+      if (type === 'message') setShowMessages(true);
+      else navigateTo('calendar');
+    },
+  );
   const [activeScreen, setActiveScreen] = useState<Screen>('dashboard');
   const [slideDirection, setSlideDirection] = useState(0);
   const [showSplash, setShowSplash] = useState(true);
@@ -139,9 +153,14 @@ function AppContent() {
   };
 
   const handleLogin = async () => {
-    const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
+      if (Capacitor.isNativePlatform()) {
+        const googleUser = await GoogleAuth.signIn();
+        const credential = GoogleAuthProvider.credential(googleUser.authentication.idToken);
+        await signInWithCredential(auth, credential);
+      } else {
+        await signInWithPopup(auth, new GoogleAuthProvider());
+      }
     } catch (error) {
       console.error('Login failed:', error);
     }
@@ -284,7 +303,7 @@ function AppContent() {
       case 'scanner': return <Scanner onScan={addBirthday} onScanSuccess={incrementScansCount} existingBirthdays={birthdays} />;
       case 'calendar': return <Calendar birthdays={birthdays} user={user} onAddBirthday={addBirthday} onUpdateBirthday={updateBirthday} onDeleteBirthday={deleteBirthday} onFirstVisit={() => unlockCard('c2')} openAddModal={triggerAddFriend} onAddModalOpened={() => setTriggerAddFriend(false)} />;
       case 'collection': return <Collection user={user} birthdays={birthdays} />;
-      case 'profile': return <Profile user={user} onUpdate={setUser} birthdays={birthdays} challenges={challenges} />;
+      case 'profile': return <Profile user={user} onUpdate={setUser} birthdays={birthdays} challenges={challenges} notifEnabled={notifEnabled} onNotifEnable={notifEnable} onNotifDisable={notifDisable} isOnline={isOnline} />;
       default: return <Dashboard birthdays={birthdays} user={user} />;
     }
   };
@@ -419,6 +438,24 @@ function AppContent() {
                   <X size={14} />
                 </button>
               </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Offline banner */}
+      <AnimatePresence>
+        {!isOnline && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: 'easeInOut' }}
+            className="overflow-hidden"
+          >
+            <div className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-white text-xs font-bold">
+              <span className="w-2 h-2 rounded-full bg-slate-400 shrink-0" />
+              Mode hors ligne — les données seront synchronisées à la reconnexion
             </div>
           </motion.div>
         )}
