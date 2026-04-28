@@ -245,13 +245,17 @@ export function useAppState() {
   const addBirthday = async (birthday: Birthday) => {
     if (!firebaseUser || !user) return;
     const path = `users/${firebaseUser.uid}/birthdays`;
+    // Critical: save the birthday. Rethrow on failure so the UI can report the error.
     try {
       await addDoc(collection(db, path), birthday);
-      
-      // Base XP for adding a birthday
+    } catch (e) {
+      handleFirestoreError(e, OperationType.WRITE, path);
+    }
+
+    // Non-critical: update XP/challenges. Log errors but never throw to caller.
+    try {
       let newXp = user.xp + 20;
 
-      // Update ch1 (Premier Ami) and grant reward if it just completed
       const ch1Ref = doc(db, 'users', firebaseUser.uid, 'challenges', 'ch1');
       const ch1Snap = await getDoc(ch1Ref);
       if (ch1Snap.exists()) {
@@ -266,7 +270,6 @@ export function useAppState() {
 
       const newLevel = Math.floor(Math.sqrt(newXp / 100)) + 1;
 
-      // Check for card unlocks
       const newCards = [...user.collectedCards];
       if (birthdays.length + 1 === 1 && !newCards.includes('c1')) newCards.push('c1');
       if (birthdays.length + 1 === 10 && !newCards.includes('c3')) newCards.push('c3');
@@ -277,7 +280,7 @@ export function useAppState() {
         collectedCards: newCards,
       });
     } catch (e) {
-      handleFirestoreError(e, OperationType.WRITE, path);
+      console.error('[addBirthday] XP update failed (non-critical):', e);
     }
   };
 

@@ -89,12 +89,12 @@ service cloud.firestore {
              data.level is number && data.level >= 1 &&
              data.collectedCards is list && data.collectedCards.size() <= 50 &&
              (!('wishlist' in data) || (data.wishlist is list && data.wishlist.size() <= 20)) &&
-             (!('photoUrl' in data) || isValidUrl(data.photoUrl));
+             (!('photoUrl' in data) || data.photoUrl == '' || isValidUrl(data.photoUrl));
     }
 
     function isValidBirthday(data) {
       return data.keys().hasAll(['id', 'name', 'birthDate', 'zodiac', 'addedAt']) &&
-             data.keys().hasOnly(['id', 'name', 'birthDate', 'zodiac', 'addedAt', 'photoUrl', 'phone', 'socials']) &&
+             data.keys().hasOnly(['id', 'name', 'birthDate', 'zodiac', 'addedAt', 'photoUrl', 'phone', 'socials', 'category', 'wishlist', 'userId']) &&
              data.id is string && data.id.size() < 100 &&
              data.name is string && data.name.size() > 0 && data.name.size() < 50 &&
              isValidDateString(data.birthDate) &&
@@ -102,7 +102,10 @@ service cloud.firestore {
              isValidDateString(data.addedAt) &&
              (!('photoUrl' in data) || isValidUrl(data.photoUrl)) &&
              (!('phone' in data) || data.phone is string) &&
-             (!('socials' in data) || data.socials is map);
+             (!('socials' in data) || data.socials is map) &&
+             (!('category' in data) || data.category is string) &&
+             (!('wishlist' in data) || data.wishlist is list) &&
+             (!('userId' in data) || data.userId is string);
     }
 
     function isValidChallenge(data) {

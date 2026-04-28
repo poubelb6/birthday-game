@@ -362,42 +362,52 @@ export function Calendar({
     setNewSocials({ instagram: '', snapchat: '', tiktok: '', twitter: '', facebook: '' });
     setNewWishlist([]); setNewWishInput('');
     setShowWishlist(false); setShowPhotoMenu(false);
-    setFormError(null);
+    setFormError(null); setSubmitting(false);
   };
 
   const closeAddModal = () => { setShowAddModal(false); resetAddForm(); };
+
+  const [submitting, setSubmitting] = useState(false);
 
   const handleAddFriend = async () => {
     if (!newName && !newDate) { setFormError('Remplis le nom et la date.'); return; }
     if (!newName) { setFormError('Le nom est requis.'); return; }
     if (!newDate) { setFormError('La date de naissance est requise.'); return; }
-    if (!onAddBirthday) return;
+    if (!onAddBirthday) { setFormError('Impossible d\'ajouter pour l\'instant.'); return; }
+    if (submitting) return;
     setFormError(null);
-    const birthDate = parseISO(newDate);
-    const socials = Object.fromEntries(
-      Object.entries(newSocials).filter(([, v]) => v.trim() !== '')
-    ) as Birthday['socials'];
-    const birthday: Birthday = {
-      id: Math.random().toString(36).substr(2, 9),
-      name: newName,
-      birthDate: newDate,
-      zodiac: getZodiacSign(birthDate),
-      addedAt: new Date().toISOString(),
-      ...(newPhotoUrl && { photoUrl: newPhotoUrl }),
-      ...(newPhone && { phone: newPhone }),
-      ...(Object.keys(socials ?? {}).length > 0 && { socials }),
-      ...(newWishlist.length > 0 && { wishlist: newWishlist }),
-      ...(newCategory && { category: newCategory }),
-    };
-    await onAddBirthday(birthday);
-    const addedName = newName;
-    closeAddModal();
-    setToastName(addedName);
-    setTimeout(() => setToastName(null), 5000);
-    const colors = ['#FF4B4B', '#58CC02', '#ffffff', '#FEF08A'];
-    const base = { particleCount: 60, angle: 90, spread: 160, colors, scalar: 1.4, startVelocity: 35, ticks: 250, origin: { x: 0.5, y: 0 } };
-    confetti(base);
-    setTimeout(() => confetti({ ...base, particleCount: 40, startVelocity: 28 }), 350);
+    setSubmitting(true);
+    try {
+      const birthDate = parseISO(newDate);
+      const socials = Object.fromEntries(
+        Object.entries(newSocials).filter(([, v]) => v.trim() !== '')
+      ) as Birthday['socials'];
+      const birthday: Birthday = {
+        id: Math.random().toString(36).substr(2, 9),
+        name: newName,
+        birthDate: newDate,
+        zodiac: getZodiacSign(birthDate),
+        addedAt: new Date().toISOString(),
+        ...(newPhotoUrl && { photoUrl: newPhotoUrl }),
+        ...(newPhone && { phone: newPhone }),
+        ...(Object.keys(socials ?? {}).length > 0 && { socials }),
+        ...(newCategory && { category: newCategory }),
+      };
+      await onAddBirthday(birthday);
+      const addedName = newName;
+      closeAddModal();
+      setToastName(addedName);
+      setTimeout(() => setToastName(null), 5000);
+      const colors = ['#FF4B4B', '#58CC02', '#ffffff', '#FEF08A'];
+      const base = { particleCount: 60, angle: 90, spread: 160, colors, scalar: 1.4, startVelocity: 35, ticks: 250, origin: { x: 0.5, y: 0 } };
+      confetti(base);
+      setTimeout(() => confetti({ ...base, particleCount: 40, startVelocity: 28 }), 350);
+    } catch (err) {
+      setFormError('Erreur lors de l\'ajout. Réessaie.');
+      console.error('[handleAddFriend]', err);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleClassify = async (category: 'famille' | 'ami' | 'autre') => {
@@ -803,6 +813,7 @@ export function Calendar({
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              onClick={e => e.stopPropagation()}
               className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl flex flex-col max-h-[90vh]"
             >
               <div className="relative flex items-center justify-between px-5 py-3 shrink-0 rounded-t-3xl" style={{ background: 'linear-gradient(135deg, #FF4B4B 0%, #C2185B 100%)' }}>
@@ -1105,16 +1116,15 @@ export function Calendar({
                     </motion.p>
                   )}
                 </AnimatePresence>
-                <motion.button
+                <button
                   type="button"
                   onClick={handleAddFriend}
-                  disabled={photoUploading}
-                  whileTap={{ scale: 0.97 }}
-                  className="w-full text-white font-black py-4 rounded-2xl shadow-lg transition-all disabled:opacity-50"
-                  style={{ background: '#FF4B4B', boxShadow: '0 4px 0 #CC2E2E' }}
+                  disabled={photoUploading || submitting}
+                  className="w-full text-white font-black py-4 rounded-2xl shadow-lg transition-all active:scale-95 active:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ background: '#FF4B4B', boxShadow: submitting ? 'none' : '0 4px 0 #CC2E2E' }}
                 >
-                  {photoUploading ? 'Upload en cours...' : "AJOUTER L'AMI"}
-                </motion.button>
+                  {submitting ? 'Ajout en cours...' : photoUploading ? 'Upload en cours...' : "AJOUTER L'AMI"}
+                </button>
               </div>
             </motion.div>
           </div>
