@@ -118,7 +118,7 @@ function AppContent() {
       try {
         const profile = JSON.parse(decodeURIComponent(escape(atob(pendingDeepLink))));
         if (!profile.id || !profile.name || !profile.birthDate) return;
-        const alreadyExists = birthdays.some(b => b.userId === profile.id || b.id === profile.id || b.name.toLowerCase() === profile.name.toLowerCase());
+        const alreadyExists = birthdays.some(b => b.userId === profile.id);
         if (!alreadyExists) {
           const birthday: Birthday = {
             id:        profile.id,

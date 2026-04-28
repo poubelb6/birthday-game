@@ -173,8 +173,8 @@ export function useAppState() {
         return {
           ...data,
           id: d.id,
-          // userId is only set after Firestore verification in the enrichment step below
-          userId: undefined,
+          // Preserve an already-stored linked account id while still allowing enrichment below.
+          userId: data.userId,
         };
       });
 

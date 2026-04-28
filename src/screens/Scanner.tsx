@@ -109,7 +109,7 @@ export function Scanner({ onScan, onScanSuccess, existingBirthdays = [] }: {
         }
 
         const alreadyExists = existingBirthdays.some(
-          b => b.id === profile.id || b.name === profile.name
+          b => b.userId === profile.id
         );
         if (alreadyExists) {
           showError(`${profile.name} est déjà dans ta collection !`);
@@ -139,6 +139,7 @@ export function Scanner({ onScan, onScanSuccess, existingBirthdays = [] }: {
 
     const birthday: Birthday = {
       id:        pending.id,
+      userId:    pending.id,
       name:      pending.name,
       birthDate: pending.birthDate,
       zodiac,
