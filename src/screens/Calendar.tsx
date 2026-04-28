@@ -314,9 +314,19 @@ export function Calendar({
   };
 
   const handleImportContact = async () => {
+    const contactsApi = (navigator as Navigator & {
+      contacts?: {
+        select?: (properties: string[], options?: { multiple?: boolean }) => Promise<Array<{ name?: string[]; tel?: string[] }>>;
+      };
+    }).contacts;
+
+    if (typeof contactsApi?.select !== 'function') {
+      setFormError("L'import de contacts n'est pas disponible sur cet appareil. Utilise l'ajout manuel.");
+      return;
+    }
+
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const contacts = await (navigator as any).contacts.select(['name', 'tel'], { multiple: false });
+      const contacts = await contactsApi.select(['name', 'tel'], { multiple: false });
       if (contacts.length > 0) {
         const c = contacts[0];
         if (c.name?.[0]) setNewName(c.name[0]);
@@ -883,9 +893,9 @@ export function Calendar({
                       <motion.button
                         type="button"
                         whileTap={{ scale: 0.93 }}
-                        onClick={'contacts' in navigator ? handleImportContact : undefined}
+                        onClick={handleImportContact}
                         className="w-20 h-20 flex flex-col items-center justify-center border border-slate-900 rounded-2xl text-[12px] font-black text-slate-600 bg-slate-50 transition-colors"
-                        style={{ opacity: 'contacts' in navigator ? 1 : 0.4 }}
+                        style={{ opacity: 'contacts' in navigator ? 1 : 0.72 }}
                       >
                         <span className="text-3xl leading-none">📱</span>
                         <span className="mt-1">Contact</span>

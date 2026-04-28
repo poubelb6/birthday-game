@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { formatZodiac, getAvatarColor } from './utils/zodiac';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -21,17 +21,18 @@ import { useStreak } from './hooks/useStreak';
 import { useStreakNotification } from './hooks/useStreakNotification';
 import { useNotifications } from './hooks/useNotifications';
 import { useNetworkStatus } from './hooks/useNetworkStatus';
-import { Onboarding } from './screens/Onboarding';
 import { Dashboard } from './screens/Dashboard';
-import { Scanner } from './screens/Scanner';
-import { Calendar } from './screens/Calendar';
-import { Collection } from './screens/Collection';
-import { Profile } from './screens/Profile';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Logo } from './components/Logo';
-import { MessagesModal } from './components/MessagesModal';
 import confetti from 'canvas-confetti';
 import { Birthday } from './types';
+
+const Onboarding = lazy(() => import('./screens/Onboarding').then(module => ({ default: module.Onboarding })));
+const Scanner = lazy(() => import('./screens/Scanner').then(module => ({ default: module.Scanner })));
+const Calendar = lazy(() => import('./screens/Calendar').then(module => ({ default: module.Calendar })));
+const Collection = lazy(() => import('./screens/Collection').then(module => ({ default: module.Collection })));
+const Profile = lazy(() => import('./screens/Profile').then(module => ({ default: module.Profile })));
+const MessagesModal = lazy(() => import('./components/MessagesModal').then(module => ({ default: module.MessagesModal })));
 
 // Distributed evenly across the full scrollable height in 4 rows × 3 columns
 const GIGI_PARTICLES = [
@@ -56,6 +57,23 @@ const GIGI_PARTICLES = [
 type Screen = 'dashboard' | 'scanner' | 'calendar' | 'collection' | 'profile';
 
 const SCREEN_ORDER: Screen[] = ['dashboard', 'calendar', 'collection', 'profile'];
+
+function ScreenFallback({ scanner = false }: { scanner?: boolean }) {
+  return (
+    <div className={scanner ? 'flex-1 flex flex-col p-4' : 'h-full p-4'}>
+      <div
+        className={`w-full rounded-3xl border border-slate-200 bg-white/90 shadow-sm ${scanner ? 'flex-1 min-h-[60vh]' : 'h-full min-h-[420px]'}`}
+      >
+        <div className="p-5 space-y-4">
+          <div className="w-28 h-4 rounded-full bg-slate-200 animate-pulse" />
+          <div className="w-full h-32 rounded-2xl bg-slate-100 animate-pulse" />
+          <div className="w-full h-24 rounded-2xl bg-slate-100 animate-pulse" />
+          <div className="w-3/4 h-24 rounded-2xl bg-slate-100 animate-pulse" />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function AppContent() {
   const { user, birthdays, challenges, inbox, sentMessages, loading, firebaseUser, setUser, addBirthday, updateBirthday, deleteBirthday, incrementScansCount, unlockCard, sendMessage, markConversationRead } = useAppState();
@@ -300,7 +318,11 @@ function AppContent() {
   }
 
   if (!user) {
-    return <Onboarding onComplete={setUser} />;
+    return (
+      <Suspense fallback={<ScreenFallback />}>
+        <Onboarding onComplete={setUser} />
+      </Suspense>
+    );
   }
 
   const renderScreen = () => {
@@ -493,7 +515,9 @@ function AppContent() {
             transition={{ duration: 0.26, ease: [0.32, 0, 0.68, 1] }}
             className={activeScreen === 'scanner' ? 'flex-1 flex flex-col' : 'h-full'}
           >
-            {renderScreen()}
+            <Suspense fallback={<ScreenFallback scanner={activeScreen === 'scanner'} />}>
+              {renderScreen()}
+            </Suspense>
           </motion.div>
         </AnimatePresence>
       </main>
@@ -565,16 +589,18 @@ function AppContent() {
         )}
       </AnimatePresence>
 
-      <MessagesModal
-        open={showMessages}
-        onClose={() => setShowMessages(false)}
-        inbox={inbox}
-        sentMessages={sentMessages}
-        friends={birthdays}
-        currentUser={user}
-        onSend={sendMessage}
-        onMarkConversationRead={markConversationRead}
-      />
+      <Suspense fallback={null}>
+        <MessagesModal
+          open={showMessages}
+          onClose={() => setShowMessages(false)}
+          inbox={inbox}
+          sentMessages={sentMessages}
+          friends={birthdays}
+          currentUser={user}
+          onSend={sendMessage}
+          onMarkConversationRead={markConversationRead}
+        />
+      </Suspense>
 
       <nav
         aria-label="Navigation principale"
