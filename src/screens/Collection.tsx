@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Trophy } from 'lucide-react';
 import { UserProfile, Birthday, CardRarity } from '../types';
@@ -36,6 +36,7 @@ interface CollectionProps {
 export function Collection({ user, birthdays }: CollectionProps) {
   const [filter, setFilter] = useState<CardRarity | 'Tous'>('Tous');
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
+  const [celebrationQueue, setCelebrationQueue] = useState<string[]>([]);
   const sectionRefs = useRef<Partial<Record<CardRarity, HTMLDivElement>>>({});
   const topRef      = useRef<HTMLDivElement>(null);
 
@@ -43,6 +44,35 @@ export function Collection({ user, birthdays }: CollectionProps) {
   const selected    = CARDS.find(c => c.id === selectedCard);
   const isSelectedUnlocked = selectedCard ? unlockedIds.includes(selectedCard) : false;
   const isNew = (id: string) => (user.newCards ?? []).includes(id);
+  const celebrationCardId = celebrationQueue[0] ?? null;
+  const celebrationCard = celebrationCardId ? CARDS.find(card => card.id === celebrationCardId) ?? null : null;
+
+  useEffect(() => {
+    const storageKey = `seen-unlocked-cards:${user.id}`;
+    const seen = new Set<string>(JSON.parse(localStorage.getItem(storageKey) || '[]'));
+    const fresh = unlockedIds.filter(id => !seen.has(id));
+
+    if (fresh.length === 0) return;
+
+    setCelebrationQueue(current => {
+      const queued = new Set(current);
+      const additions = fresh.filter(id => !queued.has(id));
+      return additions.length > 0 ? [...current, ...additions] : current;
+    });
+  }, [unlockedIds, user.id]);
+
+  const dismissCelebration = (cardId: string) => {
+    const storageKey = `seen-unlocked-cards:${user.id}`;
+    const seen = new Set<string>(JSON.parse(localStorage.getItem(storageKey) || '[]'));
+    seen.add(cardId);
+    localStorage.setItem(storageKey, JSON.stringify([...seen]));
+    setCelebrationQueue(current => current.filter(id => id !== cardId));
+  };
+
+  const revealCelebrationCard = (cardId: string) => {
+    dismissCelebration(cardId);
+    setSelectedCard(cardId);
+  };
 
   const handleFilter = (f: CardRarity | 'Tous') => {
     setFilter(f);
@@ -315,6 +345,102 @@ export function Collection({ user, birthdays }: CollectionProps) {
 
       {/* Modal detail */}
       <AnimatePresence>
+        {celebrationCard && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed', inset: 0, zIndex: 60,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: 20, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(10px)',
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.88, y: 24 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 12 }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              className="w-full max-w-[320px] rounded-[28px] overflow-hidden"
+              style={{
+                background: 'var(--surface-card)',
+                border: `3px solid ${RARITY_STYLES[celebrationCard.rarity].border}`,
+                boxShadow: '0 24px 80px rgba(15,23,42,0.28)',
+              }}
+            >
+              <div
+                className="px-5 pt-5 pb-4 text-center"
+                style={{
+                  background: celebrationCard.rarity === 'Légendaire'
+                    ? 'linear-gradient(145deg, rgba(200,134,26,0.16) 0%, rgba(255,248,232,0.96) 100%)'
+                    : celebrationCard.rarity === 'Épique'
+                    ? 'linear-gradient(145deg, rgba(123,47,190,0.14) 0%, rgba(245,238,255,0.96) 100%)'
+                    : celebrationCard.rarity === 'Rare'
+                    ? 'linear-gradient(145deg, rgba(26,111,196,0.12) 0%, rgba(238,245,255,0.96) 100%)'
+                    : 'linear-gradient(145deg, rgba(255,75,75,0.10) 0%, rgba(255,255,255,0.96) 100%)',
+                }}
+              >
+                <p
+                  style={{
+                    fontFamily: "'Press Start 2P', monospace",
+                    fontSize: '10px',
+                    color: '#FF4B4B',
+                    marginBottom: 14,
+                  }}
+                >
+                  NOUVELLE CARTE
+                </p>
+
+                <div
+                  className="mx-auto mb-4 w-24 h-24 rounded-[26px] flex items-center justify-center"
+                  style={{
+                    background: 'var(--card-emoji-bg)',
+                    border: `2px solid ${RARITY_STYLES[celebrationCard.rarity].border}`,
+                  }}
+                >
+                  <span style={{ fontSize: 46 }}>{celebrationCard.emoji}</span>
+                </div>
+
+                <p className="font-black text-[26px] leading-tight mb-2" style={{ color: 'var(--text-1)' }}>
+                  Tu as débloqué
+                </p>
+                <p className="font-black text-lg leading-tight mb-2" style={{ color: RARITY_LABEL_COLOR[celebrationCard.rarity] }}>
+                  {celebrationCard.title}
+                </p>
+                <p className="text-sm font-semibold" style={{ color: 'var(--text-2)' }}>
+                  {RARITY_EMOJI[celebrationCard.rarity]} {celebrationCard.rarity} • +{celebrationCard.xpReward} XP
+                </p>
+              </div>
+
+              <div className="px-5 pb-5 pt-4 space-y-3">
+                <p className="text-center text-sm leading-6" style={{ color: 'var(--text-2)' }}>
+                  {celebrationCard.description}
+                </p>
+
+                <button
+                  onClick={() => revealCelebrationCard(celebrationCard.id)}
+                  className="w-full rounded-2xl py-3 text-white font-black text-sm"
+                  style={{ background: '#FF4B4B', boxShadow: '0 6px 0 #CC2E2E' }}
+                >
+                  VOIR LA CARTE
+                </button>
+
+                <button
+                  onClick={() => dismissCelebration(celebrationCard.id)}
+                  className="w-full rounded-2xl py-3 font-black text-sm border"
+                  style={{
+                    color: 'var(--text-2)',
+                    borderColor: 'var(--border-mid)',
+                    background: 'var(--surface-card)',
+                  }}
+                >
+                  PLUS TARD
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+
         {selectedCard && selected && (
           <motion.div
             initial={{ opacity: 0 }}
