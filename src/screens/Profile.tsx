@@ -779,7 +779,7 @@ const getZodiacEmoji = (zodiac: string) => {
                   )}
                 </div>}
 
-                {/* Gestion des données RGPD */}
+                {/* Gestion des donn?es RGPD */}
                 {false && <button
                   onClick={() => setShowDataModal(true)}
                   className="w-full bg-white p-5 rounded-[var(--radius-card)] border border-slate-100 shadow-sm flex items-center justify-between group hover:border-sky-200 transition-colors"
@@ -789,8 +789,8 @@ const getZodiacEmoji = (zodiac: string) => {
                       <ShieldCheck size={24} />
                     </div>
                     <div className="text-left">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Confidentialité</p>
-                      <p className="font-bold text-slate-900">Gestion des données</p>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Confidentialit?</p>
+                      <p className="font-bold text-slate-900">Gestion des donn?es</p>
                     </div>
                   </div>
                   <ChevronRight size={18} className="text-slate-300 group-hover:text-sky-400 transition-colors" />
@@ -839,8 +839,8 @@ const getZodiacEmoji = (zodiac: string) => {
                       <ShieldCheck size={24} />
                     </div>
                     <div className="text-left">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Confidentialité</p>
-                      <p className="font-bold text-slate-900">Gestion des données</p>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Confidentialit?</p>
+                      <p className="font-bold text-slate-900">Gestion des donn?es</p>
                     </div>
                   </div>
                   <ChevronRight size={18} className="text-slate-300 group-hover:text-sky-400 transition-colors" />
@@ -953,8 +953,8 @@ const getZodiacEmoji = (zodiac: string) => {
                   <ShieldCheck size={20} className="text-sky-500" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-bold text-slate-900 text-sm">Gestion des données</p>
-                  <p className="text-[10px] text-slate-400 font-medium">Confidentialité & RGPD</p>
+                  <p className="font-bold text-slate-900 text-sm">Gestion des donn?es</p>
+                  <p className="text-[10px] text-slate-400 font-medium">Confidentialit? & RGPD</p>
                 </div>
                 <ChevronRight size={16} className="text-slate-300 shrink-0" />
               </button>
@@ -1039,7 +1039,7 @@ const getZodiacEmoji = (zodiac: string) => {
         )}
       </AnimatePresence>
 
-      {/* Modal â€” Gestion des données RGPD */}
+      {/* Modal â€” Gestion des donn?es RGPD */}
       <AnimatePresence>
         {showDataModal && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[300] flex items-end justify-center">
@@ -1058,7 +1058,7 @@ const getZodiacEmoji = (zodiac: string) => {
                   <ShieldCheck size={20} className="text-sky-500" />
                 </div>
                 <div>
-                  <h3 className="font-black text-slate-900 text-base">Gestion des données</h3>
+                  <h3 className="font-black text-slate-900 text-base">Gestion des donn?es</h3>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ConformitÃ© RGPD</p>
                 </div>
               </div>
