@@ -750,7 +750,7 @@ const getZodiacEmoji = (zodiac: string) => {
                   <ChevronRight size={18} className="text-white/20 group-hover:text-white transition-colors" />
                 </button>
 
-                <div className="w-full bg-white p-5 rounded-[var(--radius-card)] border border-slate-100 shadow-sm flex items-center justify-between gap-3">
+                {false && <div className="w-full bg-white p-5 rounded-[var(--radius-card)] border border-slate-100 shadow-sm flex items-center justify-between gap-3">
                   <button
                     onClick={() => { setBgPassword(''); setBgStatus(null); setShowBgModal(true); }}
                     className="flex items-center gap-4 flex-1 text-left group"
@@ -777,10 +777,10 @@ const getZodiacEmoji = (zodiac: string) => {
                       Annuler
                     </button>
                   )}
-                </div>
+                </div>}
 
                 {/* Gestion des données RGPD */}
-                <button
+                {false && <button
                   onClick={() => setShowDataModal(true)}
                   className="w-full bg-white p-5 rounded-[var(--radius-card)] border border-slate-100 shadow-sm flex items-center justify-between group hover:border-sky-200 transition-colors"
                 >
@@ -794,7 +794,7 @@ const getZodiacEmoji = (zodiac: string) => {
                     </div>
                   </div>
                   <ChevronRight size={18} className="text-slate-300 group-hover:text-sky-400 transition-colors" />
-                </button>
+                </button>}
 
                 {/* Dark mode toggle */}
                 <div className="w-full bg-white p-5 rounded-[var(--radius-card)] border border-slate-100 shadow-sm flex items-center justify-between">
@@ -829,6 +829,22 @@ const getZodiacEmoji = (zodiac: string) => {
                     />
                   </button>
                 </div>
+
+                <button
+                  onClick={() => setShowDataModal(true)}
+                  className="w-full bg-white p-5 rounded-[var(--radius-card)] border border-slate-100 shadow-sm flex items-center justify-between group hover:border-sky-200 transition-colors"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-sky-50 rounded-2xl flex items-center justify-center text-sky-500 shrink-0">
+                      <ShieldCheck size={24} />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">ConfidentialitÃ©</p>
+                      <p className="font-bold text-slate-900">Gestion des donnÃ©es</p>
+                    </div>
+                  </div>
+                  <ChevronRight size={18} className="text-slate-300 group-hover:text-sky-400 transition-colors" />
+                </button>
               </motion.div>
             )}
           </AnimatePresence>
