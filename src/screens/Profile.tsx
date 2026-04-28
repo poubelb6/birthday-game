@@ -789,8 +789,8 @@ const getZodiacEmoji = (zodiac: string) => {
                       <ShieldCheck size={24} />
                     </div>
                     <div className="text-left">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Confidentialit?</p>
-                      <p className="font-bold text-slate-900">Gestion des donn?es</p>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{'Confidentialit\u00E9'}</p>
+                      <p className="font-bold text-slate-900">{'Gestion des donn\u00E9es'}</p>
                     </div>
                   </div>
                   <ChevronRight size={18} className="text-slate-300 group-hover:text-sky-400 transition-colors" />
@@ -839,8 +839,8 @@ const getZodiacEmoji = (zodiac: string) => {
                       <ShieldCheck size={24} />
                     </div>
                     <div className="text-left">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Confidentialit?</p>
-                      <p className="font-bold text-slate-900">Gestion des donn?es</p>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{'Confidentialit\u00E9'}</p>
+                      <p className="font-bold text-slate-900">{'Gestion des donn\u00E9es'}</p>
                     </div>
                   </div>
                   <ChevronRight size={18} className="text-slate-300 group-hover:text-sky-400 transition-colors" />
@@ -953,8 +953,8 @@ const getZodiacEmoji = (zodiac: string) => {
                   <ShieldCheck size={20} className="text-sky-500" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-bold text-slate-900 text-sm">Gestion des donn?es</p>
-                  <p className="text-[10px] text-slate-400 font-medium">Confidentialit? & RGPD</p>
+                  <p className="font-bold text-slate-900 text-sm">{'Gestion des donn\u00E9es'}</p>
+                  <p className="text-[10px] text-slate-400 font-medium">{'Confidentialit\u00E9 & RGPD'}</p>
                 </div>
                 <ChevronRight size={16} className="text-slate-300 shrink-0" />
               </button>
@@ -1175,4 +1175,3 @@ const getZodiacEmoji = (zodiac: string) => {
     </div>
   );
 }
-
