@@ -81,7 +81,11 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
     });
   };
 
-  const handleDayClick = () => {
+  const handleDayClick = (dayBirthdays: Birthday[]) => {
+    if (dayBirthdays.length > 0) {
+      setViewingFriend(dayBirthdays[0]);
+      return;
+    }
     onRequestAddFriend?.();
   };
 
@@ -216,7 +220,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
                   return (
                     <motion.div
                       key={day.toString()}
-                      onClick={handleDayClick}
+                      onClick={() => handleDayClick(dayBirthdays)}
                       whileHover={{ scale: 1.15, zIndex: 10 }}
                       whileTap={{ scale: 0.95 }}
                       animate={hasBirthdays && !isToday && showCake ? { scale: [1, 1.12, 1] } : { scale: 1 }}
