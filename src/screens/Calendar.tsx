@@ -297,7 +297,7 @@ export function Calendar({
 
   useEffect(() => {
     if (!celebrationFriend) return;
-    const timeout = setTimeout(() => setCelebrationFriend(null), 2600);
+    const timeout = setTimeout(() => setCelebrationFriend(null), 4200);
     return () => clearTimeout(timeout);
   }, [celebrationFriend]);
 
@@ -1228,49 +1228,52 @@ export function Calendar({
               onClick={() => setCelebrationFriend(null)}
             />
             <motion.div
-              initial={{ opacity: 0, y: 18, scale: 0.92 }}
+              initial={{ opacity: 0, y: 24, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 16, scale: 0.94 }}
-              transition={{ type: 'spring', stiffness: 360, damping: 28 }}
-              className="fixed inset-x-5 top-1/2 z-[201] mx-auto max-w-sm -translate-y-1/2 overflow-hidden rounded-[28px] bg-white"
-              style={{ boxShadow: '0 8px 0 #CC2E2E, 0 24px 50px rgba(15,23,42,0.24)' }}
+              exit={{ opacity: 0, y: 18, scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 280, damping: 24, mass: 0.9 }}
+              className="fixed inset-x-5 top-1/2 z-[201] mx-auto max-w-sm -translate-y-1/2 overflow-hidden rounded-[32px] bg-white"
+              style={{ boxShadow: '0 10px 0 #CC2E2E, 0 30px 65px rgba(15,23,42,0.26)' }}
             >
-              <div className="px-5 py-3.5 flex items-center justify-between" style={{ background: 'linear-gradient(135deg, #FF4B4B 0%, #FF6B7A 100%)' }}>
-                <div>
-                  <p className="text-[10px] font-black tracking-[0.22em] text-white/80 uppercase">Ami ajouté</p>
-                  <p className="text-lg font-black text-white">Collection mise à jour</p>
-                </div>
-                <div className="w-11 h-11 rounded-2xl bg-white/16 border border-white/20 flex items-center justify-center text-2xl">
+              <div className="relative overflow-hidden px-6 py-4 text-center" style={{ background: 'linear-gradient(135deg, #FF4B4B 0%, #FF6B7A 55%, #FF8E72 100%)' }}>
+                <div className="absolute inset-0 opacity-20" style={{ background: 'radial-gradient(circle at top left, rgba(255,255,255,0.9), transparent 34%), radial-gradient(circle at bottom right, rgba(255,255,255,0.55), transparent 28%)' }} />
+                <div className="relative mx-auto mb-3 w-12 h-12 rounded-2xl bg-white/16 border border-white/20 flex items-center justify-center text-2xl shadow-sm">
                   🎉
+                </div>
+                <div className="relative">
+                  <p className="text-[10px] font-black tracking-[0.24em] text-white/80 uppercase">Ami ajouté</p>
+                  <p className="text-[22px] font-black text-white leading-tight mt-1">Collection mise à jour</p>
                 </div>
               </div>
 
-              <div className="px-6 pt-6 pb-5">
-                <div className="flex items-start gap-4">
+              <div className="relative px-6 pt-7 pb-6 text-center">
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-24 opacity-70" style={{ background: 'radial-gradient(circle at center top, rgba(255,75,75,0.10), transparent 72%)' }} />
+                <div className="relative flex flex-col items-center gap-4">
                   <div className="relative shrink-0">
-                    <div className="w-20 h-20 rounded-[22px] overflow-hidden border-4 border-white shadow-lg" style={{ boxShadow: '0 0 0 2px rgba(255,75,75,0.16)' }}>
+                    <div className="w-24 h-24 rounded-[26px] overflow-hidden border-4 border-white shadow-lg" style={{ boxShadow: '0 0 0 2px rgba(255,75,75,0.20), 0 18px 30px rgba(15,23,42,0.14)' }}>
                       {celebrationFriend.photoUrl ? (
                         <img src={celebrationFriend.photoUrl} alt={celebrationFriend.name} className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-3xl font-black text-white" style={{ background: getAvatarColor(celebrationFriend.name) }}>
+                        <div className="w-full h-full flex items-center justify-center text-[34px] font-black text-white" style={{ background: getAvatarColor(celebrationFriend.name) }}>
                           {celebrationFriend.name.charAt(0).toUpperCase()}
                         </div>
                       )}
                     </div>
-                    <div className="absolute -bottom-2 -right-2 px-2.5 py-1 rounded-full bg-amber-100 border border-amber-200 text-[11px] font-black text-amber-700 shadow-sm">
+                    <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-amber-100 border border-amber-200 text-[11px] font-black text-amber-700 shadow-sm whitespace-nowrap">
                       +20 XP
                     </div>
                   </div>
 
-                  <div className="flex-1 min-w-0 pt-1">
+                  <div className="flex flex-col items-center min-w-0 pt-4">
                     <p className="text-slate-400 text-[11px] font-black uppercase tracking-[0.22em] mb-1">Bravo</p>
-                    <p className="text-2xl font-black text-slate-900 leading-tight break-words">{celebrationFriend.name}</p>
-                    <p className="text-sm font-semibold text-slate-500 mt-1">
-                      {ZODIAC_EMOJI[celebrationFriend.zodiac] ?? ''} {formatZodiac(celebrationFriend.zodiac)}
-                    </p>
+                    <p className="text-[30px] font-black text-slate-900 leading-[1.05] break-words max-w-[240px]">{celebrationFriend.name}</p>
+                    <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-violet-50 border border-violet-100 px-3.5 py-1.5">
+                      <span className="text-sm">{ZODIAC_EMOJI[celebrationFriend.zodiac] ?? ''}</span>
+                      <span className="text-[12px] font-black text-violet-700">{formatZodiac(celebrationFriend.zodiac)}</span>
+                    </div>
                     {celebrationFriend.category && (
                       <span
-                        className="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-full text-[11px] font-black capitalize"
+                        className="inline-flex items-center gap-1.5 mt-3 px-3.5 py-1.5 rounded-full text-[11px] font-black capitalize"
                         style={{
                           background:
                             celebrationFriend.category === 'famille' ? 'rgba(244,63,94,0.10)' :
@@ -1291,8 +1294,8 @@ export function Calendar({
                   </div>
                 </div>
 
-                <div className="mt-5 rounded-2xl border border-rose-100 bg-rose-50/60 px-4 py-3">
-                  <p className="text-sm font-bold text-slate-700 leading-snug">
+                <div className="relative mt-6 rounded-[22px] border border-rose-100 bg-gradient-to-br from-rose-50 via-white to-amber-50 px-5 py-4">
+                  <p className="text-[15px] font-bold text-slate-700 leading-snug">
                     <span style={{ color: '#FF4B4B' }}>{celebrationFriend.name}</span> a bien été ajouté à ta collection d'amis.
                   </p>
                 </div>
@@ -1300,8 +1303,8 @@ export function Calendar({
                 <motion.button
                   whileTap={{ scale: 0.97 }}
                   onClick={() => setCelebrationFriend(null)}
-                  className="mt-5 w-full py-3.5 rounded-2xl font-black text-white text-sm"
-                  style={{ background: '#FF4B4B', boxShadow: '0 4px 0 #CC2E2E' }}
+                  className="mt-6 w-full py-4 rounded-[22px] font-black text-white text-sm tracking-[0.12em] uppercase"
+                  style={{ background: 'linear-gradient(180deg, #FF5C5C 0%, #FF4B4B 100%)', boxShadow: '0 5px 0 #CC2E2E' }}
                 >
                   Continuer
                 </motion.button>
