@@ -54,6 +54,30 @@ function getCategoryStyle(category?: string) {
   }
 }
 
+function getAddFriendErrorMessage(error: unknown): string {
+  if (!(error instanceof Error)) return "Impossible d'ajouter cet ami pour le moment.";
+
+  if (error.message.includes('offline') || error.message.includes('Failed to get document because the client is offline')) {
+    return 'Tu es hors ligne. Reconnecte-toi puis réessaie.';
+  }
+
+  try {
+    const parsed = JSON.parse(error.message);
+    const raw = String(parsed.error ?? '').toLowerCase();
+
+    if (raw.includes('insufficient permissions') || raw.includes('permission-denied')) {
+      return "L'app n'a pas pu enregistrer cet ami dans la base. Vérifie les règles Firestore.";
+    }
+    if (raw.includes('invalid') || raw.includes('unsupported field value')) {
+      return "Certaines données du formulaire ne sont pas valides. Vérifie la date et les champs optionnels.";
+    }
+  } catch {
+    // Message non structuré: on garde le fallback générique.
+  }
+
+  return "Impossible d'ajouter cet ami pour le moment.";
+}
+
 function DaysUntilBadge({ days }: { days: number }) {
   if (days === 0) {
     return (
@@ -370,8 +394,11 @@ export function Calendar({
   const [submitting, setSubmitting] = useState(false);
 
   const handleAddFriend = async () => {
-    if (!newName && !newDate) { setFormError('Remplis le nom et la date.'); return; }
-    if (!newName) { setFormError('Le nom est requis.'); return; }
+    const trimmedName = newName.trim();
+    const trimmedPhone = newPhone.trim();
+
+    if (!trimmedName && !newDate) { setFormError('Remplis le nom et la date.'); return; }
+    if (!trimmedName) { setFormError('Le nom est requis.'); return; }
     if (!newDate) { setFormError('La date de naissance est requise.'); return; }
     if (!onAddBirthday) { setFormError('Impossible d\'ajouter pour l\'instant.'); return; }
     if (submitting) return;
@@ -384,17 +411,18 @@ export function Calendar({
       ) as Birthday['socials'];
       const birthday: Birthday = {
         id: Math.random().toString(36).substr(2, 9),
-        name: newName,
+        name: trimmedName,
         birthDate: newDate,
         zodiac: getZodiacSign(birthDate),
         addedAt: new Date().toISOString(),
         ...(newPhotoUrl && { photoUrl: newPhotoUrl }),
-        ...(newPhone && { phone: newPhone }),
+        ...(trimmedPhone && { phone: trimmedPhone }),
         ...(Object.keys(socials ?? {}).length > 0 && { socials }),
         ...(newCategory && { category: newCategory }),
+        ...(newWishlist.length > 0 && { wishlist: newWishlist }),
       };
       await onAddBirthday(birthday);
-      const addedName = newName;
+      const addedName = trimmedName;
       closeAddModal();
       setToastName(addedName);
       setTimeout(() => setToastName(null), 5000);
@@ -403,7 +431,7 @@ export function Calendar({
       confetti(base);
       setTimeout(() => confetti({ ...base, particleCount: 40, startVelocity: 28 }), 350);
     } catch (err) {
-      setFormError('Erreur lors de l\'ajout. Réessaie.');
+      setFormError(getAddFriendErrorMessage(err));
       console.error('[handleAddFriend]', err);
     } finally {
       setSubmitting(false);

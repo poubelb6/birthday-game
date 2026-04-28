@@ -114,30 +114,36 @@ function AppContent() {
   // Process deep link once user is authenticated and loaded
   useEffect(() => {
     if (!pendingDeepLink || !user || !firebaseUser || loading) return;
-    try {
-      const profile = JSON.parse(decodeURIComponent(escape(atob(pendingDeepLink))));
-      if (!profile.id || !profile.name || !profile.birthDate) return;
-      const alreadyExists = birthdays.some(b => b.userId === profile.id || b.id === profile.id || b.name.toLowerCase() === profile.name.toLowerCase());
-      if (!alreadyExists) {
-        const birthday: Birthday = {
-          id:        profile.id,
-          name:      profile.name,
-          birthDate: profile.birthDate,
-          zodiac:    profile.zodiac,
-          addedAt:   new Date().toISOString(),
-          ...(profile.photoUrl && { photoUrl: profile.photoUrl }),
-          ...(profile.socials && { socials: profile.socials }),
-        };
-        addBirthday(birthday);
-        setCelebrationFriend(birthday);
-        const colors = ['#FF4B4B', '#FFD700', '#ffffff', '#FEF08A'];
-        confetti({ particleCount: 80, angle: 90, spread: 160, colors, scalar: 1.4, startVelocity: 38, ticks: 280, origin: { x: 0.5, y: 0 } });
-        setTimeout(() => confetti({ particleCount: 50, angle: 90, spread: 160, colors, scalar: 1.2, startVelocity: 28, ticks: 250, origin: { x: 0.5, y: 0 } }), 400);
+    const processDeepLink = async () => {
+      try {
+        const profile = JSON.parse(decodeURIComponent(escape(atob(pendingDeepLink))));
+        if (!profile.id || !profile.name || !profile.birthDate) return;
+        const alreadyExists = birthdays.some(b => b.userId === profile.id || b.id === profile.id || b.name.toLowerCase() === profile.name.toLowerCase());
+        if (!alreadyExists) {
+          const birthday: Birthday = {
+            id:        profile.id,
+            userId:    profile.id,
+            name:      profile.name,
+            birthDate: profile.birthDate,
+            zodiac:    profile.zodiac,
+            addedAt:   new Date().toISOString(),
+            ...(profile.photoUrl && { photoUrl: profile.photoUrl }),
+            ...(profile.socials && { socials: profile.socials }),
+          };
+          await addBirthday(birthday);
+          setCelebrationFriend(birthday);
+          const colors = ['#FF4B4B', '#FFD700', '#ffffff', '#FEF08A'];
+          confetti({ particleCount: 80, angle: 90, spread: 160, colors, scalar: 1.4, startVelocity: 38, ticks: 280, origin: { x: 0.5, y: 0 } });
+          setTimeout(() => confetti({ particleCount: 50, angle: 90, spread: 160, colors, scalar: 1.2, startVelocity: 28, ticks: 250, origin: { x: 0.5, y: 0 } }), 400);
+        }
+      } catch (e) {
+        console.error('Deep link decode error:', e);
+      } finally {
+        setPendingDeepLink(null);
       }
-    } catch (e) {
-      console.error('Deep link decode error:', e);
-    }
-    setPendingDeepLink(null);
+    };
+
+    void processDeepLink();
   }, [pendingDeepLink, user, firebaseUser, loading]);
 
   useEffect(() => {

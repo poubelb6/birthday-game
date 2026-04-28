@@ -71,6 +71,49 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
   throw new Error(JSON.stringify(errInfo));
 }
 
+function normalizeBirthDate(input: string): string {
+  const value = input.trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+
+  const frMatch = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (frMatch) {
+    const [, day, month, year] = frMatch;
+    return `${year}-${month}-${day}`;
+  }
+
+  return value;
+}
+
+function sanitizeBirthdayForWrite(birthday: Birthday): Birthday {
+  const trimmedName = birthday.name.trim();
+  const trimmedId = birthday.id.trim();
+  const birthDate = normalizeBirthDate(birthday.birthDate);
+  const phone = birthday.phone?.trim();
+  const photoUrl = birthday.photoUrl?.trim();
+  const wishlist = (birthday.wishlist ?? []).map(item => item.trim()).filter(Boolean).slice(0, 20);
+  const socials = birthday.socials
+    ? Object.fromEntries(
+        Object.entries(birthday.socials)
+          .map(([key, value]) => [key, value?.trim() ?? ''])
+          .filter(([, value]) => value !== '')
+      ) as Birthday['socials']
+    : undefined;
+
+  return {
+    id: trimmedId,
+    name: trimmedName,
+    birthDate,
+    zodiac: birthday.zodiac,
+    addedAt: birthday.addedAt?.trim() ? birthday.addedAt : new Date().toISOString(),
+    ...(photoUrl ? { photoUrl } : {}),
+    ...(phone ? { phone } : {}),
+    ...(socials && Object.keys(socials).length > 0 ? { socials } : {}),
+    ...(birthday.category ? { category: birthday.category } : {}),
+    ...(wishlist.length > 0 ? { wishlist } : {}),
+    ...(birthday.userId?.trim() ? { userId: birthday.userId.trim() } : {}),
+  };
+}
+
 export function useAppState() {
   const [user, setUserProfile] = useState<UserProfile | null>(null);
   const [birthdays, setBirthdays] = useState<Birthday[]>([]);
@@ -245,9 +288,10 @@ export function useAppState() {
   const addBirthday = async (birthday: Birthday) => {
     if (!firebaseUser || !user) return;
     const path = `users/${firebaseUser.uid}/birthdays`;
+    const payload = sanitizeBirthdayForWrite(birthday);
     // Critical: save the birthday. Rethrow on failure so the UI can report the error.
     try {
-      await addDoc(collection(db, path), birthday);
+      await addDoc(collection(db, path), payload);
     } catch (e) {
       handleFirestoreError(e, OperationType.WRITE, path);
     }
