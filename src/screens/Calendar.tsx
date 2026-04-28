@@ -119,8 +119,6 @@ function FriendRow({
 }) {
   const days = getDaysUntil(friend.birthDate);
   const { borderColor, bgTint, icon: categoryIcon } = getCategoryStyle(friend.category);
-  const zodiacEmoji = ZODIAC_EMOJI[friend.zodiac] ?? '';
-
   return (
     <motion.div
       initial={{ opacity: 0, x: -20 }}
@@ -169,7 +167,7 @@ function FriendRow({
         <p className="font-display text-[12px] text-slate-500 font-semibold mt-0.5 truncate">
           {format(parseISO(friend.birthDate), 'd MMM', { locale: fr })}
           {' · '}
-          {zodiacEmoji} {formatZodiac(friend.zodiac)}
+          {formatZodiac(friend.zodiac)}
         </p>
       </div>
 
