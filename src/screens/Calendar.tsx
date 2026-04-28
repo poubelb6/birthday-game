@@ -255,7 +255,7 @@ export function Calendar({
   const [showWishlist, setShowWishlist] = useState(false);
   const [newWishlist, setNewWishlist] = useState<string[]>([]);
   const [newWishInput, setNewWishInput] = useState('');
-  const [toastName, setToastName] = useState<string | null>(null);
+  const [celebrationFriend, setCelebrationFriend] = useState<Birthday | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Birthday | null>(null);
   const [showPhotoMenu, setShowPhotoMenu] = useState(false);
@@ -294,6 +294,12 @@ export function Calendar({
       setFriendsWithAccount(new Set(snapshots.flatMap(s => s.docs.map(d => d.id))));
     }).catch(() => {});
   }, [birthdays.length]);
+
+  useEffect(() => {
+    if (!celebrationFriend) return;
+    const timeout = setTimeout(() => setCelebrationFriend(null), 2600);
+    return () => clearTimeout(timeout);
+  }, [celebrationFriend]);
 
   const openLeaderboard = async () => {
     setShowLeaderboard(true);
@@ -422,10 +428,9 @@ export function Calendar({
         ...(newWishlist.length > 0 && { wishlist: newWishlist }),
       };
       await onAddBirthday(birthday);
-      const addedName = trimmedName;
+      const addedFriend = birthday;
       closeAddModal();
-      setToastName(addedName);
-      setTimeout(() => setToastName(null), 5000);
+      setCelebrationFriend(addedFriend);
       const colors = ['#FF4B4B', '#58CC02', '#ffffff', '#FEF08A'];
       const base = { particleCount: 60, angle: 90, spread: 160, colors, scalar: 1.4, startVelocity: 35, ticks: 250, origin: { x: 0.5, y: 0 } };
       confetti(base);
@@ -1213,23 +1218,99 @@ export function Calendar({
 
       {/* ── Toast ───────────────────────────────────────────────── */}
       <AnimatePresence>
-        {toastName && (
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.8, opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 28 }}
-            className="fixed inset-x-6 top-1/2 -translate-y-1/2 z-[200] mx-auto max-w-sm bg-white rounded-3xl px-6 py-6"
-            style={{ border: '2px solid #FF4B4B', boxShadow: '0 6px 0 #CC2E2E, 0 12px 40px rgba(255,75,75,0.18)' }}
-          >
-            <p className="text-2xl text-center mb-1">🎉</p>
-            <p className="text-base font-black font-display text-slate-900 text-center leading-snug">
-              Bravo ! Tu as ajouté<br />
-              <span style={{ color: '#FF4B4B' }}>{toastName}</span> à ta collection !
-            </p>
-          </motion.div>
+        {celebrationFriend && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[200] bg-slate-900/28 backdrop-blur-[2px]"
+              onClick={() => setCelebrationFriend(null)}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 18, scale: 0.92 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 16, scale: 0.94 }}
+              transition={{ type: 'spring', stiffness: 360, damping: 28 }}
+              className="fixed inset-x-5 top-1/2 z-[201] mx-auto max-w-sm -translate-y-1/2 overflow-hidden rounded-[28px] bg-white"
+              style={{ boxShadow: '0 8px 0 #CC2E2E, 0 24px 50px rgba(15,23,42,0.24)' }}
+            >
+              <div className="px-5 py-3.5 flex items-center justify-between" style={{ background: 'linear-gradient(135deg, #FF4B4B 0%, #FF6B7A 100%)' }}>
+                <div>
+                  <p className="text-[10px] font-black tracking-[0.22em] text-white/80 uppercase">Ami ajouté</p>
+                  <p className="text-lg font-black text-white">Collection mise à jour</p>
+                </div>
+                <div className="w-11 h-11 rounded-2xl bg-white/16 border border-white/20 flex items-center justify-center text-2xl">
+                  🎉
+                </div>
+              </div>
+
+              <div className="px-6 pt-6 pb-5">
+                <div className="flex items-start gap-4">
+                  <div className="relative shrink-0">
+                    <div className="w-20 h-20 rounded-[22px] overflow-hidden border-4 border-white shadow-lg" style={{ boxShadow: '0 0 0 2px rgba(255,75,75,0.16)' }}>
+                      {celebrationFriend.photoUrl ? (
+                        <img src={celebrationFriend.photoUrl} alt={celebrationFriend.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-3xl font-black text-white" style={{ background: getAvatarColor(celebrationFriend.name) }}>
+                          {celebrationFriend.name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                    <div className="absolute -bottom-2 -right-2 px-2.5 py-1 rounded-full bg-amber-100 border border-amber-200 text-[11px] font-black text-amber-700 shadow-sm">
+                      +20 XP
+                    </div>
+                  </div>
+
+                  <div className="flex-1 min-w-0 pt-1">
+                    <p className="text-slate-400 text-[11px] font-black uppercase tracking-[0.22em] mb-1">Bravo</p>
+                    <p className="text-2xl font-black text-slate-900 leading-tight break-words">{celebrationFriend.name}</p>
+                    <p className="text-sm font-semibold text-slate-500 mt-1">
+                      {ZODIAC_EMOJI[celebrationFriend.zodiac] ?? ''} {formatZodiac(celebrationFriend.zodiac)}
+                    </p>
+                    {celebrationFriend.category && (
+                      <span
+                        className="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-full text-[11px] font-black capitalize"
+                        style={{
+                          background:
+                            celebrationFriend.category === 'famille' ? 'rgba(244,63,94,0.10)' :
+                            celebrationFriend.category === 'ami' ? 'rgba(14,165,233,0.10)' :
+                            'rgba(148,163,184,0.12)',
+                          color:
+                            celebrationFriend.category === 'famille' ? '#e11d48' :
+                            celebrationFriend.category === 'ami' ? '#0284c7' :
+                            '#64748b',
+                        }}
+                      >
+                        {celebrationFriend.category === 'famille' ? <Heart size={12} strokeWidth={2.8} /> :
+                         celebrationFriend.category === 'ami' ? <Users size={12} strokeWidth={2.8} /> :
+                         <UserCircle size={12} strokeWidth={2.8} />}
+                        {celebrationFriend.category}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-5 rounded-2xl border border-rose-100 bg-rose-50/60 px-4 py-3">
+                  <p className="text-sm font-bold text-slate-700 leading-snug">
+                    <span style={{ color: '#FF4B4B' }}>{celebrationFriend.name}</span> a bien été ajouté à ta collection d'amis.
+                  </p>
+                </div>
+
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => setCelebrationFriend(null)}
+                  className="mt-5 w-full py-3.5 rounded-2xl font-black text-white text-sm"
+                  style={{ background: '#FF4B4B', boxShadow: '0 4px 0 #CC2E2E' }}
+                >
+                  Continuer
+                </motion.button>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
+
     </div>
   );
 }
