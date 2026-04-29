@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useEffect, useRef } from 'react';
 import { ZODIAC_EMOJI, formatZodiac, getAvatarColor } from '../utils/zodiac';
-import { Star, ChevronLeft, ChevronRight, Plus, ChevronDown, Sparkles, Globe2, Flame } from 'lucide-react';
+import { Star, ChevronLeft, ChevronRight, Plus, ChevronDown, Sparkles, Globe2, Flame, Heart, Users, UserCircle } from 'lucide-react';
 import { Birthday, UserProfile } from '../types';
 import { format, differenceInDays, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, startOfDay, addMonths, subMonths } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -28,6 +28,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
   const [selectedFriend, setSelectedFriend] = useState<Birthday | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Birthday | null>(null);
   const [viewingFriend, setViewingFriend] = useState<Birthday | null>(null);
+  const [birthdayPicker, setBirthdayPicker] = useState<{ dayLabel: string; birthdays: Birthday[] } | null>(null);
   const [celebExpanded, setCelebExpanded] = useState(false);
 
   // Swipe touch tracking
@@ -81,9 +82,16 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
     });
   };
 
-  const handleDayClick = (dayBirthdays: Birthday[]) => {
-    if (dayBirthdays.length > 0) {
+  const handleDayClick = (day: Date, dayBirthdays: Birthday[]) => {
+    if (dayBirthdays.length === 1) {
       setViewingFriend(dayBirthdays[0]);
+      return;
+    }
+    if (dayBirthdays.length > 1) {
+      setBirthdayPicker({
+        dayLabel: format(day, 'd MMMM', { locale: fr }),
+        birthdays: dayBirthdays,
+      });
       return;
     }
     onRequestAddFriend?.();
@@ -220,7 +228,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
                   return (
                     <motion.div
                       key={day.toString()}
-                      onClick={() => handleDayClick(dayBirthdays)}
+                      onClick={() => handleDayClick(day, dayBirthdays)}
                       whileHover={{ scale: 1.15, zIndex: 10 }}
                       whileTap={{ scale: 0.95 }}
                       animate={hasBirthdays && !isToday && showCake ? { scale: [1, 1.12, 1] } : { scale: 1 }}
@@ -508,6 +516,85 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
         onClose={() => setViewingFriend(null)}
         onEdit={() => { setSelectedFriend(viewingFriend); setViewingFriend(null); }}
       />
+
+      <AnimatePresence>
+        {birthdayPicker && (
+          <div className="fixed inset-0 z-[190] flex items-end justify-center">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setBirthdayPicker(null)}
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 36 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 36 }}
+              transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+              className="relative w-full max-w-md rounded-t-[32px] px-5 pt-4 pb-6 space-y-4"
+              style={{ background: 'var(--surface-card)', boxShadow: '0 -18px 60px rgba(15,23,42,0.18)' }}
+            >
+              <div className="w-12 h-1.5 rounded-full bg-slate-200 mx-auto" />
+
+              <div className="text-center space-y-1">
+                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-rose-500">Anniversaires</p>
+                <h3 className="font-black text-lg text-slate-900">{birthdayPicker.dayLabel}</h3>
+                <p className="text-sm font-semibold text-slate-500">
+                  {birthdayPicker.birthdays.length} profil{birthdayPicker.birthdays.length > 1 ? 's' : ''} à consulter
+                </p>
+              </div>
+
+              <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-1">
+                {birthdayPicker.birthdays.map(friend => {
+                  const categoryIcon = friend.category === 'famille'
+                    ? <Heart size={13} className="text-rose-500" strokeWidth={2.6} />
+                    : friend.category === 'ami'
+                    ? <Users size={13} className="text-sky-500" strokeWidth={2.6} />
+                    : <UserCircle size={13} className="text-slate-400" strokeWidth={2.6} />;
+
+                  return (
+                    <motion.button
+                      key={friend.id}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => {
+                        setBirthdayPicker(null);
+                        setViewingFriend(friend);
+                      }}
+                      className="w-full rounded-2xl border border-slate-200 px-3 py-3 bg-white flex items-center gap-3 text-left shadow-sm"
+                    >
+                      <div className="relative shrink-0">
+                        {friend.photoUrl ? (
+                          <img src={friend.photoUrl} alt={friend.name} className="w-12 h-12 rounded-2xl object-cover border border-black/10" />
+                        ) : (
+                          <div
+                            className="w-12 h-12 rounded-2xl flex items-center justify-center font-black text-lg text-white"
+                            style={{ background: getAvatarColor(friend.name) }}
+                          >
+                            {friend.name.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-sm">
+                          {categoryIcon}
+                        </div>
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <p className="font-black text-sm text-slate-900 truncate">{friend.name}</p>
+                        <p className="text-xs font-semibold text-slate-500 truncate">{formatZodiac(friend.zodiac)}</p>
+                      </div>
+
+                      <div className="shrink-0 px-3 py-2 rounded-xl bg-rose-50 text-rose-500 text-[11px] font-black">
+                        Voir
+                      </div>
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <section className="space-y-4">
         <div className="bg-white rounded-3xl border border-slate-100 shadow-sm px-4 pt-4 pb-3">
