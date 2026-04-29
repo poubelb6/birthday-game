@@ -1,10 +1,14 @@
 import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
+import PrivacyPolicy from './screens/PrivacyPolicy.tsx';
 import './index.css';
 
-createRoot(document.getElementById('root')!).render(
+const root = document.getElementById('root')!;
+const isPrivacyPolicy = window.location.pathname === '/privacy-policy';
+
+createRoot(root).render(
   <StrictMode>
-    <App />
+    {isPrivacyPolicy ? <PrivacyPolicy /> : <App />}
   </StrictMode>,
 );
