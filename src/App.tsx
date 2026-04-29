@@ -98,7 +98,7 @@ function AppContent() {
   const [showMessages, setShowMessages] = useState(false);
 
   const [celebrationFriend, setCelebrationFriend] = useState<Birthday | null>(null);
-  const [gigiBg, setGigiBg] = useState(() => import.meta.env.DEV && localStorage.getItem('gigiBg') === 'true');
+  const [gigiBg, setGigiBg] = useState(() => (import.meta as { env?: { DEV?: boolean } }).env?.DEV === true && localStorage.getItem('gigiBg') === 'true');
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('darkMode');
     if (saved !== null) return saved === 'true';

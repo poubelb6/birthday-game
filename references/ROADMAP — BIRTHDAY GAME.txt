@@ -1,0 +1,148 @@
+ROADMAP — BIRTHDAY GAME
+Dernière mise à jour : 20 avril 2026
+
+Objectif actuel : rendre l'app éligible au Google Play Store.
+
+---
+PHASE 0 — DÉPLOIEMENT GOOGLE PLAY STORE
+✅ = terminé | ⏳ = en cours | ☐ = à faire
+
+  ┌──────┬──────────────────────────────────────────────────────────┬────────────────────┐
+  │  #   │                          Tâche                           │       Statut        │
+  ├──────┼──────────────────────────────────────────────────────────┼────────────────────┤
+  │ 0.1  │ Retirer la clé Gemini du bundle (vite.config.ts)         │ ✅ Fait             │
+  ├──────┼──────────────────────────────────────────────────────────┼────────────────────┤
+  │ 0.2  │ Nettoyer les dépendances parasites (express, framer-     │ ✅ Fait             │
+  │      │ motion, @google/genai, dotenv) + renommer le package     │                    │
+  ├──────┼──────────────────────────────────────────────────────────┼────────────────────┤
+  │ 0.3  │ Intégrer Capacitor + générer projet Android              │ ✅ Fait             │
+  ├──────┼──────────────────────────────────────────────────────────┼────────────────────┤
+  │ 0.4  │ Générer les icônes Android + splash screen               │ ✅ Fait             │
+  │      │ (74 fichiers via @capacitor/assets)                      │                    │
+  ├──────┼──────────────────────────────────────────────────────────┼────────────────────┤
+  │ 0.5  │ Build APK debug (test sur téléphone)                     │ ✅ Fait             │
+  ├──────┼──────────────────────────────────────────────────────────┼────────────────────┤
+  │ 0.6  │ Compléter les célébrités manquantes                      │ ⏳ En cours         │
+  │      │ (Jan +9, Fév +8, Mar +11, Déc +12)                      │                    │
+  ├──────┼──────────────────────────────────────────────────────────┼────────────────────┤
+  │ 0.7  │ Activer catégories (famille/ami/autre) + recherche amis  │ ☐ À faire           │
+  ├──────┼──────────────────────────────────────────────────────────┼────────────────────┤
+  │ 0.8  │ Ajouter tests unitaires (logique XP, cartes, challenges) │ ☐ À faire           │
+  ├──────┼──────────────────────────────────────────────────────────┼────────────────────┤
+  │ 0.9  │ Créer keystore de signature + build AAB release signé    │ ☐ À faire           │
+  ├──────┼──────────────────────────────────────────────────────────┼────────────────────┤
+  │ 0.10 │ Créer compte Google Play Console (25$) + soumettre AAB   │ ☐ À faire           │
+  └──────┴──────────────────────────────────────────────────────────┴────────────────────┘
+
+  Estimation restante pour être Play Store-ready : 1 à 2 jours.
+
+---
+PHASE 1 — CORRECTIONS BLOQUANTES
+
+Moins d'une journée au total. Aucune raison de ne pas les faire maintenant.
+
+  ┌─────┬─────────────────────────────────────────────────────────────────┬────────────────────────┬────────┐
+  │  #  │                              Tâche                              │        Fichier         │ Effort │
+  ├─────┼─────────────────────────────────────────────────────────────────┼────────────────────────┼────────┤
+  │ 1.1 │ Splash 2500ms → 900ms                                           │ App.tsx:122            │ 1 min  │
+  ├─────┼─────────────────────────────────────────────────────────────────┼────────────────────────┼────────┤
+  │ 1.2 │ --text-3 light → #64748b (WCAG AA)                              │ index.css:43           │ 2 min  │
+  ├─────┼─────────────────────────────────────────────────────────────────┼────────────────────────┼────────┤
+  │ 1.3 │ --text-3 dark → #8b949e (WCAG AA)                               │ index.css:88           │ 2 min  │
+  ├─────┼─────────────────────────────────────────────────────────────────┼────────────────────────┼────────┤
+  │ 1.4 │ Press Start 2P minimum 11px (badge niveau + XP)                 │ App.tsx:331,336        │ 5 min  │
+  ├─────┼─────────────────────────────────────────────────────────────────┼────────────────────────┼────────┤
+  │ 1.5 │ text-indigo-100 → text-rose-100 steps 2 et 3 onboarding         │ Onboarding.tsx:115,161 │ 2 min  │
+  ├─────┼─────────────────────────────────────────────────────────────────┼────────────────────────┼────────┤
+  │ 1.6 │ Avatar MessagesModal → getAvatarColor(name)                     │ MessagesModal.tsx:35   │ 10 min │
+  ├─────┼─────────────────────────────────────────────────────────────────┼────────────────────────┼────────┤
+  │ 1.7 │ Conflit Inter/Outfit : supprimer Inter, aligner body sur Outfit │ index.css:1,122        │ 10 min │
+  └─────┴─────────────────────────────────────────────────────────────────┴────────────────────────┴────────┘
+
+---
+PHASE 2 — FRICTIONS UX MAJEURES
+
+1 à 3 jours. Impact direct sur la complétion d'onboarding et la rétention.
+
+  ┌─────┬─────────────────────────────────────────────────────────────────┬──────────────────────────────────────────────────────────────────┬────────┐
+  │  #  │                              Tâche                              │                              Détail                              │ Effort │
+  ├─────┼─────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────┼────────┤
+  │ 2.1 │ Step 2 onboarding : marquer les champs réseaux comme optionnels │ Ajouter "(optionnel)" dans les labels ou un sous-titre explicite │ 30 min │
+  ├─────┼─────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────┼────────┤
+  │ 2.2 │ Réordonner réseaux onboarding                                   │ Instagram → TikTok → Snapchat → Twitter → Facebook               │ 5 min  │
+  ├─────┼─────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────┼────────┤
+  │ 2.3 │ Feedback champs invalides step 1                                │ Bordure rouge + message si bouton grisé sans raison visible      │ 30 min │
+  ├─────┼─────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────┼────────┤
+  │ 2.4 │ Step 3 wishlist : remplacer textarea CSV → input tag par tag    │ Champ + bouton "Ajouter", tags supprimables                      │ 1-2h   │
+  ├─────┼─────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────┼────────┤
+  │ 2.5 │ État vide MessagesModal explicatif                              │ Message quand aucun ami n'a l'app                                │ 20 min │
+  ├─────┼─────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────┼────────┤
+  │ 2.6 │ Dark mode auto au premier lancement                             │ Lire prefers-color-scheme si pas de valeur localStorage          │ 15 min │
+  └─────┴─────────────────────────────────────────────────────────────────┴──────────────────────────────────────────────────────────────────┴────────┘
+
+---
+PHASE 3 — COHÉRENCE VISUELLE
+
+3 à 5 jours. Ne bloque pas la prod mais crée une dette qui grossit à chaque nouvelle feature.
+
+  ┌─────┬────────────────────────────────────────────┬───────────────────────────────────────────────────────────────────────────────────────────────────┬────────┐
+  │  #  │                   Tâche                    │                                              Détail                                               │ Effort │
+  ├─────┼────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────┼────────┤
+  │ 3.1 │ Unifier icônes navigation                  │ Tout Lucide React — supprimer les emojis 🏠 🃏 👤 de la nav                                       │ 1h     │
+  ├─────┼────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────┼────────┤
+  │ 3.2 │ Appliquer les tokens radius existants      │ Remplacer rounded-[28px], rounded-t-[2.5rem] par les variables --radius-*                         │ 2-3h   │
+  ├─────┼────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────┼────────┤
+  │ 3.3 │ Input date onboarding                      │ Remplacer type="date" natif par un sélecteur custom (3 selects jour/mois/année ou une lib légère) │ 2-3h   │
+  ├─────┼────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────┼────────┤
+  │ 3.4 │ Varier visuellement les 3 steps onboarding │ Dégradé progressif ou changement d'accent entre les étapes                                        │ 1-2h   │
+  ├─────┼────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────┼────────┤
+  │ 3.5 │ Unifier les ombres                         │ Définir 3 niveaux (shadow-sm, shadow-md, shadow-lg) et remplacer les valeurs custom dispersées    │ 2-3h   │
+  └─────┴────────────────────────────────────────────┴───────────────────────────────────────────────────────────────────────────────────────────────────┴────────┘
+
+---
+PHASE 4 — RÉTENTION & GAMIFICATION
+
+1 à 2 semaines. C'est ce qui transforme une app J1 en app J30.
+
+  ┌─────┬────────────────────────────────────────────────┬───────────────────────────────────────────────────────────────────────────────────────┬───────────┐
+  │  #  │                     Tâche                      │                                        Détail                                         │  Effort   │
+  ├─────┼────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────┼───────────┤
+  │ 4.1 │ Birthday Streak                                │ Compteur de jours consécutifs, affiché dans le header ou Dashboard                    │ 2-3 jours │
+  ├─────┼────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────┼───────────┤
+  │ 4.2 │ Hero card Dashboard                            │ "Prochain anniversaire dans X jours" en plein-écran hero, reste du contenu secondaire │ ✅ Fait    │
+  ├─────┼────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────┼───────────┤
+  │ 4.3 │ Barre de progression onboarding plus immersive │ Changer le fond/accent à chaque step pour renforcer la progression perçue             │ 2-3h      │
+  ├─────┼────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────┼───────────┤
+  │ 4.4 │ Notification streak                            │ Push/local notif "N'oublie pas ton streak !"                                          │ 1 jour    │
+  └─────┴────────────────────────────────────────────────┴───────────────────────────────────────────────────────────────────────────────────────┴───────────┘
+
+---
+PHASE 5 — AMÉLIORATIONS LONG TERME
+
+Optionnel, post-stabilisation. Différenciateurs produit.
+
+  ┌─────┬──────────────────────────────────────┬───────────────────────────────────────────────────────┐
+  │  #  │                Tâche                 │                        Détail                         │
+  ├─────┼──────────────────────────────────────┼───────────────────────────────────────────────────────┤
+  │ 5.1 │ Easter egg Gigi → env dev uniquement │ Conditionner à import.meta.env.DEV                    │
+  ├─────┼──────────────────────────────────────┼───────────────────────────────────────────────────────┤
+  │ 5.2 │ Pull-to-refresh                      │ Sur les listes du Dashboard et Calendar               │
+  ├─────┼──────────────────────────────────────┼───────────────────────────────────────────────────────┤
+  │ 5.3 │ Swipe gestures inter-écrans          │ Swipe horizontal pour naviguer entre tabs             │
+  ├─────┼──────────────────────────────────────┼───────────────────────────────────────────────────────┤
+  │ 5.4 │ Safe areas dynamiques                │ ✅ Fait — env(safe-area-inset-top) en place           │
+  ├─────┼──────────────────────────────────────┼───────────────────────────────────────────────────────┤
+  │ 5.5 │ Widget PWA                           │ Prochain anniversaire sur l'écran d'accueil           │
+  ├─────┼──────────────────────────────────────┼───────────────────────────────────────────────────────┤
+  │ 5.6 │ Cadeau IA                            │ Suggestions basées sur le profil de l'ami             │
+  └─────┴──────────────────────────────────────┴───────────────────────────────────────────────────────┘
+
+---
+RÉSUMÉ VISUEL
+
+PHASE 0 ──── En cours      ──── Déploiement Google Play Store (10 tâches, 5 ✅)
+PHASE 1 ──── < 1 journée   ──── Corrections bloquantes (7 tâches)
+PHASE 2 ──── 1-3 jours     ──── Frictions UX majeures (6 tâches)
+PHASE 3 ──── 3-5 jours     ──── Cohérence visuelle (5 tâches)
+PHASE 4 ──── 1-2 semaines  ──── Rétention & gamification (4 tâches, 1 ✅)
+PHASE 5 ──── Post-prod     ──── Différenciateurs long terme (6 tâches, 1 ✅)

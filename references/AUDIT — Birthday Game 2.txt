@@ -1,0 +1,106 @@
+AUDIT — Birthday Game                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                      
+  ---                                                                                                                                                                                                                                                                 
+  ✅ POINTS POSITIFS                                                                                                                                                                                                                                                  
+                                                                                                                                                                                                                                                                      
+  Architecture & Code                                                                                                                                                                                                                                                 
+  - Stack moderne solide : React 19 + TypeScript + Vite + Tailwind v4                                                                                                                                                                                                 
+  - Hooks bien séparés (useAppState, useStreak, useStreakNotification)                                                                                                                                                                                                
+  - Design tokens CSS cohérents (couleurs, radius, ombres, dark mode)
+  - Firestore avec onSnapshot partout → données temps réel, pas de stale data
+  - Error Boundary en place
+  - Skeleton loading states soignés
+
+  UX & Produit
+  - Concept original et différenciant (gamification des anniversaires)
+  - Onboarding fluide en 3 steps avec fond animé
+  - QR code pour ajouter des amis → frictionless
+  - Deep link : partage de profil via URL
+  - Dark mode complet
+  - Safe areas dynamiques (qu'on vient de faire)
+  - Hero card dashboard bien conçue
+  - Célébrités par jour → touche éditoriale unique
+
+  ---
+  ❌ POINTS NÉGATIFS / BLOQUANTS
+
+  🔴 CRITIQUE — Sécurité
+
+  La clé API Gemini est exposée dans le bundle public via vite.config.ts :
+  define: { 'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY) }
+  N'importe qui peut ouvrir les DevTools et l'extraire. À corriger avant tout déploiement.
+
+  ---
+  🔴 CRITIQUE — App Store : l'app n'est pas soumettable telle quelle
+
+  C'est une PWA web, pas une app native. Pour l'App Store Apple ou le Play Store Google, il faut obligatoirement :
+  1. Wrapper l'app avec Capacitor (recommandé) ou Cordova pour la transformer en app native
+  2. Créer des icônes aux formats requis (1024×1024 pour iOS, multiples tailles pour Android)
+  3. Signer le build avec un certificat Apple Developer ($99/an) ou Google Play ($25 une fois)
+  4. Passer la review Apple (7-14 jours) / Google (quelques heures)
+
+  Sans Capacitor, la seule option est l'installation PWA depuis le navigateur (ajout à l'écran d'accueil) — mais ce n'est pas l'App Store.
+
+  ---
+  🔴 CRITIQUE — Pas de manifest PWA ni de Service Worker
+
+  Sans manifest.json :
+  - L'app ne peut pas être installée depuis Chrome/Safari
+  - Pas d'icône sur l'écran d'accueil
+  - Pas de mode plein écran sans la barre du navigateur
+
+  Sans Service Worker :
+  - Zéro fonctionnement hors-ligne — une coupure réseau = écran blanc
+  - Les notifications push en arrière-plan sont impossibles
+
+  ---
+  🟠 MAJEUR — Dépendances parasites
+
+  express est dans les dependencies (production) alors que c'est un package serveur. Il gonfle le bundle inutilement.
+
+  framer-motion et motion sont tous les deux présents — motion est le nouveau nom de framer-motion v12. Doublons à nettoyer.
+
+  Le nom du package est encore "react-example" dans package.json — résidu du projet starter.
+
+  ---
+  🟠 MAJEUR — Pas de tests
+
+  Zéro test unitaire ou d'intégration. Sur une app Firebase avec logique métier (XP, cartes, challenges), un bug peut passer en prod sans être détecté.
+
+  ---
+  🟡 MINEUR — Fonctionnel incomplet
+
+  - category existe dans les types (famille / ami / autre) mais n'est jamais utilisé dans l'UI
+  - Seulement 2 challenges — le système est sous-exploité
+  - Pas de recherche / filtre dans la liste d'amis — problématique dès 30+ amis
+  - Célébrités incomplètes sur 11 mois sur 12
+
+  ---
+  📋 CE QU'IL FAUT FAIRE AVANT DÉPLOIEMENT
+
+  ┌──────────┬────────────────────────────────────────────────────┐
+  │ Priorité │                       Action                       │
+  ├──────────┼────────────────────────────────────────────────────┤
+  │ 🔴 1     │ Retirer la clé Gemini du bundle                    │
+  ├──────────┼────────────────────────────────────────────────────┤
+  │ 🔴 2     │ Créer manifest.json + icônes app                   │
+  ├──────────┼────────────────────────────────────────────────────┤
+  │ 🔴 3     │ Ajouter un Service Worker (cache offline minimal)  │
+  ├──────────┼────────────────────────────────────────────────────┤
+  │ 🔴 4     │ Intégrer Capacitor pour wrapper en app native      │
+  ├──────────┼────────────────────────────────────────────────────┤
+  │ 🟠 5     │ Nettoyer express et framer-motion des deps         │
+  ├──────────┼────────────────────────────────────────────────────┤
+  │ 🟠 6     │ Renommer le package (birthday-game)                │
+  ├──────────┼────────────────────────────────────────────────────┤
+  │ 🟡 7     │ Compléter les célébrités (11 mois restants)        │
+  ├──────────┼────────────────────────────────────────────────────┤
+  │ 🟡 8     │ Ajouter au moins des tests sur la logique XP/cards │
+  └──────────┴────────────────────────────────────────────────────┘
+
+  ---
+  VERDICT
+
+  ▎ Non prête pour l'App Store. Prête à ~65% pour une PWA installable. Le produit est solide et le concept est bien exécuté — il manque principalement la couche technique de distribution (manifest, SW, Capacitor) et un correctif de sécurité sur la clé API.
+
+  Estimation pour être App Store-ready : 3 à 5 jours de travail.
