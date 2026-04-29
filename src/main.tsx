@@ -5,7 +5,7 @@ import PrivacyPolicy from './screens/PrivacyPolicy.tsx';
 import './index.css';
 
 const root = document.getElementById('root')!;
-const isPrivacyPolicy = window.location.pathname.replace(/\/$/, '') === '/privacy-policy';
+const isPrivacyPolicy = window.location.href.includes('privacy-policy');
 
 createRoot(root).render(
   <StrictMode>
