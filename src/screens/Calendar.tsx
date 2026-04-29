@@ -13,6 +13,7 @@ import { getZodiacSign } from '../utils/gameLogic';
 import { format, parseISO, differenceInDays, startOfDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { ZODIAC_EMOJI } from '../utils/zodiac';
+import { getContactsApi, supportsContactImport } from '../utils/deviceCapabilities';
 
 type TabId = 'tous' | 'famille' | 'ami' | 'autre';
 
@@ -314,13 +315,9 @@ export function Calendar({
   };
 
   const handleImportContact = async () => {
-    const contactsApi = (navigator as Navigator & {
-      contacts?: {
-        select?: (properties: string[], options?: { multiple?: boolean }) => Promise<Array<{ name?: string[]; tel?: string[] }>>;
-      };
-    }).contacts;
+    const contactsApi = getContactsApi(navigator);
 
-    if (typeof contactsApi?.select !== 'function') {
+    if (!contactsApi) {
       setFormError("L'import de contacts n'est pas disponible sur cet appareil. Utilise l'ajout manuel.");
       return;
     }
@@ -895,7 +892,7 @@ export function Calendar({
                         whileTap={{ scale: 0.93 }}
                         onClick={handleImportContact}
                         className="w-20 h-20 flex flex-col items-center justify-center border border-slate-900 rounded-2xl text-[12px] font-black text-slate-600 bg-slate-50 transition-colors"
-                        style={{ opacity: 'contacts' in navigator ? 1 : 0.72 }}
+                        style={{ opacity: supportsContactImport(navigator) ? 1 : 0.72 }}
                       >
                         <span className="text-3xl leading-none">📱</span>
                         <span className="mt-1">Contact</span>

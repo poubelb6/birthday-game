@@ -7,6 +7,7 @@ import { Birthday, ZodiacSign } from '../types';
 import { getZodiacSign } from '../utils/gameLogic';
 import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { hasSharedProfileDuplicate } from '../utils/friendMatching';
 
 interface ScannedProfile {
   id: string;
@@ -108,9 +109,7 @@ export function Scanner({ onScan, onScanSuccess, existingBirthdays = [] }: {
           return;
         }
 
-        const alreadyExists = existingBirthdays.some(
-          b => b.userId === profile.id
-        );
+        const alreadyExists = hasSharedProfileDuplicate(existingBirthdays, profile.id);
         if (alreadyExists) {
           showError(`${profile.name} est déjà dans ta collection !`);
           return;

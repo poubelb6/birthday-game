@@ -26,6 +26,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { Logo } from './components/Logo';
 import confetti from 'canvas-confetti';
 import { Birthday } from './types';
+import { hasSharedProfileDuplicate } from './utils/friendMatching';
 
 const Onboarding = lazy(() => import('./screens/Onboarding').then(module => ({ default: module.Onboarding })));
 const Scanner = lazy(() => import('./screens/Scanner').then(module => ({ default: module.Scanner })));
@@ -136,7 +137,7 @@ function AppContent() {
       try {
         const profile = JSON.parse(decodeURIComponent(escape(atob(pendingDeepLink))));
         if (!profile.id || !profile.name || !profile.birthDate) return;
-        const alreadyExists = birthdays.some(b => b.userId === profile.id);
+        const alreadyExists = hasSharedProfileDuplicate(birthdays, profile.id);
         if (!alreadyExists) {
           const birthday: Birthday = {
             id:        profile.id,
