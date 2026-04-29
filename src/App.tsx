@@ -98,8 +98,12 @@ function AppContent() {
   const [showMessages, setShowMessages] = useState(false);
 
   const [celebrationFriend, setCelebrationFriend] = useState<Birthday | null>(null);
-  const [gigiBg, setGigiBg] = useState(() => localStorage.getItem('gigiBg') === 'true');
-  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('darkMode') === 'true');
+  const [gigiBg, setGigiBg] = useState(() => import.meta.env.DEV && localStorage.getItem('gigiBg') === 'true');
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem('darkMode');
+    if (saved !== null) return saved === 'true';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
 
   // Apply / remove dark class on <html>
   useEffect(() => {
@@ -166,7 +170,7 @@ function AppContent() {
   }, [pendingDeepLink, user, firebaseUser, loading]);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowSplash(false), 2500);
+    const timer = setTimeout(() => setShowSplash(false), 800);
     return () => clearTimeout(timer);
   }, []);
 

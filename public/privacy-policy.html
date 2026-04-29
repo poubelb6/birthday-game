@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Politique de confidentialité — Birthday Game</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+      color: #1e293b;
+      background: #f8fafc;
+      padding: 0 16px 64px;
+    }
+    .container { max-width: 720px; margin: 0 auto; }
+    header {
+      padding: 40px 0 32px;
+      border-bottom: 2px solid #0f172a;
+      margin-bottom: 40px;
+    }
+    .logo { font-size: 28px; font-weight: 900; color: #FF4B4B; letter-spacing: -0.5px; }
+    .logo span { color: #0f172a; }
+    h1 { font-size: 22px; font-weight: 700; color: #0f172a; margin-top: 8px; }
+    .meta { font-size: 13px; color: #64748b; margin-top: 4px; }
+    h2 {
+      font-size: 17px;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 36px 0 12px;
+      padding-left: 12px;
+      border-left: 3px solid #FF4B4B;
+    }
+    p { margin-bottom: 12px; color: #334155; }
+    ul { margin: 8px 0 12px 20px; }
+    li { margin-bottom: 6px; color: #334155; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+    th {
+      background: #0f172a;
+      color: #fff;
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+    }
+    td { padding: 10px 14px; border-bottom: 1px solid #e2e8f0; }
+    tr:nth-child(even) td { background: #f1f5f9; }
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #fef2f2;
+      color: #FF4B4B;
+      border: 1px solid #fecaca;
+    }
+    a { color: #FF4B4B; }
+    footer {
+      margin-top: 56px;
+      padding-top: 24px;
+      border-top: 1px solid #e2e8f0;
+      font-size: 13px;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">Birthday<span>Game</span></div>
+      <h1>Politique de confidentialité</h1>
+      <p class="meta">Dernière mise à jour : 30 avril 2026 &nbsp;·&nbsp; <span class="badge">v1.0</span></p>
+    </header>
+
+    <h2>1. Qui sommes-nous ?</h2>
+    <p>
+      Birthday Game est une application mobile développée par Amine Ezzeyadi
+      (<a href="mailto:ezzeyadiamine@gmail.com">ezzeyadiamine@gmail.com</a>).
+      Elle permet de collecter les anniversaires de vos proches, de recevoir des rappels
+      et de débloquer des cartes collectionables.
+    </p>
+
+    <h2>2. Données collectées</h2>
+    <table>
+      <thead>
+        <tr><th>Donnée</th><th>Source</th><th>Finalité</th><th>Durée</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Nom, email, photo de profil</td>
+          <td>Connexion Google</td>
+          <td>Authentification, affichage du profil</td>
+          <td>Jusqu'à suppression du compte</td>
+        </tr>
+        <tr>
+          <td>Date de naissance (la vôtre)</td>
+          <td>Onboarding</td>
+          <td>Calcul du signe zodiacal, profil partageable</td>
+          <td>Jusqu'à suppression du compte</td>
+        </tr>
+        <tr>
+          <td>Anniversaires d'amis (nom + date)</td>
+          <td>Saisie manuelle ou scanner QR</td>
+          <td>Rappels, fonctionnalités de l'app</td>
+          <td>Jusqu'à suppression de l'entrée</td>
+        </tr>
+        <tr>
+          <td>Messages envoyés/reçus</td>
+          <td>Messagerie in-app</td>
+          <td>Communication entre utilisateurs</td>
+          <td>Jusqu'à suppression du compte</td>
+        </tr>
+        <tr>
+          <td>Token FCM</td>
+          <td>Appareil Android</td>
+          <td>Notifications push (messages, anniversaires)</td>
+          <td>Renouvelé automatiquement par Firebase</td>
+        </tr>
+        <tr>
+          <td>Progression (XP, cartes, défis)</td>
+          <td>Actions dans l'app</td>
+          <td>Gamification</td>
+          <td>Jusqu'à suppression du compte</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>Nous ne collectons <strong>aucune donnée de localisation</strong>, aucune donnée de santé, et n'effectuons aucun profilage publicitaire.</p>
+
+    <h2>3. Base légale (RGPD)</h2>
+    <ul>
+      <li><strong>Exécution du contrat</strong> : les données nécessaires au fonctionnement de l'app (authentification, anniversaires, notifications)</li>
+      <li><strong>Consentement</strong> : les notifications push (vous pouvez les désactiver à tout moment dans les paramètres)</li>
+      <li><strong>Intérêt légitime</strong> : amélioration de l'application</li>
+    </ul>
+
+    <h2>4. Partage des données</h2>
+    <p>Vos données sont hébergées sur <strong>Firebase (Google LLC)</strong>, basé aux États-Unis. Google est certifié conforme au cadre EU-US Data Privacy Framework. Aucune donnée n'est vendue à des tiers.</p>
+    <p>Les seules données visibles par d'autres utilisateurs sont celles que vous choisissez de partager via votre QR code ou lien de profil (nom, date de naissance, photo, réseaux sociaux).</p>
+
+    <h2>5. Vos droits</h2>
+    <p>Conformément au RGPD, vous disposez des droits suivants :</p>
+    <ul>
+      <li><strong>Accès</strong> : demander une copie de vos données</li>
+      <li><strong>Rectification</strong> : modifier vos informations depuis le profil de l'app</li>
+      <li><strong>Suppression</strong> : supprimer votre compte depuis Paramètres → Supprimer le compte (cascade complète : profil, anniversaires, défis, messages)</li>
+      <li><strong>Opposition</strong> : désactiver les notifications depuis les Paramètres</li>
+      <li><strong>Portabilité</strong> : nous contacter pour obtenir vos données au format JSON</li>
+    </ul>
+    <p>Pour exercer vos droits : <a href="mailto:ezzeyadiamine@gmail.com">ezzeyadiamine@gmail.com</a></p>
+
+    <h2>6. Sécurité</h2>
+    <p>
+      Les données sont protégées par les règles de sécurité Firestore (accès limité à votre UID),
+      la connexion HTTPS et l'authentification Google OAuth 2.0.
+      Aucune clé d'API n'est exposée dans l'application.
+    </p>
+
+    <h2>7. Mineurs</h2>
+    <p>L'application est destinée aux personnes de 13 ans et plus. Nous ne collectons pas sciemment de données sur des enfants de moins de 13 ans.</p>
+
+    <h2>8. Modifications</h2>
+    <p>En cas de modification substantielle de cette politique, vous serez informé dans l'application. La date de mise à jour figure en haut de cette page.</p>
+
+    <footer>
+      <p>Birthday Game &nbsp;·&nbsp; <a href="mailto:ezzeyadiamine@gmail.com">ezzeyadiamine@gmail.com</a> &nbsp;·&nbsp; Politique de confidentialité v1.0</p>
+    </footer>
+  </div>
+</body>
+</html>

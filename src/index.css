@@ -48,7 +48,7 @@
   /* Text */
   --text-1: #0f172a;
   --text-2: #475569;
-  --text-3: #94a3b8;
+  --text-3: #64748b;
 
   /* Collection */
   --card-emoji-bg: #F2EFE7;
@@ -107,7 +107,7 @@ html.dark {
 
   --text-1: #e6edf3;
   --text-2: #7d8590;
-  --text-3: #484f58;
+  --text-3: #8b949e;
 
   --card-emoji-bg: #1c2128;
   --progress-bg: #21262d;
