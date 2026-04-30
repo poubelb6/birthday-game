@@ -10,6 +10,7 @@ import type { Birthday, Message, UserProfile } from '../types';
 
 const ENABLED_KEY = 'notifications_enabled';
 const CHANNEL_ID  = 'birthday-reminders';
+const FCM_TOKEN_KEY = 'push_fcm_token';
 
 const MILESTONES = [
   { days: 30, index: 0 },
@@ -82,6 +83,19 @@ export function useNotifications(
     localStorage.setItem(ENABLED_KEY, String(val));
     setEnabledState(val);
   }
+
+  const persistFcmToken = useCallback(async (token: string) => {
+    localStorage.setItem(FCM_TOKEN_KEY, token);
+
+    const uid = user?.id ?? auth.currentUser?.uid;
+    if (!uid) return;
+
+    try {
+      await updateDoc(doc(db, 'users', uid), { fcmToken: token });
+    } catch (e) {
+      console.error('[FCM] token save:', e);
+    }
+  }, [user?.id]);
 
   // ── Native: schedule all birthday notifications ──────────────────────────
   const scheduleAll = useCallback(async () => {
@@ -239,13 +253,7 @@ export function useNotifications(
 
     // Save token to Firestore so the Cloud Function can target this device
     PushNotifications.addListener('registration', async (token) => {
-      const uid = user?.id ?? auth.currentUser?.uid;
-      if (!uid) return;
-      try {
-        await updateDoc(doc(db, 'users', uid), { fcmToken: token.value });
-      } catch (e) {
-        console.error('[FCM] token save:', e);
-      }
+      await persistFcmToken(token.value);
     }).then(h => handles.push(h));
 
     // Tap on FCM push (app was closed or background)
@@ -259,7 +267,16 @@ export function useNotifications(
       .then(h => handles.push(h));
 
     return () => handles.forEach(h => h.remove());
-  }, [isNative, user?.id]);
+  }, [isNative, persistFcmToken]);
+
+  useEffect(() => {
+    if (!isNative || !enabled) return;
+
+    const existingToken = localStorage.getItem(FCM_TOKEN_KEY);
+    if (!existingToken) return;
+
+    void persistFcmToken(existingToken);
+  }, [enabled, isNative, persistFcmToken]);
 
   // ── Public API ────────────────────────────────────────────────────────────
   const requestAndEnable = async (): Promise<boolean> => {
@@ -267,6 +284,13 @@ export function useNotifications(
       if (isNative) {
         const { display } = await LocalNotifications.requestPermissions();
         if (display !== 'granted') return false;
+
+        const exactAlarm = await LocalNotifications.checkExactNotificationSetting();
+        if (exactAlarm.exact_alarm !== 'granted') {
+          await LocalNotifications.changeExactNotificationSetting();
+          return false;
+        }
+
         // Also register for FCM push (background/closed notifications)
         const { receive } = await PushNotifications.requestPermissions();
         if (receive === 'granted') await PushNotifications.register();
@@ -275,6 +299,19 @@ export function useNotifications(
         if (await Notification.requestPermission() !== 'granted') return false;
       }
       persist(true);
+      if (isNative) {
+        await scheduleAll();
+        await LocalNotifications.schedule({
+          notifications: [{
+            id: 9100001,
+            title: 'Rappels activés',
+            body: "Les notifications d'anniversaires sont prêtes sur ton téléphone.",
+            schedule: { at: new Date(Date.now() + 5000), allowWhileIdle: true },
+            channelId: CHANNEL_ID,
+            extra: { type: 'birthday-test' },
+          }],
+        });
+      }
       return true;
     } catch {
       return false;

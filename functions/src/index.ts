@@ -5,13 +5,18 @@ import { getMessaging } from 'firebase-admin/messaging';
 
 initializeApp();
 
+const FIRESTORE_DATABASE_ID = 'ai-studio-205d5702-c386-45bf-9a75-c55bd6d77f3b';
+
 // Triggered every time a new message document is created in /messages
-export const onNewMessage = onDocumentCreated('messages/{messageId}', async (event) => {
+export const onNewMessage = onDocumentCreated({
+  document: 'messages/{messageId}',
+  database: FIRESTORE_DATABASE_ID,
+}, async (event) => {
   const data = event.data?.data();
   if (!data?.toId || !data?.fromName || !data?.text) return;
 
   // Read recipient's FCM token stored in their user document
-  const userSnap = await getFirestore().doc(`users/${data.toId}`).get();
+  const userSnap = await getFirestore(FIRESTORE_DATABASE_ID).doc(`users/${data.toId}`).get();
   const fcmToken = userSnap.data()?.fcmToken as string | undefined;
   if (!fcmToken) return; // user hasn't enabled push notifications
 

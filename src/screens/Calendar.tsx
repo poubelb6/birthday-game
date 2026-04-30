@@ -535,15 +535,6 @@ export function Calendar({
           >
             <Trophy size={18} style={{ color: '#D4A017' }} />
           </motion.button>
-          <motion.button
-            whileTap={{ scale: 0.88 }}
-            whileHover={{ scale: 1.05 }}
-            onClick={() => setShowAddModal(true)}
-            className="w-11 h-11 rounded-2xl flex items-center justify-center text-white shrink-0"
-            style={{ background: '#FF4B4B', boxShadow: '0 3px 0 #CC2E2E' }}
-          >
-            <Plus size={20} strokeWidth={3} />
-          </motion.button>
         </motion.div>
 
         {/* Tabs */}

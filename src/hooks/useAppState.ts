@@ -19,6 +19,7 @@ import {
 } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 import { UserProfile, Birthday, Challenge, Message } from '../types';
+import { recordFriendAdd } from './useStreak';
 
 enum OperationType {
   CREATE = 'create',
@@ -292,6 +293,7 @@ export function useAppState() {
     // Critical: save the birthday. Rethrow on failure so the UI can report the error.
     try {
       await addDoc(collection(db, path), payload);
+      recordFriendAdd();
     } catch (e) {
       handleFirestoreError(e, OperationType.WRITE, path);
     }

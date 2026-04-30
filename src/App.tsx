@@ -96,6 +96,7 @@ function AppContent() {
   const [pendingDeepLink, setPendingDeepLink] = useState<string | null>(null);
   const [triggerAddFriend, setTriggerAddFriend] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   const [celebrationFriend, setCelebrationFriend] = useState<Birthday | null>(null);
   const [gigiBg, setGigiBg] = useState(() => (import.meta as { env?: { DEV?: boolean } }).env?.DEV === true && localStorage.getItem('gigiBg') === 'true');
@@ -183,6 +184,7 @@ function AppContent() {
 
   const handleLogin = async () => {
     try {
+      setAuthError(null);
       if (Capacitor.isNativePlatform()) {
         const googleUser = await GoogleAuth.signIn();
         const credential = GoogleAuthProvider.credential(googleUser.authentication.idToken);
@@ -192,6 +194,7 @@ function AppContent() {
       }
     } catch (error) {
       console.error('Login failed:', error);
+      setAuthError("Connexion Google impossible. Réessaie.");
     }
   };
 
@@ -316,6 +319,11 @@ function AppContent() {
               </svg>
               Se connecter avec Google
             </motion.button>
+            {authError && (
+              <p className="mt-3 text-sm font-bold text-red-500">
+                {authError}
+              </p>
+            )}
           </div>
         </motion.div>
       </div>
@@ -609,7 +617,7 @@ function AppContent() {
 
       <nav
         aria-label="Navigation principale"
-        className="fixed bottom-0 left-0 right-0 max-w-md mx-auto backdrop-blur-2xl px-2 pt-4 flex items-center z-50 rounded-t-[var(--radius-pill)] shadow-token-nav"
+        className="fixed bottom-0 left-0 right-0 max-w-md mx-auto backdrop-blur-2xl px-2 pt-4 flex items-center z-50 shadow-token-nav"
         style={{ background: 'var(--surface-card-translucent)', borderTop: '2px solid var(--border-accent)', paddingBottom: 'max(env(safe-area-inset-bottom), 1rem)' }}
       >
         <div className="flex-1 flex justify-center">

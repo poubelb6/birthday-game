@@ -1,4 +1,6 @@
 import { useState, useRef } from 'react';
+import { Capacitor } from '@capacitor/core';
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 import { ZODIAC_EMOJI } from '../utils/zodiac';
 import { QRCodeSVG } from 'qrcode.react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -222,6 +224,16 @@ export function Profile({ user, onUpdate, birthdays = [], challenges = [], notif
         setDeleteError('Une erreur est survenue. Réessaie.');
       }
       setDeleting(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      if (Capacitor.isNativePlatform()) {
+        await GoogleAuth.signOut().catch(() => undefined);
+      }
+    } finally {
+      await signOut(auth);
     }
   };
 
@@ -858,7 +870,7 @@ const getZodiacEmoji = (zodiac: string) => {
           className="pb-4 space-y-3"
         >
           <motion.button
-            onClick={() => signOut(auth)}
+            onClick={handleSignOut}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
             className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl font-bold"
