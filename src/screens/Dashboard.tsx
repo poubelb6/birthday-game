@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useEffect, useRef } from 'react';
 import { ZODIAC_EMOJI, formatZodiac, getAvatarColor } from '../utils/zodiac';
-import { Star, ChevronLeft, ChevronRight, Plus, ChevronDown, Sparkles, Globe2, Flame, Heart, Users, UserCircle } from 'lucide-react';
+import { Star, ChevronLeft, ChevronRight, Plus, ChevronDown, Sparkles, Globe2, Flame, Heart, Users, UserCircle, Gift, ContactRound, CalendarDays, LayoutGrid, MessageCircleMore, Instagram, X } from 'lucide-react';
 import { Birthday, UserProfile } from '../types';
 import { format, differenceInDays, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, startOfDay, addMonths, subMonths } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -11,10 +11,11 @@ import { CELEB_BIRTHDAYS } from '../data/celebBirthdays';
 import { useStreak } from '../hooks/useStreak';
 
 
-export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthday, onDeleteBirthday }: {
+export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollection, onUpdateBirthday, onDeleteBirthday }: {
   birthdays: Birthday[],
   user: UserProfile | null,
   onRequestAddFriend?: () => void,
+  onOpenCollection?: () => void,
   onUpdateBirthday?: (id: string, updates: Record<string, unknown>) => Promise<void>,
   onDeleteBirthday?: (id: string) => void,
 }) {
@@ -31,6 +32,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
   const [birthdayPicker, setBirthdayPicker] = useState<{ dayLabel: string; birthdays: Birthday[] } | null>(null);
   const [celebExpanded, setCelebExpanded] = useState(false);
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
+  const [showInviteActions, setShowInviteActions] = useState(false);
 
   // Swipe touch tracking
   const touchStartX = useRef<number | null>(null);
@@ -113,6 +115,83 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
 
   // suppress unused warning — formatZodiac kept for potential future use in card tooltips
   void formatZodiac;
+
+  const shareablePayload = user ? {
+    userId: user.id,
+    name: user.name,
+    birthDate: user.birthDate,
+    zodiac: user.zodiac,
+    ...(user.photoUrl && !user.photoUrl.startsWith('data:') && { photoUrl: user.photoUrl }),
+    socials: user.socials,
+  } : null;
+
+  const shareUrl = shareablePayload
+    ? `https://birthday-game-green.vercel.app/add-friend?data=${btoa(unescape(encodeURIComponent(JSON.stringify(shareablePayload))))}`
+    : 'https://birthday-game-green.vercel.app';
+
+  const shareText = user
+    ? `🎂 Ajoute-moi sur Birthday Game !\n👤 ${user.name} · né(e) le ${format(parseISO(user.birthDate), 'd MMMM yyyy', { locale: fr })}\n\n🔗 ${shareUrl}`
+    : `🎂 Rejoins-moi sur Birthday Game !\n\n🔗 ${shareUrl}`;
+
+  const openExternal = (url: string) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleInviteWhatsApp = () => {
+    openExternal(`https://wa.me/?text=${encodeURIComponent(shareText)}`);
+    setShowInviteActions(false);
+  };
+
+  const handleInviteInstagram = async () => {
+    setShowInviteActions(false);
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Birthday Game', text: shareText, url: shareUrl });
+        return;
+      } catch {
+        // user cancelled
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(shareText);
+    } catch {
+      // clipboard unavailable
+    }
+    openExternal('https://www.instagram.com/');
+  };
+
+  const quickActions = [
+    {
+      title: 'Google Agenda',
+      subtitle: 'Ouvrir l’agenda',
+      icon: <CalendarDays size={18} strokeWidth={2.5} className="text-rose-500" />,
+      onClick: () => openExternal('https://calendar.google.com/calendar/u/0/r'),
+    },
+    {
+      title: 'Contacts',
+      subtitle: 'Ajouter un ami',
+      icon: <ContactRound size={18} strokeWidth={2.5} className="text-sky-500" />,
+      onClick: () => onRequestAddFriend?.(),
+    },
+    {
+      title: 'Mes cartes',
+      subtitle: 'Voir la collection',
+      icon: <LayoutGrid size={18} strokeWidth={2.5} className="text-violet-500" />,
+      onClick: () => onOpenCollection?.(),
+    },
+    {
+      title: 'Inviter',
+      subtitle: 'WhatsApp / Insta',
+      icon: <MessageCircleMore size={18} strokeWidth={2.5} className="text-emerald-500" />,
+      onClick: () => setShowInviteActions(true),
+    },
+    {
+      title: 'Idées cadeaux',
+      subtitle: 'Trouver l’inspiration',
+      icon: <Gift size={18} strokeWidth={2.5} className="text-amber-500" />,
+      onClick: () => openExternal('https://www.google.com/search?q=id%C3%A9es+cadeaux+anniversaire'),
+    },
+  ];
 
   return (
     <div className="p-6 space-y-8">
@@ -494,6 +573,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
 
       <section className="space-y-2 order-3">
         {celebOfDay && (
+          <>
           <div className="bg-amber-50 border border-amber-200 rounded-md px-4 py-3 overflow-hidden shadow-sm">
             <div className="flex items-center gap-3">
               <span className="text-xl shrink-0">{celebOfDay.emoji}</span>
@@ -544,9 +624,98 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
               )}
             </AnimatePresence>
           </div>
+          <div className="grid grid-cols-2 gap-2">
+            {quickActions.map((action) => (
+              <motion.button
+                key={action.title}
+                whileTap={{ scale: 0.97 }}
+                onClick={action.onClick}
+                className={`border-2 border-black bg-white px-3 py-3 text-left ${action.title === 'Idées cadeaux' ? 'col-span-2' : ''}`}
+              >
+                <div className="flex items-start gap-3">
+                  <div className="shrink-0 w-9 h-9 flex items-center justify-center bg-slate-50 border border-slate-200 rounded-md">
+                    {action.icon}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[12px] font-black leading-none text-slate-900">{action.title}</p>
+                    <p className="text-[11px] font-semibold mt-1 text-slate-500 leading-tight">{action.subtitle}</p>
+                  </div>
+                </div>
+              </motion.button>
+            ))}
+          </div>
+          </>
         )}
       </section>
       </div>
+
+      <AnimatePresence>
+        {showInviteActions && (
+          <div className="fixed inset-0 z-[195] flex items-end justify-center">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowInviteActions(false)}
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 32 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 32 }}
+              transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+              className="relative w-full max-w-md rounded-t-[28px] bg-white px-5 pt-4 pb-6 space-y-4"
+            >
+              <button
+                onClick={() => setShowInviteActions(false)}
+                className="absolute right-4 top-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center"
+              >
+                <X size={14} className="text-slate-500" />
+              </button>
+
+              <div className="text-center space-y-1">
+                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-500">Inviter</p>
+                <h3 className="font-black text-lg text-slate-900">Partager ton invitation</h3>
+                <p className="text-sm font-semibold text-slate-500">Envoie ton lien Birthday Game directement.</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleInviteWhatsApp}
+                  className="rounded-md border-2 border-black bg-[#25D366]/10 px-4 py-4 text-left"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-md bg-[#25D366] text-white flex items-center justify-center font-black">
+                      W
+                    </div>
+                    <div>
+                      <p className="text-sm font-black text-slate-900">WhatsApp</p>
+                      <p className="text-[11px] font-semibold text-slate-500">Envoyer le lien</p>
+                    </div>
+                  </div>
+                </motion.button>
+
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleInviteInstagram}
+                  className="rounded-md border-2 border-black bg-rose-50 px-4 py-4 text-left"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-md bg-gradient-to-tr from-amber-400 via-rose-500 to-purple-600 text-white flex items-center justify-center">
+                      <Instagram size={18} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-black text-slate-900">Instagram</p>
+                      <p className="text-[11px] font-semibold text-slate-500">Partager le lien</p>
+                    </div>
+                  </div>
+                </motion.button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <section className="hidden space-y-3">
         {upcoming.length > 0 ? (() => {

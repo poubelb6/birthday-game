@@ -340,12 +340,12 @@ function AppContent() {
 
   const renderScreen = () => {
     switch (activeScreen) {
-      case 'dashboard': return <Dashboard birthdays={birthdays} user={user} onRequestAddFriend={() => { navigateTo('calendar'); setTriggerAddFriend(true); }} onUpdateBirthday={updateBirthday} onDeleteBirthday={deleteBirthday} />;
+      case 'dashboard': return <Dashboard birthdays={birthdays} user={user} onRequestAddFriend={() => { navigateTo('calendar'); setTriggerAddFriend(true); }} onOpenCollection={() => navigateTo('collection')} onUpdateBirthday={updateBirthday} onDeleteBirthday={deleteBirthday} />;
       case 'scanner': return <Scanner onScan={addBirthday} onScanSuccess={() => { incrementScansCount(); navigateTo('calendar'); }} existingBirthdays={birthdays} />;
       case 'calendar': return <Calendar birthdays={birthdays} user={user} onAddBirthday={addBirthday} onUpdateBirthday={updateBirthday} onDeleteBirthday={deleteBirthday} onFirstVisit={() => unlockCard('c2')} openAddModal={triggerAddFriend} onAddModalOpened={() => setTriggerAddFriend(false)} />;
       case 'collection': return <Collection user={user} birthdays={birthdays} />;
       case 'profile': return <Profile user={user} onUpdate={setUser} birthdays={birthdays} challenges={challenges} notifEnabled={notifEnabled} onNotifEnable={notifEnable} onNotifDisable={notifDisable} isOnline={isOnline} />;
-      default: return <Dashboard birthdays={birthdays} user={user} />;
+      default: return <Dashboard birthdays={birthdays} user={user} onOpenCollection={() => navigateTo('collection')} />;
     }
   };
 
