@@ -140,6 +140,175 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
         )}
       </AnimatePresence>
 
+      <section className="space-y-3">
+        {upcoming.length > 0 ? (() => {
+          const [hero, ...rest] = upcoming;
+
+          const catBorder = (cat?: string) =>
+            cat === 'famille' ? '#f43f5e' :
+            cat === 'ami'     ? '#0ea5e9' :
+            cat === 'autre'   ? '#94a3b8' : '#0f172a';
+
+          const isToday   = hero.daysUntil === 0;
+          const isUrgent  = hero.daysUntil >= 1 && hero.daysUntil <= 3;
+          const isWeek    = hero.daysUntil >= 4 && hero.daysUntil <= 7;
+
+          const heroBg = isToday  ? 'linear-gradient(135deg, #FF4B4B 0%, #ff8566 100%)'
+                       : isUrgent ? 'linear-gradient(135deg, #f97316 0%, #fb923c 100%)'
+                       : isWeek   ? 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)'
+                       : 'var(--surface-card)';
+
+          const heroTextColor  = (isToday || isUrgent || isWeek) ? '#ffffff' : 'var(--text-1)';
+          const heroSubColor   = (isToday || isUrgent || isWeek) ? 'rgba(255,255,255,0.75)' : 'var(--text-2)';
+          const heroBorder     = isToday  ? '2px solid rgba(255,255,255,0.3)'
+                               : isUrgent ? '2px solid rgba(255,255,255,0.25)'
+                               : isWeek   ? '2px solid rgba(255,255,255,0.2)'
+                               : '2px solid #0f172a';
+
+          const urgencyLabel = isToday  ? "C'EST AUJOURD'HUI !"
+                             : isUrgent ? 'Très bientôt'
+                             : isWeek   ? 'Cette semaine'
+                             : 'Prochain anniversaire';
+
+          return (
+            <div className="space-y-3">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+                onClick={() => setViewingFriend(hero)}
+                className="cursor-pointer rounded-3xl overflow-hidden shadow-md"
+                style={{ background: heroBg, border: heroBorder }}
+              >
+                <div className="flex items-center gap-4 p-4">
+                  <div className="relative shrink-0">
+                    {isToday && (
+                      <motion.div
+                        animate={{ scale: [1, 1.18, 1], opacity: [0.6, 0.2, 0.6] }}
+                        transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+                        className="absolute inset-0 rounded-2xl"
+                        style={{ background: 'rgba(255,255,255,0.4)', margin: -4, borderRadius: 20 }}
+                      />
+                    )}
+                    <div className="w-20 h-20 rounded-2xl overflow-hidden" style={{ border: (isToday || isUrgent || isWeek) ? '3px solid rgba(255,255,255,0.6)' : `3px solid ${catBorder(hero.category)}` }}>
+                      {hero.photoUrl ? (
+                        <img src={hero.photoUrl} alt={hero.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center font-black text-3xl text-white" style={{ background: getAvatarColor(hero.name) }}>
+                          {hero.name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <motion.p
+                      animate={isToday ? { scale: [1, 1.04, 1] } : {}}
+                      transition={isToday ? { duration: 1.2, repeat: Infinity } : {}}
+                      className="text-[10px] font-black uppercase tracking-widest mb-0.5"
+                      style={{ color: (isToday || isUrgent || isWeek) ? 'rgba(255,255,255,0.85)' : 'var(--text-3)' }}
+                    >
+                      {urgencyLabel}
+                    </motion.p>
+                    <h3 className="font-black text-lg leading-tight truncate" style={{ color: heroTextColor }}>
+                      {hero.name.split(' ')[0]}
+                    </h3>
+                    <p className="text-sm font-semibold mt-0.5" style={{ color: heroSubColor }}>
+                      {format(parseISO(hero.birthDate), 'd MMMM', { locale: fr })} {ZODIAC_EMOJI[hero.zodiac] ?? ''}
+                    </p>
+                  </div>
+
+                  <div
+                    className="shrink-0 flex flex-col items-center justify-center w-14 h-14 rounded-2xl font-black"
+                    style={{
+                      background: (isToday || isUrgent || isWeek) ? 'rgba(255,255,255,0.2)' : '#f1f5f9',
+                      color: (isToday || isUrgent || isWeek) ? '#ffffff' : '#475569',
+                    }}
+                  >
+                    {isToday ? (
+                      <motion.span
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 1, repeat: Infinity }}
+                        className="text-2xl"
+                      >🎂</motion.span>
+                    ) : (
+                      <>
+                        <motion.span
+                          animate={isUrgent ? { scale: [1, 1.08, 1] } : {}}
+                          transition={isUrgent ? { duration: 0.8, repeat: Infinity } : {}}
+                          className="text-xl leading-none"
+                        >{hero.daysUntil}</motion.span>
+                        <span className="text-[9px] font-bold leading-none mt-0.5">jours</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+
+              {rest.length > 0 && (
+                <div className="flex gap-3 px-1">
+                  {rest.slice(0, 2).map((b, i) => (
+                    <motion.div
+                      key={b.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 + i * 0.1, type: 'spring', stiffness: 280, damping: 22 }}
+                      onClick={() => setViewingFriend(b)}
+                      className="flex-1 cursor-pointer rounded-2xl border border-slate-200 p-3 flex items-center gap-3"
+                      style={{ background: 'var(--surface-card)' }}
+                    >
+                      <div className="relative shrink-0">
+                        <div className="w-11 h-11 rounded-xl overflow-hidden" style={{ border: `2px solid ${catBorder(b.category)}` }}>
+                          {b.photoUrl ? (
+                            <img src={b.photoUrl} alt={b.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center font-black text-lg text-white" style={{ background: getAvatarColor(b.name) }}>
+                              {b.name.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                        </div>
+                        <div className={`absolute -top-1.5 -right-1.5 px-1 py-0.5 rounded-full text-[8px] font-black shadow-sm ${
+                          b.daysUntil === 0 ? 'bg-green-100 text-green-600' :
+                          b.daysUntil <= 7 ? 'bg-red-100 text-red-500' :
+                          'bg-slate-100 text-slate-500'
+                        }`}>
+                          {b.daysUntil === 0 ? '🎂' : `J-${b.daysUntil}`}
+                        </div>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-black truncate" style={{ color: 'var(--text-1)' }}>{b.name.split(' ')[0]}</p>
+                        <p className="text-[10px] font-semibold" style={{ color: 'var(--text-2)' }}>
+                          {format(parseISO(b.birthDate), 'd MMM', { locale: fr })} {ZODIAC_EMOJI[b.zodiac] ?? ''}
+                        </p>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })() : (
+          <div className="bg-slate-50 border border-dashed border-black/60 rounded-3xl p-10 text-center space-y-4">
+            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto shadow-sm">
+              <Star className="text-slate-300" size={32} />
+            </div>
+            <div className="space-y-1">
+              <p className="font-bold text-slate-600">Aucun anniversaire</p>
+              <p className="text-xs text-slate-500">Commence par ajouter un ami à ta collection</p>
+            </div>
+            <motion.button
+              whileTap={{ scale: 0.96 }}
+              onClick={() => onRequestAddFriend?.()}
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl text-white font-black text-sm"
+              style={{ background: '#FF4B4B', boxShadow: '0 4px 0 #CC2E2E' }}
+            >
+              <Plus size={16} strokeWidth={3} />
+              Ajouter un ami
+            </motion.button>
+          </div>
+        )}
+      </section>
+
       <section className="space-y-4 relative">
 
         <div className="relative pt-4">
@@ -284,7 +453,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
         </div>
       </section>
 
-      <section className="space-y-3">
+      <section className="hidden space-y-3">
         {upcoming.length > 0 ? (() => {
           const [hero, ...rest] = upcoming;
 
