@@ -503,7 +503,7 @@ function AppContent() {
       </AnimatePresence>
 
       <main
-        className={activeScreen === 'scanner' ? 'flex-1 overflow-hidden flex flex-col pb-24' : 'flex-1 overflow-y-auto pb-24'}
+        className={activeScreen === 'scanner' ? 'flex-1 overflow-hidden flex flex-col pb-20' : 'flex-1 overflow-y-auto pb-20'}
         style={{
           backgroundImage: activeScreen === 'scanner' ? 'none' : {
             dashboard:  'linear-gradient(180deg, rgba(255,75,75,0.05) 0%, transparent 100px)',
@@ -617,8 +617,8 @@ function AppContent() {
 
       <nav
         aria-label="Navigation principale"
-        className="fixed bottom-0 left-0 right-0 max-w-md mx-auto backdrop-blur-2xl px-2 pt-4 flex items-center z-50 shadow-token-nav"
-        style={{ background: 'var(--surface-card-translucent)', borderTop: '2px solid var(--border-accent)', paddingBottom: 'max(env(safe-area-inset-bottom), 1rem)' }}
+        className="fixed bottom-0 left-0 right-0 max-w-md mx-auto backdrop-blur-2xl px-2 pt-2.5 flex items-center z-50 shadow-token-nav"
+        style={{ background: 'var(--surface-card-translucent)', borderTop: '2px solid var(--border-accent)', paddingBottom: 'max(env(safe-area-inset-bottom), 0.65rem)' }}
       >
         <div className="flex-1 flex justify-center">
           <NavButton active={activeScreen === 'dashboard'} onClick={() => navigateTo('dashboard')} icon={<Home size={22} strokeWidth={2.5} />} label="Accueil" ariaLabel="Accueil" activeBg="bg-orange-50" activeColor="text-orange-500" activeFill="fill-orange-300" inactiveFill="fill-orange-300 dark:fill-transparent" />
@@ -632,10 +632,10 @@ function AppContent() {
             whileHover={{ scale: 1.15, rotate: 5 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => { navigateTo('calendar'); setTriggerAddFriend(true); }}
-            className="w-14 h-14 rounded-2xl flex items-center justify-center text-white"
+            className="w-12 h-12 rounded-2xl flex items-center justify-center text-white"
             style={{ background: '#FF4B4B' }}
           >
-            <Plus size={28} strokeWidth={2.5} />
+            <Plus size={24} strokeWidth={2.5} />
           </motion.button>
         </div>
         <div className="flex-1 flex justify-center">
@@ -675,12 +675,12 @@ function NavButton({ active, onClick, icon, label, ariaLabel, activeBg = 'bg-red
       aria-current={active ? 'page' : undefined}
       whileTap={{ scale: 0.86 }}
       transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-      className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${active ? 'scale-110' : 'opacity-70 hover:opacity-90'}`}
+      className={`flex flex-col items-center gap-1 transition-all duration-300 ${active ? 'scale-110' : 'opacity-70 hover:opacity-90'}`}
     >
       <motion.div
         animate={active ? { y: -4 } : { y: 0 }}
         transition={{ duration: 0.3 }}
-        className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 ${
+        className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${
           active ? activeBg : 'bg-transparent'
         }`}
       >
@@ -688,7 +688,7 @@ function NavButton({ active, onClick, icon, label, ariaLabel, activeBg = 'bg-red
           {iconWithFill}
         </div>
       </motion.div>
-      <span className={`text-[12px] font-black uppercase tracking-[0.15em] ${active ? activeColor : ''}`} style={active ? undefined : { color: 'var(--nav-label-inactive)' }}>
+      <span className={`text-[10px] font-black uppercase tracking-[0.13em] ${active ? activeColor : ''}`} style={active ? undefined : { color: 'var(--nav-label-inactive)' }}>
         {label}
       </span>
     </motion.button>
