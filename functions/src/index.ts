@@ -8,7 +8,7 @@ initializeApp();
 
 const FIRESTORE_DATABASE_ID = 'ai-studio-205d5702-c386-45bf-9a75-c55bd6d77f3b';
 const firestore = getFirestore(FIRESTORE_DATABASE_ID);
-const BIRTHDAY_REMINDER_DAYS = [0, 3, 7, 30] as const;
+const BIRTHDAY_REMINDER_DAYS = [0, 3, 7, 15, 30] as const;
 
 function getMonthDay(dateStr: string): string | null {
   const match = dateStr.match(/^\d{4}-(\d{2})-(\d{2})/);
@@ -91,7 +91,11 @@ function getReminderCopy(days: number, names: string[]): { title: string; body: 
         };
   }
 
-  const label = days === 30 ? 'dans 30 jours' : days === 7 ? 'dans 7 jours' : 'dans 3 jours';
+  const label =
+    days === 30 ? 'dans 30 jours' :
+    days === 15 ? 'dans 15 jours' :
+    days === 7 ? 'dans 7 jours' :
+    'dans 3 jours';
 
   return names.length === 1
     ? {

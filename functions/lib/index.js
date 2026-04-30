@@ -9,7 +9,7 @@ const scheduler_1 = require("firebase-functions/v2/scheduler");
 (0, app_1.initializeApp)();
 const FIRESTORE_DATABASE_ID = 'ai-studio-205d5702-c386-45bf-9a75-c55bd6d77f3b';
 const firestore = (0, firestore_1.getFirestore)(FIRESTORE_DATABASE_ID);
-const BIRTHDAY_REMINDER_DAYS = [0, 3, 7, 30];
+const BIRTHDAY_REMINDER_DAYS = [0, 3, 7, 15, 30];
 function getMonthDay(dateStr) {
     const match = dateStr.match(/^\d{4}-(\d{2})-(\d{2})/);
     if (!match)
@@ -82,7 +82,10 @@ function getReminderCopy(days, names) {
                 body: `${names.slice(0, 3).join(', ')}${names.length > 3 ? '…' : ''} comptent sur toi aujourd'hui.`,
             };
     }
-    const label = days === 30 ? 'dans 30 jours' : days === 7 ? 'dans 7 jours' : 'dans 3 jours';
+    const label = days === 30 ? 'dans 30 jours' :
+        days === 15 ? 'dans 15 jours' :
+            days === 7 ? 'dans 7 jours' :
+                'dans 3 jours';
     return names.length === 1
         ? {
             title: `🎂 ${names[0]} fête son anniversaire ${label}`,
