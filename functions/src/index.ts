@@ -82,12 +82,12 @@ function getReminderCopy(days: number, names: string[]): { title: string; body: 
   if (days === 0) {
     return names.length === 1
       ? {
-          title: `🎉 C'est l'anniversaire de ${names[0]}`,
-          body: "Ouvre Birthday Game pour lui envoyer un message.",
+          title: `🎉 ${names[0]} fête son anniversaire aujourd'hui`,
+          body: 'C’est le bon moment pour lui écrire un petit mot.',
         }
       : {
-          title: `🎉 ${names.length} anniversaires aujourd'hui`,
-          body: `${names.slice(0, 3).join(', ')}${names.length > 3 ? '…' : ''} comptent sur toi aujourd'hui.`,
+          title: `🎉 ${names.length} anniversaires à célébrer aujourd’hui`,
+          body: `${names.slice(0, 3).join(', ')}${names.length > 3 ? '…' : ''} t’attendent dans Birthday Game.`,
         };
   }
 
@@ -99,19 +99,19 @@ function getReminderCopy(days: number, names: string[]): { title: string; body: 
 
   return names.length === 1
     ? {
-        title: `🎂 ${names[0]} fête son anniversaire ${label}`,
-        body: "Tu peux déjà préparer ton message ou ton idée cadeau.",
+        title: `🎂 Plus que ${days} jours avant l’anniversaire de ${names[0]}`,
+        body: 'Prends un peu d’avance pour préparer ton message ou ton attention.',
       }
     : {
         title: `🎂 ${names.length} anniversaires arrivent ${label}`,
-        body: `${names.slice(0, 3).join(', ')}${names.length > 3 ? '…' : ''} arrivent bientôt.`,
+        body: `${names.slice(0, 3).join(', ')}${names.length > 3 ? '…' : ''} approchent à grands pas.`,
       };
 }
 
 function getStreakReminderCopy(userName?: string): { title: string; body: string } {
   return {
-    title: '🔥 Garde ton streak en vie',
-    body: `${userName ? `${userName}, ` : ''}ajoute un ami avant la fin de la semaine pour ne pas casser ta série.`,
+    title: '🔥 Ta série peut encore continuer',
+    body: `${userName ? `${userName}, ` : ''}ajoute un ami avant la fin de la semaine pour garder ton streak actif.`,
   };
 }
 
