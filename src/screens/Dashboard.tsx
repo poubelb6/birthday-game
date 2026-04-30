@@ -368,7 +368,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
               className="w-full flex items-center justify-center gap-2 py-2.5 text-white font-black text-[11px] uppercase tracking-[0.18em]"
               style={{ background: 'rgba(255,255,255,0.08)' }}
             >
-              <span>{isCalendarExpanded ? 'Calendrier ouvert' : 'Afficher le calendrier'}</span>
+              <span>{isCalendarExpanded ? 'Masquer le calendrier' : 'Afficher le calendrier'}</span>
               <motion.div animate={{ rotate: isCalendarExpanded ? 180 : 0 }} transition={{ duration: 0.22 }}>
                 <ChevronDown size={16} className="text-white" strokeWidth={3} />
               </motion.div>
