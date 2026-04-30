@@ -141,8 +141,8 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
         )}
       </AnimatePresence>
 
-      <div className="flex flex-col gap-8">
-      <section className="space-y-3 order-2">
+      <div className="flex flex-col gap-4">
+      <section className="space-y-2 order-2">
         {upcoming.length > 0 ? (() => {
           const [hero, ...rest] = upcoming;
 
@@ -311,7 +311,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
         )}
       </section>
 
-      <section className="space-y-4 relative order-1">
+      <section className="space-y-2 relative order-1">
 
         <div className="relative pt-4">
           <div className="absolute top-0 left-0 right-0 flex justify-around px-8 z-20">
@@ -492,7 +492,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
         </div>
       </section>
 
-      <section className="space-y-3 order-3">
+      <section className="space-y-2 order-3">
         {celebOfDay && (
           <div className="bg-amber-50 border border-amber-200 rounded-md px-4 py-3 overflow-hidden shadow-sm">
             <div className="flex items-center gap-3">
