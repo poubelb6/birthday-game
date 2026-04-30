@@ -30,6 +30,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
   const [viewingFriend, setViewingFriend] = useState<Birthday | null>(null);
   const [birthdayPicker, setBirthdayPicker] = useState<{ dayLabel: string; birthdays: Birthday[] } | null>(null);
   const [celebExpanded, setCelebExpanded] = useState(false);
+  const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
 
   // Swipe touch tracking
   const touchStartX = useRef<number | null>(null);
@@ -361,6 +362,27 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
               </motion.button>
             </div>
 
+            <motion.button
+              whileTap={{ scale: 0.96 }}
+              onClick={() => setIsCalendarExpanded(v => !v)}
+              className="w-full flex items-center justify-center gap-2 py-2.5 text-white font-black text-[11px] uppercase tracking-[0.18em]"
+              style={{ background: 'rgba(255,255,255,0.08)' }}
+            >
+              <span>{isCalendarExpanded ? 'Calendrier ouvert' : 'Afficher le calendrier'}</span>
+              <motion.div animate={{ rotate: isCalendarExpanded ? 180 : 0 }} transition={{ duration: 0.22 }}>
+                <ChevronDown size={16} className="text-white" strokeWidth={3} />
+              </motion.div>
+            </motion.button>
+
+            <AnimatePresence initial={false}>
+              {isCalendarExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.28, ease: 'easeInOut' }}
+              className="overflow-hidden"
+            >
             <div className="p-3" style={{ background: 'var(--calendar-warm-bg)' }}>
               <div className="grid grid-cols-7 gap-1 mb-1.5">
                 {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day, i) => (
@@ -448,7 +470,20 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
               </motion.div>
               </AnimatePresence>
               </div>
+
+              <motion.button
+                whileTap={{ scale: 0.96 }}
+                onClick={() => setIsCalendarExpanded(false)}
+                className="w-full mt-3 flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-black"
+                style={{ background: '#fff1f2', color: '#e11d48' }}
+              >
+                <ChevronDown size={16} strokeWidth={3} />
+                Réduire le calendrier
+              </motion.button>
             </div>
+            </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </section>
