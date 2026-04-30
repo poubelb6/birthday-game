@@ -256,7 +256,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.1 + i * 0.1, type: 'spring', stiffness: 280, damping: 22 }}
                       onClick={() => setViewingFriend(b)}
-                      className="flex-1 cursor-pointer rounded-lg border border-slate-200 p-3 flex items-center gap-3"
+                      className="flex-1 cursor-pointer rounded-lg border-2 border-black p-3 flex items-center gap-3"
                       style={{ background: 'var(--surface-card)' }}
                     >
                       <div className="relative shrink-0">
