@@ -362,17 +362,22 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
               </motion.button>
             </div>
 
-            <motion.button
-              whileTap={{ scale: 0.96 }}
-              onClick={() => setIsCalendarExpanded(v => !v)}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 font-black text-[11px] uppercase tracking-[0.18em]"
-              style={{ background: 'var(--calendar-warm-bg)', color: 'var(--text-1)' }}
-            >
-              <span>{isCalendarExpanded ? 'Masquer le calendrier' : 'Afficher le calendrier'}</span>
-              <motion.div animate={{ rotate: isCalendarExpanded ? 180 : 0 }} transition={{ duration: 0.22 }}>
-                <ChevronDown size={16} strokeWidth={3} />
-              </motion.div>
-            </motion.button>
+            <div className="px-3 pt-3" style={{ background: 'var(--calendar-warm-bg)' }}>
+              <motion.button
+                whileTap={{ scale: 0.96 }}
+                onClick={() => setIsCalendarExpanded(v => !v)}
+                className="w-full flex items-center justify-center gap-3 rounded-2xl px-4 py-3 text-sm font-black"
+                style={{ background: '#fff1f2', color: '#e11d48' }}
+              >
+                <motion.div animate={{ rotate: isCalendarExpanded ? 180 : 0 }} transition={{ duration: 0.22 }}>
+                  <ChevronDown size={16} strokeWidth={3} />
+                </motion.div>
+                <span>{isCalendarExpanded ? 'Masquer le calendrier' : 'Afficher le calendrier'}</span>
+                <motion.div animate={{ rotate: isCalendarExpanded ? 180 : 0 }} transition={{ duration: 0.22 }}>
+                  <ChevronDown size={16} strokeWidth={3} />
+                </motion.div>
+              </motion.button>
+            </div>
 
             <AnimatePresence initial={false}>
               {isCalendarExpanded && (
