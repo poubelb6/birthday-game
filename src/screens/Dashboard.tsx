@@ -65,44 +65,15 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
   const todayMMDD = format(today, 'MM-dd');
   const celebOfDay = CELEB_BIRTHDAYS.find(c => c.date === todayMMDD) ?? null;
 
-  const upcomingBirthdays = birthdays
+  const upcoming = birthdays
     .map(b => {
       const bDate = parseISO(b.birthDate);
       const nextBday = startOfDay(new Date(today.getFullYear(), bDate.getMonth(), bDate.getDate()));
       if (nextBday < todayStart) nextBday.setFullYear(today.getFullYear() + 1);
       return { ...b, daysUntil: differenceInDays(nextBday, todayStart) };
     })
-    .sort((a, b) => a.daysUntil - b.daysUntil);
-
-  const upcoming = upcomingBirthdays.slice(0, 5);
-  const todayBirthdays = upcomingBirthdays.filter(b => b.daysUntil === 0);
-  const weekBirthdays = upcomingBirthdays.filter(b => b.daysUntil <= 7);
-  const monthBirthdays = upcomingBirthdays.filter(b => b.daysUntil <= 30);
-  const heroBirthday = todayBirthdays[0] ?? upcomingBirthdays[0] ?? null;
-
-  const categoryBorder = (category?: string) =>
-    category === 'famille' ? '#f43f5e' :
-    category === 'ami' ? '#0ea5e9' :
-    category === 'autre' ? '#94a3b8' : '#0f172a';
-
-  const formatCountdown = (daysUntil: number) => {
-    if (daysUntil === 0) return "Aujourd'hui";
-    if (daysUntil === 1) return 'Demain';
-    if (daysUntil <= 7) return `J-${daysUntil}`;
-    return `${daysUntil} jours`;
-  };
-
-  const openBirthdayGroup = (items: Birthday[], dayLabel: string) => {
-    if (items.length === 1) {
-      setViewingFriend(items[0]);
-      return;
-    }
-    if (items.length > 1) {
-      setBirthdayPicker({ dayLabel, birthdays: items });
-      return;
-    }
-    onRequestAddFriend?.();
-  };
+    .sort((a, b) => a.daysUntil - b.daysUntil)
+    .slice(0, 3);
 
   const getBirthdaysForDay = (day: Date) => {
     return birthdays.filter(b => {
@@ -169,255 +140,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
         )}
       </AnimatePresence>
 
-      <section className="space-y-4">
-        {heroBirthday ? (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ type: 'spring', stiffness: 240, damping: 24 }}
-            className="rounded-[28px] overflow-hidden shadow-token-lg"
-            style={{
-              background: heroBirthday.daysUntil === 0
-                ? 'linear-gradient(135deg, #FF4B4B 0%, #ff8566 100%)'
-                : heroBirthday.daysUntil <= 7
-                ? 'linear-gradient(135deg, #f97316 0%, #fb923c 100%)'
-                : 'linear-gradient(135deg, #fff7ed 0%, #ffffff 100%)',
-              border: heroBirthday.daysUntil <= 7 ? '1px solid rgba(255,255,255,0.22)' : '1px solid var(--border-mid)',
-            }}
-          >
-            <div className="p-5 space-y-4">
-              <div className="flex items-start justify-between gap-4">
-                <div className="space-y-1 min-w-0">
-                  <p
-                    className="text-[11px] font-black uppercase tracking-[0.2em]"
-                    style={{ color: heroBirthday.daysUntil <= 7 ? 'rgba(255,255,255,0.84)' : '#f97316' }}
-                  >
-                    {todayBirthdays.length > 1
-                      ? `${todayBirthdays.length} anniversaires aujourd'hui`
-                      : heroBirthday.daysUntil === 0
-                      ? "Aujourd'hui"
-                      : heroBirthday.daysUntil <= 7
-                      ? 'À faire cette semaine'
-                      : 'Prochaine attention'}
-                  </p>
-                  <h2
-                    className="text-2xl font-black leading-tight"
-                    style={{ color: heroBirthday.daysUntil <= 7 ? '#ffffff' : 'var(--text-1)' }}
-                  >
-                    {heroBirthday.daysUntil === 0
-                      ? `C'est le jour de ${heroBirthday.name.split(' ')[0]}`
-                      : `${heroBirthday.name.split(' ')[0]} arrive bientôt`}
-                  </h2>
-                  <p
-                    className="text-sm font-semibold"
-                    style={{ color: heroBirthday.daysUntil <= 7 ? 'rgba(255,255,255,0.8)' : 'var(--text-2)' }}
-                  >
-                    {heroBirthday.daysUntil === 0
-                      ? "Ouvre sa fiche pour lui écrire tout de suite."
-                      : `${format(parseISO(heroBirthday.birthDate), 'd MMMM', { locale: fr })} · ${formatCountdown(heroBirthday.daysUntil)}`}
-                  </p>
-                </div>
-
-                <div className="relative shrink-0">
-                  <div
-                    className="w-20 h-20 rounded-[22px] overflow-hidden"
-                    style={{ border: heroBirthday.daysUntil <= 7 ? '3px solid rgba(255,255,255,0.52)' : `3px solid ${categoryBorder(heroBirthday.category)}` }}
-                  >
-                    {heroBirthday.photoUrl ? (
-                      <img src={heroBirthday.photoUrl} alt={heroBirthday.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center font-black text-3xl text-white" style={{ background: getAvatarColor(heroBirthday.name) }}>
-                        {heroBirthday.name.charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                  </div>
-                  <div
-                    className="absolute -bottom-2 -right-2 px-2.5 py-1 rounded-full text-[10px] font-black shadow-sm"
-                    style={{
-                      background: heroBirthday.daysUntil <= 7 ? '#ffffff' : '#fff1f2',
-                      color: heroBirthday.daysUntil <= 7 ? '#f97316' : '#e11d48',
-                    }}
-                  >
-                    {heroBirthday.daysUntil === 0 ? 'Aujourd’hui' : formatCountdown(heroBirthday.daysUntil)}
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <motion.button
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => openBirthdayGroup(
-                    todayBirthdays.length > 0 ? todayBirthdays : [heroBirthday],
-                    todayBirthdays.length > 0 ? "Aujourd'hui" : format(parseISO(heroBirthday.birthDate), 'd MMMM', { locale: fr }),
-                  )}
-                  className="rounded-2xl px-4 py-3 text-sm font-black"
-                  style={{
-                    background: heroBirthday.daysUntil <= 7 ? '#ffffff' : '#FF4B4B',
-                    color: heroBirthday.daysUntil <= 7 ? '#0f172a' : '#ffffff',
-                    boxShadow: heroBirthday.daysUntil <= 7 ? '0 6px 18px rgba(255,255,255,0.22)' : '0 4px 0 #CC2E2E',
-                  }}
-                >
-                  {todayBirthdays.length > 1 ? 'Voir les profils' : 'Voir le profil'}
-                </motion.button>
-
-                <motion.button
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => onRequestAddFriend?.()}
-                  className="rounded-2xl px-4 py-3 text-sm font-black border"
-                  style={{
-                    background: heroBirthday.daysUntil <= 7 ? 'rgba(255,255,255,0.16)' : '#ffffff',
-                    color: heroBirthday.daysUntil <= 7 ? '#ffffff' : 'var(--text-1)',
-                    borderColor: heroBirthday.daysUntil <= 7 ? 'rgba(255,255,255,0.28)' : 'var(--border-mid)',
-                  }}
-                >
-                  Ajouter un ami
-                </motion.button>
-              </div>
-            </div>
-          </motion.div>
-        ) : (
-          <div className="bg-slate-50 border border-dashed border-black/60 rounded-3xl p-10 text-center space-y-4">
-            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto shadow-sm">
-              <Star className="text-slate-300" size={32} />
-            </div>
-            <div className="space-y-1">
-              <p className="font-bold text-slate-600">Aucun anniversaire</p>
-              <p className="text-xs text-slate-500">Commence par ajouter un ami pour remplir ton accueil.</p>
-            </div>
-            <motion.button
-              whileTap={{ scale: 0.96 }}
-              onClick={() => onRequestAddFriend?.()}
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl text-white font-black text-sm"
-              style={{ background: '#FF4B4B', boxShadow: '0 4px 0 #CC2E2E' }}
-            >
-              <Plus size={16} strokeWidth={3} />
-              Ajouter un ami
-            </motion.button>
-          </div>
-        )}
-
-        <div className="grid grid-cols-2 gap-3">
-          <motion.button
-            whileTap={{ scale: 0.98 }}
-            onClick={() => openBirthdayGroup(todayBirthdays, "Aujourd'hui")}
-            className="rounded-[24px] p-4 text-left border shadow-token-sm"
-            style={{ background: 'var(--surface-card)', borderColor: 'var(--border-mid)' }}
-          >
-            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-rose-500">À faire maintenant</p>
-            <p className="mt-2 text-2xl font-black" style={{ color: 'var(--text-1)' }}>{todayBirthdays.length}</p>
-            <p className="text-sm font-semibold" style={{ color: 'var(--text-2)' }}>
-              anniversaire{todayBirthdays.length > 1 ? 's' : ''} aujourd'hui
-            </p>
-          </motion.button>
-
-          <motion.button
-            whileTap={{ scale: 0.98 }}
-            onClick={() => openBirthdayGroup(weekBirthdays, 'Cette semaine')}
-            className="rounded-[24px] p-4 text-left border shadow-token-sm"
-            style={{ background: 'var(--surface-card)', borderColor: 'var(--border-mid)' }}
-          >
-            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-orange-500">Cette semaine</p>
-            <p className="mt-2 text-2xl font-black" style={{ color: 'var(--text-1)' }}>{weekBirthdays.length}</p>
-            <p className="text-sm font-semibold" style={{ color: 'var(--text-2)' }}>
-              anniversaire{weekBirthdays.length > 1 ? 's' : ''} à anticiper
-            </p>
-          </motion.button>
-
-          <div
-            className="rounded-[24px] p-4 border shadow-token-sm"
-            style={{ background: 'var(--surface-card)', borderColor: 'var(--border-mid)' }}
-          >
-            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-amber-500">Streak actif</p>
-            <p className="mt-2 text-2xl font-black" style={{ color: 'var(--text-1)' }}>{streak}</p>
-            <p className="text-sm font-semibold" style={{ color: 'var(--text-2)' }}>
-              ami{streak > 1 ? 's' : ''} ajouté{streak > 1 ? 's' : ''} cette semaine
-            </p>
-          </div>
-
-          <motion.button
-            whileTap={{ scale: 0.98 }}
-            onClick={() => onRequestAddFriend?.()}
-            className="rounded-[24px] p-4 text-left border shadow-token-sm"
-            style={{ background: 'var(--surface-card)', borderColor: 'var(--border-mid)' }}
-          >
-            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-sky-500">Ton cercle</p>
-            <p className="mt-2 text-2xl font-black" style={{ color: 'var(--text-1)' }}>{birthdays.length}</p>
-            <p className="text-sm font-semibold" style={{ color: 'var(--text-2)' }}>
-              profil{birthdays.length > 1 ? 's' : ''} enregistré{birthdays.length > 1 ? 's' : ''}
-            </p>
-          </motion.button>
-        </div>
-
-        <div className="rounded-[28px] border p-4 shadow-token-sm space-y-3" style={{ background: 'var(--surface-card)', borderColor: 'var(--border-mid)' }}>
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">Prochains anniversaires</p>
-              <h3 className="text-lg font-black" style={{ color: 'var(--text-1)' }}>Ce qui arrive bientôt</h3>
-            </div>
-            <div className="text-right">
-              <p className="text-[11px] font-black text-rose-500">{monthBirthdays.length}</p>
-              <p className="text-[11px] font-semibold text-slate-500">dans les 30 jours</p>
-            </div>
-          </div>
-
-          {upcoming.length > 0 ? (
-            <div className="space-y-3">
-              {upcoming.map(friend => (
-                <motion.button
-                  key={friend.id}
-                  whileTap={{ scale: 0.985 }}
-                  onClick={() => setViewingFriend(friend)}
-                  className="w-full rounded-[22px] border px-3 py-3 bg-white flex items-center gap-3 text-left"
-                  style={{ borderColor: 'var(--border-mid)' }}
-                >
-                  {friend.photoUrl ? (
-                    <img src={friend.photoUrl} alt={friend.name} className="w-12 h-12 rounded-2xl object-cover border border-black/10 shrink-0" />
-                  ) : (
-                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center font-black text-lg text-white shrink-0" style={{ background: getAvatarColor(friend.name) }}>
-                      {friend.name.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-
-                  <div className="min-w-0 flex-1">
-                    <p className="font-black text-sm truncate" style={{ color: 'var(--text-1)' }}>{friend.name}</p>
-                    <p className="text-xs font-semibold truncate" style={{ color: 'var(--text-2)' }}>
-                      {format(parseISO(friend.birthDate), 'd MMMM', { locale: fr })} · {friend.zodiac}
-                    </p>
-                  </div>
-
-                  <div className="shrink-0 text-right">
-                    <div className="px-2.5 py-1 rounded-full text-[10px] font-black bg-rose-50 text-rose-500">
-                      {friend.daysUntil === 0 ? 'Aujourd’hui' : formatCountdown(friend.daysUntil)}
-                    </div>
-                    <span className="mt-2 block text-[11px] font-black text-slate-500">Voir</span>
-                  </div>
-                </motion.button>
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-2xl bg-slate-50 px-4 py-6 text-center">
-              <p className="font-black text-slate-700">Aucun anniversaire à venir</p>
-              <p className="text-xs font-medium text-slate-500 mt-1">Ajoute un ami pour remplir cette liste utile.</p>
-            </div>
-          )}
-        </div>
-      </section>
-
       <section className="space-y-4 relative">
-        <div className="flex items-center justify-between gap-3 px-1">
-          <div>
-            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">Calendrier</p>
-            <h3 className="text-lg font-black" style={{ color: 'var(--text-1)' }}>Vue mensuelle</h3>
-          </div>
-          <motion.button
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setCurrentMonth(today)}
-            className="px-3 py-2 rounded-2xl border text-[11px] font-black"
-            style={{ background: 'var(--surface-card)', borderColor: 'var(--border-mid)', color: 'var(--text-1)' }}
-          >
-            Revenir à aujourd'hui
-          </motion.button>
-        </div>
 
         <div className="relative pt-4">
           <div className="absolute top-0 left-0 right-0 flex justify-around px-8 z-20">
@@ -561,63 +284,6 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
         </div>
       </section>
 
-      <section className="space-y-3">
-        {celebOfDay && (
-          <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 overflow-hidden shadow-sm">
-            <div className="flex items-center gap-3">
-              <span className="text-xl shrink-0">{celebOfDay.emoji}</span>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5 mb-0.5">
-                  <Sparkles size={9} className="text-amber-400 shrink-0" />
-                  <span className="text-[9px] font-bold text-amber-500 uppercase tracking-wider">Né(e) aujourd'hui</span>
-                </div>
-                <h4 className="font-display font-black text-[13px] leading-tight truncate" style={{ color: 'var(--text-1)' }}>
-                  {celebOfDay.name}
-                </h4>
-                <p className="text-[11px] font-medium leading-tight mt-0.5 truncate" style={{ color: 'var(--text-2)' }}>
-                  {celebOfDay.title}
-                </p>
-              </div>
-              <motion.button
-                onClick={() => setCelebExpanded(v => !v)}
-                whileTap={{ scale: 0.88 }}
-                className="w-7 h-7 rounded-lg bg-amber-100 flex items-center justify-center shrink-0"
-              >
-                <motion.div animate={{ rotate: celebExpanded ? 180 : 0 }} transition={{ duration: 0.25 }}>
-                  <ChevronDown size={14} className="text-amber-500" strokeWidth={2.5} />
-                </motion.div>
-              </motion.button>
-            </div>
-            <AnimatePresence initial={false}>
-              {celebExpanded && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.28, ease: 'easeInOut' }}
-                  className="overflow-hidden"
-                >
-                  <div className="pt-3 mt-3 border-t border-amber-100 space-y-2.5">
-                    <p className="text-[12px] text-slate-600 leading-relaxed">{celebOfDay.description}</p>
-                    <a
-                      href={celebOfDay.wikipedia}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 bg-amber-100 border border-amber-200 rounded-xl px-3 py-1.5 active:scale-95 transition-transform"
-                    >
-                      <Globe2 size={11} className="text-amber-600" />
-                      <span className="text-[11px] font-black text-amber-600">Wikipedia</span>
-                    </a>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        )}
-      </section>
-
-      {false && (
-      <>
       <section className="space-y-3">
         {upcoming.length > 0 ? (() => {
           const [hero, ...rest] = upcoming;
@@ -844,9 +510,6 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
       </section>
 
       {/* ── Friend profile modal (anniversaires à venir) ────── */}
-      </>
-      )}
-
       <FriendProfileModal
         friend={viewingFriend}
         hasAccount={false}
