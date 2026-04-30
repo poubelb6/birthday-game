@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { PushNotifications } from '@capacitor/push-notifications';
-import { doc, updateDoc } from 'firebase/firestore';
+import { deleteField, doc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 import { parseISO, format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -320,6 +320,17 @@ export function useNotifications(
 
   const disable = async () => {
     persist(false);
+    localStorage.removeItem(FCM_TOKEN_KEY);
+
+    const uid = user?.id ?? auth.currentUser?.uid;
+    if (uid) {
+      try {
+        await updateDoc(doc(db, 'users', uid), { fcmToken: deleteField() });
+      } catch (e) {
+        console.error('[FCM] token delete:', e);
+      }
+    }
+
     if (isNative) {
       try {
         const { notifications } = await LocalNotifications.getPending();
