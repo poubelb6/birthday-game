@@ -125,7 +125,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -16 }}
             transition={{ duration: 0.35, ease: 'easeInOut' }}
-            className="flex items-center justify-between px-4 py-3 rounded-2xl"
+            className="flex items-center justify-between px-4 py-3 rounded-md"
             style={{ background: 'rgba(251,146,60,0.1)', border: '1.5px solid rgba(251,146,60,0.25)' }}
           >
             <div className="flex items-center gap-2.5">
@@ -179,7 +179,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ type: 'spring', stiffness: 260, damping: 22 }}
                 onClick={() => setViewingFriend(hero)}
-                className="cursor-pointer rounded-3xl overflow-hidden shadow-md"
+                className="cursor-pointer rounded-lg overflow-hidden shadow-md"
                 style={{ background: heroBg, border: heroBorder }}
               >
                 <div className="flex items-center gap-4 p-4">
@@ -192,7 +192,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
                         style={{ background: 'rgba(255,255,255,0.4)', margin: -4, borderRadius: 20 }}
                       />
                     )}
-                    <div className="w-20 h-20 rounded-2xl overflow-hidden" style={{ border: (isToday || isUrgent || isWeek) ? '3px solid rgba(255,255,255,0.6)' : `3px solid ${catBorder(hero.category)}` }}>
+                    <div className="w-20 h-20 rounded-md overflow-hidden" style={{ border: (isToday || isUrgent || isWeek) ? '3px solid rgba(255,255,255,0.6)' : `3px solid ${catBorder(hero.category)}` }}>
                       {hero.photoUrl ? (
                         <img src={hero.photoUrl} alt={hero.name} className="w-full h-full object-cover" />
                       ) : (
@@ -221,7 +221,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
                   </div>
 
                   <div
-                    className="shrink-0 flex flex-col items-center justify-center w-14 h-14 rounded-2xl font-black"
+                    className="shrink-0 flex flex-col items-center justify-center w-14 h-14 rounded-md font-black"
                     style={{
                       background: (isToday || isUrgent || isWeek) ? 'rgba(255,255,255,0.2)' : '#f1f5f9',
                       color: (isToday || isUrgent || isWeek) ? '#ffffff' : '#475569',
@@ -256,11 +256,11 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.1 + i * 0.1, type: 'spring', stiffness: 280, damping: 22 }}
                       onClick={() => setViewingFriend(b)}
-                      className="flex-1 cursor-pointer rounded-2xl border border-slate-200 p-3 flex items-center gap-3"
+                      className="flex-1 cursor-pointer rounded-lg border border-slate-200 p-3 flex items-center gap-3"
                       style={{ background: 'var(--surface-card)' }}
                     >
                       <div className="relative shrink-0">
-                        <div className="w-11 h-11 rounded-xl overflow-hidden" style={{ border: `2px solid ${catBorder(b.category)}` }}>
+                        <div className="w-11 h-11 rounded-md overflow-hidden" style={{ border: `2px solid ${catBorder(b.category)}` }}>
                           {b.photoUrl ? (
                             <img src={b.photoUrl} alt={b.name} className="w-full h-full object-cover" />
                           ) : (
@@ -290,7 +290,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
             </div>
           );
         })() : (
-          <div className="bg-slate-50 border border-dashed border-black/60 rounded-3xl p-10 text-center space-y-4">
+          <div className="bg-slate-50 border border-dashed border-black/60 rounded-lg p-10 text-center space-y-4">
             <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto shadow-sm">
               <Star className="text-slate-300" size={32} />
             </div>
@@ -301,7 +301,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
             <motion.button
               whileTap={{ scale: 0.96 }}
               onClick={() => onRequestAddFriend?.()}
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl text-white font-black text-sm"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-md text-white font-black text-sm"
               style={{ background: '#FF4B4B', boxShadow: '0 4px 0 #CC2E2E' }}
             >
               <Plus size={16} strokeWidth={3} />
@@ -368,7 +368,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
                 <motion.button
                   whileTap={{ scale: 0.96 }}
                   onClick={() => setIsCalendarExpanded(true)}
-                  className="w-full flex items-center justify-center gap-3 rounded-2xl px-4 py-2 text-xs font-black"
+                  className="w-full flex items-center justify-center gap-3 rounded-md px-4 py-2 text-xs font-black"
                   style={{ background: 'transparent', color: 'var(--text-1)' }}
                 >
                   <ChevronDown size={16} strokeWidth={3} />
@@ -478,7 +478,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
               <motion.button
                 whileTap={{ scale: 0.96 }}
                 onClick={() => setIsCalendarExpanded(false)}
-                className="w-full mt-3 flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-black"
+                className="w-full mt-3 flex items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-black"
                 style={{ background: '#fff1f2', color: '#e11d48' }}
               >
                 <ChevronDown size={16} strokeWidth={3} />
@@ -494,7 +494,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
 
       <section className="space-y-3 order-3">
         {celebOfDay && (
-          <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 overflow-hidden shadow-sm">
+          <div className="bg-amber-50 border border-amber-200 rounded-md px-4 py-3 overflow-hidden shadow-sm">
             <div className="flex items-center gap-3">
               <span className="text-xl shrink-0">{celebOfDay.emoji}</span>
               <div className="flex-1 min-w-0">
@@ -759,7 +759,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
                     href={celebOfDay.wikipedia}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 bg-amber-100 border border-amber-200 rounded-xl px-3 py-1.5 active:scale-95 transition-transform"
+                    className="inline-flex items-center gap-1.5 bg-amber-100 border border-amber-200 rounded-md px-3 py-1.5 active:scale-95 transition-transform"
                   >
                     <Globe2 size={11} className="text-amber-600" />
                     <span className="text-[11px] font-black text-amber-600">Wikipedia</span>
@@ -861,7 +861,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
       </AnimatePresence>
 
       <section className="space-y-4">
-        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm px-4 pt-4 pb-3">
+        <div className="bg-white rounded-lg border border-slate-100 shadow-sm px-4 pt-4 pb-3">
           {(() => {
             const monthLabels = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
             const monthZodiacs = ['♑','♒','♓','♈','♉','♊','♋','♌','♍','♎','♏','♐'];
