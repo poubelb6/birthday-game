@@ -141,7 +141,8 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
         )}
       </AnimatePresence>
 
-      <section className="space-y-3">
+      <div className="flex flex-col gap-8">
+      <section className="space-y-3 order-2">
         {upcoming.length > 0 ? (() => {
           const [hero, ...rest] = upcoming;
 
@@ -310,7 +311,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
         )}
       </section>
 
-      <section className="space-y-4 relative">
+      <section className="space-y-4 relative order-1">
 
         <div className="relative pt-4">
           <div className="absolute top-0 left-0 right-0 flex justify-around px-8 z-20">
@@ -362,22 +363,20 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
               </motion.button>
             </div>
 
-            <div className="px-3 pt-3" style={{ background: 'var(--calendar-warm-bg)' }}>
-              <motion.button
-                whileTap={{ scale: 0.96 }}
-                onClick={() => setIsCalendarExpanded(v => !v)}
-                className="w-full flex items-center justify-center gap-3 rounded-2xl px-4 py-3 text-sm font-black"
-                style={{ background: '#fff1f2', color: '#e11d48' }}
-              >
-                <motion.div animate={{ rotate: isCalendarExpanded ? 180 : 0 }} transition={{ duration: 0.22 }}>
+            {!isCalendarExpanded && (
+              <div className="px-3 pt-3" style={{ background: 'var(--calendar-warm-bg)' }}>
+                <motion.button
+                  whileTap={{ scale: 0.96 }}
+                  onClick={() => setIsCalendarExpanded(true)}
+                  className="w-full flex items-center justify-center gap-3 rounded-2xl px-4 py-3 text-sm font-black"
+                  style={{ background: 'transparent', color: 'var(--text-1)' }}
+                >
                   <ChevronDown size={16} strokeWidth={3} />
-                </motion.div>
-                <span>{isCalendarExpanded ? 'Masquer le calendrier' : 'Afficher le calendrier'}</span>
-                <motion.div animate={{ rotate: isCalendarExpanded ? 180 : 0 }} transition={{ duration: 0.22 }}>
+                  <span>Afficher le calendrier</span>
                   <ChevronDown size={16} strokeWidth={3} />
-                </motion.div>
-              </motion.button>
-            </div>
+                </motion.button>
+              </div>
+            )}
 
             <AnimatePresence initial={false}>
               {isCalendarExpanded && (
@@ -493,7 +492,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
         </div>
       </section>
 
-      <section className="space-y-3">
+      <section className="space-y-3 order-3">
         {celebOfDay && (
           <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 overflow-hidden shadow-sm">
             <div className="flex items-center gap-3">
@@ -547,6 +546,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
           </div>
         )}
       </section>
+      </div>
 
       <section className="hidden space-y-3">
         {upcoming.length > 0 ? (() => {
