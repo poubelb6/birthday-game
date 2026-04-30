@@ -364,11 +364,11 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onUpdateBirthda
             </div>
 
             {!isCalendarExpanded && (
-              <div className="px-3 pt-3" style={{ background: 'var(--calendar-warm-bg)' }}>
+              <div className="px-3 pt-1.5 pb-1.5" style={{ background: 'var(--calendar-warm-bg)' }}>
                 <motion.button
                   whileTap={{ scale: 0.96 }}
                   onClick={() => setIsCalendarExpanded(true)}
-                  className="w-full flex items-center justify-center gap-3 rounded-2xl px-4 py-3 text-sm font-black"
+                  className="w-full flex items-center justify-center gap-3 rounded-2xl px-4 py-2 text-xs font-black"
                   style={{ background: 'transparent', color: 'var(--text-1)' }}
                 >
                   <ChevronDown size={16} strokeWidth={3} />
