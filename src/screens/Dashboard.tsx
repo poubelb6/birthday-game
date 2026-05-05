@@ -10,6 +10,16 @@ import { FriendProfileModal } from '../components/FriendProfileModal';
 import { CELEB_BIRTHDAYS } from '../data/celebBirthdays';
 import { useStreak } from '../hooks/useStreak';
 
+function WhatsAppLogo() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M19.05 4.94A9.77 9.77 0 0 0 12.08 2a9.92 9.92 0 0 0-8.5 14.99L2 22l5.17-1.53A9.94 9.94 0 0 0 12.08 22c5.5 0 9.92-4.43 9.92-9.92 0-2.64-1.03-5.12-2.95-7.14Zm-6.97 15.38a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-3.07.91.92-2.99-.2-.31a8.2 8.2 0 1 1 6.83 3.72Zm4.5-6.14c-.24-.12-1.43-.7-1.65-.78-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06-.24-.12-1.01-.37-1.93-1.18-.71-.63-1.19-1.4-1.33-1.64-.14-.24-.02-.37.1-.49.1-.1.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.3-.74-1.78-.19-.46-.39-.4-.54-.4h-.46c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.7 2.6 4.11 3.64.57.25 1.02.4 1.37.52.58.18 1.1.16 1.52.1.46-.07 1.43-.58 1.63-1.13.2-.55.2-1.02.14-1.12-.06-.1-.22-.16-.46-.28Z"
+      />
+    </svg>
+  );
+}
 
 export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollection, onUpdateBirthday, onDeleteBirthday }: {
   birthdays: Birthday[],
@@ -164,33 +174,48 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
     {
       title: 'Google Agenda',
       subtitle: 'Ouvrir l’agenda',
-      icon: <CalendarDays size={18} strokeWidth={2.5} className="text-rose-500" />,
-      onClick: () => openExternal('https://calendar.google.com/calendar/u/0/r'),
-    },
+        icon: <CalendarDays size={18} strokeWidth={2.5} className="text-rose-500" />,
+        onClick: () => openExternal('https://calendar.google.com/calendar/u/0/r'),
+        cardClassName: 'bg-gradient-to-br from-rose-50 via-white to-rose-100/70',
+        iconWrapClassName: 'bg-rose-100',
+        cardStyle: { background: 'linear-gradient(135deg, #fff1f2 0%, #ffffff 55%, #ffe4e6 100%)' },
+      },
     {
       title: 'Contacts',
       subtitle: 'Ajouter un ami',
-      icon: <ContactRound size={18} strokeWidth={2.5} className="text-sky-500" />,
-      onClick: () => onRequestAddFriend?.(),
-    },
+        icon: <ContactRound size={18} strokeWidth={2.5} className="text-sky-500" />,
+        onClick: () => onRequestAddFriend?.(),
+        cardClassName: 'bg-gradient-to-br from-sky-50 via-white to-cyan-100/70',
+        iconWrapClassName: 'bg-sky-100',
+        cardStyle: { background: 'linear-gradient(135deg, #f0f9ff 0%, #ffffff 55%, #cffafe 100%)' },
+      },
     {
       title: 'Mes cartes',
       subtitle: 'Voir la collection',
-      icon: <LayoutGrid size={18} strokeWidth={2.5} className="text-violet-500" />,
-      onClick: () => onOpenCollection?.(),
-    },
+        icon: <LayoutGrid size={18} strokeWidth={2.5} className="text-violet-500" />,
+        onClick: () => onOpenCollection?.(),
+        cardClassName: 'bg-gradient-to-br from-violet-50 via-white to-fuchsia-100/70',
+        iconWrapClassName: 'bg-violet-100',
+        cardStyle: { background: 'linear-gradient(135deg, #f5f3ff 0%, #ffffff 55%, #fae8ff 100%)' },
+      },
     {
       title: 'Inviter',
       subtitle: 'WhatsApp / Insta',
-      icon: <MessageCircleMore size={18} strokeWidth={2.5} className="text-emerald-500" />,
-      onClick: () => setShowInviteActions(true),
-    },
+        icon: <MessageCircleMore size={18} strokeWidth={2.5} className="text-emerald-500" />,
+        onClick: () => setShowInviteActions(true),
+        cardClassName: 'bg-gradient-to-br from-emerald-50 via-white to-lime-100/70',
+        iconWrapClassName: 'bg-emerald-100',
+        cardStyle: { background: 'linear-gradient(135deg, #ecfdf5 0%, #ffffff 55%, #dcfce7 100%)' },
+      },
     {
       title: 'Idées cadeaux',
       subtitle: 'Trouver l’inspiration',
-      icon: <Gift size={18} strokeWidth={2.5} className="text-amber-500" />,
-      onClick: () => openExternal('https://www.google.com/search?q=id%C3%A9es+cadeaux+anniversaire'),
-    },
+        icon: <Gift size={18} strokeWidth={2.5} className="text-amber-500" />,
+        onClick: () => openExternal('https://www.google.com/search?q=id%C3%A9es+cadeaux+anniversaire'),
+        cardClassName: 'bg-gradient-to-br from-amber-50 via-white to-orange-100/70',
+        iconWrapClassName: 'bg-amber-100',
+        cardStyle: { background: 'linear-gradient(135deg, #fffbeb 0%, #ffffff 55%, #ffedd5 100%)' },
+      },
   ];
 
   return (
@@ -624,21 +649,28 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
               )}
             </AnimatePresence>
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-4">
             {quickActions.map((action) => (
               <motion.button
                 key={action.title}
                 whileTap={{ scale: 0.97 }}
                 onClick={action.onClick}
+                style={{
+                  border: 'none',
+                  background: action.cardStyle.background,
+                  borderRadius: 24,
+                  padding: '1rem',
+                  boxShadow: '0 6px 18px rgba(15,23,42,0.08)',
+                }}
                 className={`border-2 border-black bg-white px-3 py-3 text-left ${action.title === 'Idées cadeaux' ? 'col-span-2' : ''}`}
               >
-                <div className="flex items-start gap-3">
-                  <div className="shrink-0 w-9 h-9 flex items-center justify-center bg-slate-50 border border-slate-200 rounded-md">
+                <div className="flex items-start gap-3.5 min-h-[74px]">
+                  <div className={`shrink-0 w-11 h-11 flex items-center justify-center rounded-[16px] shadow-sm ${action.iconWrapClassName}`}>
                     {action.icon}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[12px] font-black leading-none text-slate-900">{action.title}</p>
-                    <p className="text-[11px] font-semibold mt-1 text-slate-500 leading-tight">{action.subtitle}</p>
+                    <p className="text-[13px] font-black leading-none text-slate-900">{action.title}</p>
+                    <p className="text-[11px] font-semibold mt-1.5 text-slate-500 leading-snug">{action.subtitle}</p>
                   </div>
                 </div>
               </motion.button>
@@ -683,11 +715,12 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
                 <motion.button
                   whileTap={{ scale: 0.97 }}
                   onClick={handleInviteWhatsApp}
-                  className="rounded-md border-2 border-black bg-[#25D366]/10 px-4 py-4 text-left"
+                  className="rounded-[24px] px-4 py-4 text-left shadow-sm"
+                  style={{ background: 'linear-gradient(135deg, #ecfdf5 0%, #ffffff 55%, #dcfce7 100%)' }}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-md bg-[#25D366] text-white flex items-center justify-center font-black">
-                      W
+                    <div className="w-11 h-11 rounded-[16px] bg-[#25D366] text-white flex items-center justify-center shadow-sm">
+                      <WhatsAppLogo />
                     </div>
                     <div>
                       <p className="text-sm font-black text-slate-900">WhatsApp</p>
@@ -699,10 +732,11 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
                 <motion.button
                   whileTap={{ scale: 0.97 }}
                   onClick={handleInviteInstagram}
-                  className="rounded-md border-2 border-black bg-rose-50 px-4 py-4 text-left"
+                  className="rounded-[24px] px-4 py-4 text-left shadow-sm"
+                  style={{ background: 'linear-gradient(135deg, #fff1f2 0%, #ffffff 55%, #fae8ff 100%)' }}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-md bg-gradient-to-tr from-amber-400 via-rose-500 to-purple-600 text-white flex items-center justify-center">
+                    <div className="w-11 h-11 rounded-[16px] bg-gradient-to-tr from-amber-400 via-rose-500 to-purple-600 text-white flex items-center justify-center shadow-sm">
                       <Instagram size={18} />
                     </div>
                     <div>
