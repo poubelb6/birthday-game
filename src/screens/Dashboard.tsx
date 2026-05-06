@@ -218,6 +218,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
     {
       title: 'Google Agenda',
       subtitle: 'Ajoute tes anniversaires via Google Agenda',
+      image: '/illustrations/google.png',
         icon: <GoogleCalendarIcon />,
         onClick: () => openExternal('https://calendar.google.com/calendar/u/0/r'),
         iconWrapClassName: 'bg-white border border-slate-200',
@@ -225,6 +226,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
     {
       title: 'Contacts',
       subtitle: 'Ajoute tes contacts et note leur anniversaire',
+      image: '/illustrations/contacts.png',
         icon: <ContactRound size={18} strokeWidth={2.5} className="text-sky-500" />,
         onClick: () => onRequestAddFriend?.(),
         iconWrapClassName: 'bg-sky-100',
@@ -232,6 +234,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
     {
       title: 'Mes cartes',
       subtitle: 'Regarde les nouvelles cartes débloquées',
+      image: '/illustrations/cartes.png',
         icon: <PlayingCardIcon />,
         onClick: () => onOpenCollection?.(),
         iconWrapClassName: 'bg-white border border-slate-200',
@@ -239,6 +242,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
     {
       title: 'Inviter',
       subtitle: 'Invite tes amis à ne plus jamais rater un anniversaire',
+      image: '/illustrations/whatsapp.png',
         icon: <MessageCircleMore size={18} strokeWidth={2.5} className="text-emerald-500" />,
         onClick: () => setShowInviteActions(true),
         iconWrapClassName: 'bg-emerald-100',
@@ -246,6 +250,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
     {
       title: 'Idées cadeaux',
       subtitle: "Trouve l'inspiration pour le cadeau parfait",
+      image: '/illustrations/cadeau.png',
         icon: <Gift size={18} strokeWidth={2.5} className="text-amber-500" />,
         onClick: () => openExternal('https://www.google.com/search?q=id%C3%A9es+cadeaux+anniversaire'),
         iconWrapClassName: 'bg-amber-100',
@@ -683,20 +688,51 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
               )}
             </AnimatePresence>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div
+            className="flex gap-3 overflow-x-auto pb-2"
+            style={{
+              scrollSnapType: 'x mandatory',
+              WebkitOverflowScrolling: 'touch',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+              marginLeft: '-1.5rem',
+              marginRight: '-1.5rem',
+              paddingLeft: '1.5rem',
+              paddingRight: '1.5rem',
+            }}
+          >
             {quickActions.map((action) => (
               <motion.button
                 key={action.title}
                 whileTap={{ scale: 0.97 }}
                 onClick={action.onClick}
-                className={`rounded-xl bg-white flex flex-col items-center gap-2.5 px-3 py-4 ${action.title === 'Idées cadeaux' ? 'col-span-2 flex-row justify-center gap-4' : ''}`}
-                style={{ boxShadow: '0 2px 10px rgba(15,23,42,0.08)' }}
+                className="shrink-0 rounded-2xl bg-white overflow-hidden text-left"
+                style={{
+                  width: '62%',
+                  scrollSnapAlign: 'start',
+                  boxShadow: '0 4px 18px rgba(15,23,42,0.10)',
+                }}
               >
-                <div className={`w-12 h-12 flex items-center justify-center rounded-xl ${action.iconWrapClassName}`}>
-                  {action.icon}
+                <div className="relative w-full overflow-hidden" style={{ height: '130px' }}>
+                  <img
+                    src={action.image}
+                    alt={action.title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).style.display = 'none';
+                      const fb = e.currentTarget.nextElementSibling as HTMLElement | null;
+                      if (fb) fb.style.display = 'flex';
+                    }}
+                  />
+                  <div
+                    className={`absolute inset-0 items-center justify-center ${action.iconWrapClassName}`}
+                    style={{ display: 'none' }}
+                  >
+                    {action.icon}
+                  </div>
                 </div>
-                <div className="text-center">
-                  <p className="text-[12px] font-black leading-none text-slate-900">{action.title}</p>
+                <div className="px-3 py-3">
+                  <p className="text-[13px] font-black leading-tight text-slate-900">{action.title}</p>
                   <p className="text-[11px] font-medium mt-1 text-slate-400 leading-snug">{action.subtitle}</p>
                 </div>
               </motion.button>
