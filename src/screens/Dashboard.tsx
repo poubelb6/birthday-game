@@ -89,6 +89,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
   const [showInviteActions, setShowInviteActions] = useState(false);
   const [carouselIdx, setCarouselIdx] = useState(0);
   const carouselScrollRef = useRef<HTMLDivElement>(null);
+  const carouselInitDone = useRef(false);
 
   // Swipe touch tracking
   const touchStartX = useRef<number | null>(null);
@@ -107,6 +108,26 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
     return () => clearInterval(interval);
   }, []);
 
+
+  // Carousel: scroll to middle set on mount + infinite reset on scrollend
+  useEffect(() => {
+    const el = carouselScrollRef.current;
+    if (!el) return;
+    const getUnit = () => el.offsetWidth * 0.65 + 12;
+    // Wait one frame so layout is ready
+    requestAnimationFrame(() => {
+      el.scrollLeft = 5 * getUnit();
+      carouselInitDone.current = true;
+    });
+    const onScrollEnd = () => {
+      const unit = getUnit();
+      const idx = Math.round(el.scrollLeft / unit);
+      if (idx >= 2 * 5) el.scrollLeft -= 5 * unit;
+      else if (idx < 5) el.scrollLeft += 5 * unit;
+    };
+    el.addEventListener('scrollend', onScrollEnd);
+    return () => el.removeEventListener('scrollend', onScrollEnd);
+  }, []);
 
   const streak = useStreak();
   const [showStreakToast, setShowStreakToast] = useState(false);
@@ -695,10 +716,12 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
           <div
             ref={carouselScrollRef}
             onScroll={() => {
+              if (!carouselInitDone.current) return;
               const el = carouselScrollRef.current;
               if (!el) return;
-              const cardW = el.scrollWidth / quickActions.length;
-              setCarouselIdx(Math.min(Math.round(el.scrollLeft / cardW), quickActions.length - 1));
+              const unit = el.offsetWidth * 0.65 + 12;
+              const idx = Math.round(el.scrollLeft / unit);
+              setCarouselIdx(((idx % 5) + 5) % 5);
             }}
             style={{
               display: 'flex',
@@ -708,16 +731,17 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
               WebkitOverflowScrolling: 'touch',
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
-              paddingLeft: '17.5%',
-              paddingRight: '17.5%',
-              scrollPaddingLeft: '17.5%',
-              scrollPaddingRight: '17.5%',
+              paddingLeft: 'calc((100% - 65%) / 2)',
+              paddingRight: 'calc((100% - 65%) / 2)',
+              scrollPaddingLeft: 'calc((100% - 65%) / 2)',
+              scrollPaddingRight: 'calc((100% - 65%) / 2)',
               margin: '0 -1.5rem',
+              boxSizing: 'border-box',
             }}
           >
-            {quickActions.map((action) => (
+            {[...quickActions, ...quickActions, ...quickActions].map((action, i) => (
               <button
-                key={action.title}
+                key={`${action.title}-${i}`}
                 onClick={action.onClick}
                 style={{
                   flex: '0 0 65%',
