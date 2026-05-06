@@ -689,16 +689,15 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
                 key={action.title}
                 whileTap={{ scale: 0.97 }}
                 onClick={action.onClick}
-                className={`rounded-md border-2 border-black bg-white px-3 py-3 text-left ${action.title === 'Idées cadeaux' ? 'col-span-2' : ''}`}
+                className={`rounded-xl bg-white flex flex-col items-center gap-2.5 px-3 py-4 ${action.title === 'Idées cadeaux' ? 'col-span-2 flex-row justify-center gap-4' : ''}`}
+                style={{ boxShadow: '0 2px 10px rgba(15,23,42,0.08)' }}
               >
-                <div className="flex items-start gap-3 min-h-[64px]">
-                  <div className={`shrink-0 w-10 h-10 flex items-center justify-center rounded-md ${action.iconWrapClassName}`}>
-                    {action.icon}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-[13px] font-black leading-none text-slate-900">{action.title}</p>
-                    <p className="text-[11px] font-semibold mt-1.5 text-slate-500 leading-snug">{action.subtitle}</p>
-                  </div>
+                <div className={`w-12 h-12 flex items-center justify-center rounded-xl ${action.iconWrapClassName}`}>
+                  {action.icon}
+                </div>
+                <div className="text-center">
+                  <p className="text-[12px] font-black leading-none text-slate-900">{action.title}</p>
+                  <p className="text-[11px] font-medium mt-1 text-slate-400 leading-snug">{action.subtitle}</p>
                 </div>
               </motion.button>
             ))}
