@@ -109,24 +109,31 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
   }, []);
 
 
-  // Carousel: scroll to middle set on mount + infinite reset on scrollend
+  // Carousel: init at middle set + seamless infinite reset
   useEffect(() => {
     const el = carouselScrollRef.current;
     if (!el) return;
+    const N = quickActions.length;
     const getUnit = () => el.offsetWidth * 0.65 + 12;
-    // Wait one frame so layout is ready
+
     requestAnimationFrame(() => {
-      el.scrollLeft = 5 * getUnit();
+      el.scrollLeft = N * getUnit();
       carouselInitDone.current = true;
     });
-    const onScrollEnd = () => {
-      const unit = getUnit();
-      const idx = Math.round(el.scrollLeft / unit);
-      if (idx >= 2 * 5) el.scrollLeft -= 5 * unit;
-      else if (idx < 5) el.scrollLeft += 5 * unit;
+
+    let timer: ReturnType<typeof setTimeout>;
+    const onScroll = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        const unit = getUnit();
+        const idx = Math.round(el.scrollLeft / unit);
+        if (idx >= 2 * N) el.scrollLeft -= N * unit;
+        else if (idx < N) el.scrollLeft += N * unit;
+      }, 50);
     };
-    el.addEventListener('scrollend', onScrollEnd);
-    return () => el.removeEventListener('scrollend', onScrollEnd);
+
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => { el.removeEventListener('scroll', onScroll); clearTimeout(timer); };
   }, []);
 
   const streak = useStreak();
