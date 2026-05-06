@@ -87,6 +87,9 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
   const [celebExpanded, setCelebExpanded] = useState(false);
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
   const [showInviteActions, setShowInviteActions] = useState(false);
+  const [carouselIdx, setCarouselIdx] = useState(0);
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const [carouselW, setCarouselW] = useState(0);
 
   // Swipe touch tracking
   const touchStartX = useRef<number | null>(null);
@@ -103,6 +106,15 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
     cycle();
     const interval = setInterval(cycle, 8000);
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const el = carouselRef.current;
+    if (!el) return;
+    const obs = new ResizeObserver(() => setCarouselW(el.offsetWidth));
+    obs.observe(el);
+    setCarouselW(el.offsetWidth);
+    return () => obs.disconnect();
   }, []);
 
   const streak = useStreak();
@@ -187,6 +199,11 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
     ? `🎂 Ajoute-moi sur Birthday Game !\n👤 ${user.name} · né(e) le ${format(parseISO(user.birthDate), 'd MMMM yyyy', { locale: fr })}\n\n🔗 ${shareUrl}`
     : `🎂 Rejoins-moi sur Birthday Game !\n\n🔗 ${shareUrl}`;
 
+  const goCarousel = (i: number) => {
+    const n = quickActions.length;
+    setCarouselIdx(((i % n) + n) % n);
+  };
+
   const openExternal = (url: string) => {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
@@ -226,7 +243,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
     {
       title: 'Contacts',
       subtitle: 'Ajoute tes contacts et note leur anniversaire',
-      image: '/illustrations/contacts.png',
+      image: '/illustrations/contact.png',
         icon: <ContactRound size={18} strokeWidth={2.5} className="text-sky-500" />,
         onClick: () => onRequestAddFriend?.(),
         iconWrapClassName: 'bg-sky-100',
@@ -688,55 +705,80 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
               )}
             </AnimatePresence>
           </div>
-          <div
-            className="flex gap-3 overflow-x-auto pb-2"
-            style={{
-              scrollSnapType: 'x mandatory',
-              WebkitOverflowScrolling: 'touch',
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
-              marginLeft: '-1.5rem',
-              marginRight: '-1.5rem',
-              paddingLeft: '1.5rem',
-              paddingRight: '1.5rem',
-            }}
-          >
-            {quickActions.map((action) => (
-              <motion.button
-                key={action.title}
-                whileTap={{ scale: 0.97 }}
-                onClick={action.onClick}
-                className="shrink-0 rounded-2xl bg-white overflow-hidden text-left"
-                style={{
-                  width: '62%',
-                  scrollSnapAlign: 'start',
-                  boxShadow: '0 4px 18px rgba(15,23,42,0.10)',
-                }}
-              >
-                <div className="relative w-full overflow-hidden" style={{ height: '130px' }}>
-                  <img
-                    src={action.image}
-                    alt={action.title}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).style.display = 'none';
-                      const fb = e.currentTarget.nextElementSibling as HTMLElement | null;
-                      if (fb) fb.style.display = 'flex';
+          <div ref={carouselRef} className="overflow-hidden" style={{ margin: '0 -1.5rem' }}>
+            <motion.div
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.13}
+              dragMomentum={false}
+              onDragEnd={(_, info) => {
+                if (info.offset.x < -50) goCarousel(carouselIdx + 1);
+                else if (info.offset.x > 50) goCarousel(carouselIdx - 1);
+              }}
+              animate={{ x: carouselW ? carouselW / 2 - carouselW * 0.62 / 2 - carouselIdx * (carouselW * 0.62 + 12) : 0 }}
+              transition={{ type: 'spring', stiffness: 290, damping: 30 }}
+              className="flex"
+              style={{ gap: '12px', paddingLeft: '1.5rem', paddingRight: '1.5rem' }}
+            >
+              {quickActions.map((action, i) => {
+                const dist = Math.abs(i - carouselIdx);
+                return (
+                  <motion.button
+                    key={action.title}
+                    onClick={action.onClick}
+                    animate={{
+                      scale: dist === 0 ? 1 : dist === 1 ? 0.87 : 0.76,
+                      opacity: dist === 0 ? 1 : dist === 1 ? 0.6 : 0.35,
                     }}
-                  />
-                  <div
-                    className={`absolute inset-0 items-center justify-center ${action.iconWrapClassName}`}
-                    style={{ display: 'none' }}
+                    transition={{ type: 'spring', stiffness: 280, damping: 26 }}
+                    className="shrink-0 rounded-2xl bg-white overflow-hidden text-left"
+                    style={{
+                      width: carouselW ? `${Math.round(carouselW * 0.62)}px` : '62%',
+                      boxShadow: dist === 0
+                        ? '0 8px 28px rgba(15,23,42,0.14)'
+                        : '0 2px 8px rgba(15,23,42,0.07)',
+                    }}
                   >
-                    {action.icon}
-                  </div>
-                </div>
-                <div className="px-3 py-3">
-                  <p className="text-[13px] font-black leading-tight text-slate-900">{action.title}</p>
-                  <p className="text-[11px] font-medium mt-1 text-slate-400 leading-snug">{action.subtitle}</p>
-                </div>
-              </motion.button>
-            ))}
+                    <div className="relative w-full overflow-hidden" style={{ height: '130px' }}>
+                      <img
+                        src={action.image}
+                        alt={action.title}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).style.display = 'none';
+                          const fb = e.currentTarget.nextElementSibling as HTMLElement | null;
+                          if (fb) fb.style.display = 'flex';
+                        }}
+                      />
+                      <div
+                        className={`absolute inset-0 items-center justify-center ${action.iconWrapClassName}`}
+                        style={{ display: 'none' }}
+                      >
+                        {action.icon}
+                      </div>
+                    </div>
+                    <div className="px-3 py-3">
+                      <p className="text-[13px] font-black leading-tight text-slate-900">{action.title}</p>
+                      <p className="text-[11px] font-medium mt-1 text-slate-400 leading-snug">{action.subtitle}</p>
+                    </div>
+                  </motion.button>
+                );
+              })}
+            </motion.div>
+            <div className="flex justify-center gap-1.5 mt-3">
+              {quickActions.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => goCarousel(i)}
+                  className="rounded-full transition-all duration-200"
+                  style={{
+                    width: i === carouselIdx ? '16px' : '6px',
+                    height: '6px',
+                    background: i === carouselIdx ? '#FF4B4B' : '#cbd5e1',
+                  }}
+                />
+              ))}
+            </div>
           </div>
           </>
         )}
