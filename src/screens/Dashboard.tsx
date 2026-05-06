@@ -1,4 +1,4 @@
-﻿import { motion, AnimatePresence } from 'motion/react';
+﻿import { motion, AnimatePresence, useMotionValue, animate as motionAnimate } from 'motion/react';
 import { useState, useEffect, useRef } from 'react';
 import { ZODIAC_EMOJI, formatZodiac, getAvatarColor } from '../utils/zodiac';
 import { Star, ChevronLeft, ChevronRight, Plus, ChevronDown, Sparkles, Globe2, Flame, Heart, Users, UserCircle, Gift, ContactRound, CalendarDays, LayoutGrid, MessageCircleMore, Instagram, X } from 'lucide-react';
@@ -87,9 +87,10 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
   const [celebExpanded, setCelebExpanded] = useState(false);
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
   const [showInviteActions, setShowInviteActions] = useState(false);
-  const [carouselIdx, setCarouselIdx] = useState(0);
+  const [rawIdx, setRawIdx] = useState(5);
   const carouselRef = useRef<HTMLDivElement>(null);
   const [carouselW, setCarouselW] = useState(0);
+  const xMv = useMotionValue(0);
 
   // Swipe touch tracking
   const touchStartX = useRef<number | null>(null);
@@ -111,9 +112,15 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
   useEffect(() => {
     const el = carouselRef.current;
     if (!el) return;
-    const obs = new ResizeObserver(() => setCarouselW(el.offsetWidth));
+    const update = () => {
+      const w = el.offsetWidth;
+      setCarouselW(w);
+      const cardW = w * 0.62;
+      xMv.set(w / 2 - cardW / 2 - 24 - 5 * (cardW + 12));
+    };
+    const obs = new ResizeObserver(update);
     obs.observe(el);
-    setCarouselW(el.offsetWidth);
+    update();
     return () => obs.disconnect();
   }, []);
 
@@ -199,10 +206,29 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
     ? `🎂 Ajoute-moi sur Birthday Game !\n👤 ${user.name} · né(e) le ${format(parseISO(user.birthDate), 'd MMMM yyyy', { locale: fr })}\n\n🔗 ${shareUrl}`
     : `🎂 Rejoins-moi sur Birthday Game !\n\n🔗 ${shareUrl}`;
 
-  const goCarousel = (i: number) => {
-    const n = quickActions.length;
-    setCarouselIdx(((i % n) + n) % n);
+  const goCarousel = (delta: number) => {
+    setRawIdx(prev => prev + delta);
   };
+
+  useEffect(() => {
+    if (carouselW === 0) return;
+    const cardW = carouselW * 0.62;
+    const getX = (idx: number) => carouselW / 2 - cardW / 2 - 24 - idx * (cardW + 12);
+
+    if (rawIdx >= 2 * 5) {
+      const reset = rawIdx - 5;
+      xMv.set(getX(reset));
+      setRawIdx(reset);
+      return;
+    }
+    if (rawIdx < 5) {
+      const reset = rawIdx + 5;
+      xMv.set(getX(reset));
+      setRawIdx(reset);
+      return;
+    }
+    motionAnimate(xMv, getX(rawIdx), { type: 'spring', stiffness: 300, damping: 32 });
+  }, [rawIdx, carouselW]);
 
   const openExternal = (url: string) => {
     window.open(url, '_blank', 'noopener,noreferrer');
@@ -707,28 +733,33 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
           </div>
           <div ref={carouselRef} className="overflow-hidden" style={{ margin: '0 -1.5rem' }}>
             <motion.div
+              style={{ x: xMv, display: 'flex', gap: `${12}px`, paddingLeft: '24px', paddingRight: '24px' }}
               drag="x"
               dragConstraints={{ left: 0, right: 0 }}
-              dragElastic={0.13}
+              dragElastic={0.18}
               dragMomentum={false}
               onDragEnd={(_, info) => {
-                if (info.offset.x < -50) goCarousel(carouselIdx + 1);
-                else if (info.offset.x > 50) goCarousel(carouselIdx - 1);
+                const snap = () => {
+                  if (carouselW === 0) return;
+                  const cardW = carouselW * 0.62;
+                  motionAnimate(xMv, carouselW / 2 - cardW / 2 - 24 - rawIdx * (cardW + 12), { type: 'spring', stiffness: 300, damping: 32 });
+                };
+                if (Math.abs(info.velocity.x) > 400 || Math.abs(info.offset.x) > 60) {
+                  info.velocity.x < 0 || info.offset.x < -60 ? goCarousel(1) : goCarousel(-1);
+                } else {
+                  snap();
+                }
               }}
-              animate={{ x: carouselW ? carouselW / 2 - carouselW * 0.62 / 2 - carouselIdx * (carouselW * 0.62 + 12) : 0 }}
-              transition={{ type: 'spring', stiffness: 290, damping: 30 }}
-              className="flex"
-              style={{ gap: '12px', paddingLeft: '1.5rem', paddingRight: '1.5rem' }}
             >
-              {quickActions.map((action, i) => {
-                const dist = Math.abs(i - carouselIdx);
+              {[...quickActions, ...quickActions, ...quickActions].map((action, i) => {
+                const dist = Math.abs(i - rawIdx);
                 return (
                   <motion.button
-                    key={action.title}
+                    key={`${action.title}-${i}`}
                     onClick={action.onClick}
                     animate={{
-                      scale: dist === 0 ? 1 : dist === 1 ? 0.87 : 0.76,
-                      opacity: dist === 0 ? 1 : dist === 1 ? 0.6 : 0.35,
+                      scale: dist === 0 ? 1 : dist === 1 ? 0.88 : 0.78,
+                      opacity: dist === 0 ? 1 : dist === 1 ? 0.65 : 0.4,
                     }}
                     transition={{ type: 'spring', stiffness: 280, damping: 26 }}
                     className="shrink-0 rounded-2xl bg-white overflow-hidden text-left"
@@ -769,12 +800,12 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
               {quickActions.map((_, i) => (
                 <button
                   key={i}
-                  onClick={() => goCarousel(i)}
+                  onClick={() => setRawIdx(5 + i)}
                   className="rounded-full transition-all duration-200"
                   style={{
-                    width: i === carouselIdx ? '16px' : '6px',
+                    width: (rawIdx % 5) === i ? '16px' : '6px',
                     height: '6px',
-                    background: i === carouselIdx ? '#FF4B4B' : '#cbd5e1',
+                    background: (rawIdx % 5) === i ? '#FF4B4B' : '#cbd5e1',
                   }}
                 />
               ))}
