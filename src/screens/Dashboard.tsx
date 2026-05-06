@@ -751,23 +751,14 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
                 }
               }}
             >
-              {[...quickActions, ...quickActions, ...quickActions].map((action, i) => {
-                const dist = Math.abs(i - rawIdx);
-                return (
+              {[...quickActions, ...quickActions, ...quickActions].map((action, i) => (
                   <motion.button
                     key={`${action.title}-${i}`}
                     onClick={action.onClick}
-                    animate={{
-                      scale: dist === 0 ? 1 : dist === 1 ? 0.88 : 0.78,
-                      opacity: dist === 0 ? 1 : dist === 1 ? 0.65 : 0.4,
-                    }}
-                    transition={{ type: 'spring', stiffness: 280, damping: 26 }}
                     className="shrink-0 rounded-2xl bg-white overflow-hidden text-left"
                     style={{
                       width: carouselW ? `${Math.round(carouselW * 0.62)}px` : '62%',
-                      boxShadow: dist === 0
-                        ? '0 8px 28px rgba(15,23,42,0.14)'
-                        : '0 2px 8px rgba(15,23,42,0.07)',
+                      boxShadow: '0 4px 16px rgba(15,23,42,0.10)',
                     }}
                   >
                     <div className="relative w-full overflow-hidden" style={{ height: '130px' }}>
@@ -793,8 +784,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
                       <p className="text-[11px] font-medium mt-1 text-slate-400 leading-snug">{action.subtitle}</p>
                     </div>
                   </motion.button>
-                );
-              })}
+              ))}
             </motion.div>
             <div className="flex justify-center gap-1.5 mt-3">
               {quickActions.map((_, i) => (
