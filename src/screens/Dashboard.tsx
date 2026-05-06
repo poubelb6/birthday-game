@@ -1,4 +1,4 @@
-﻿import { motion, AnimatePresence, useMotionValue, animate as motionAnimate } from 'motion/react';
+﻿import { motion, AnimatePresence } from 'motion/react';
 import { useState, useEffect, useRef } from 'react';
 import { ZODIAC_EMOJI, formatZodiac, getAvatarColor } from '../utils/zodiac';
 import { Star, ChevronLeft, ChevronRight, Plus, ChevronDown, Sparkles, Globe2, Flame, Heart, Users, UserCircle, Gift, ContactRound, CalendarDays, LayoutGrid, MessageCircleMore, Instagram, X } from 'lucide-react';
@@ -87,10 +87,8 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
   const [celebExpanded, setCelebExpanded] = useState(false);
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
   const [showInviteActions, setShowInviteActions] = useState(false);
-  const [rawIdx, setRawIdx] = useState(5);
-  const carouselRef = useRef<HTMLDivElement>(null);
-  const [carouselW, setCarouselW] = useState(0);
-  const xMv = useMotionValue(0);
+  const [carouselIdx, setCarouselIdx] = useState(0);
+  const carouselScrollRef = useRef<HTMLDivElement>(null);
 
   // Swipe touch tracking
   const touchStartX = useRef<number | null>(null);
@@ -109,20 +107,6 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    const el = carouselRef.current;
-    if (!el) return;
-    const update = () => {
-      const w = el.offsetWidth;
-      setCarouselW(w);
-      const cardW = w * 0.62;
-      xMv.set(w / 2 - cardW / 2 - 24 - 5 * (cardW + 12));
-    };
-    const obs = new ResizeObserver(update);
-    obs.observe(el);
-    update();
-    return () => obs.disconnect();
-  }, []);
 
   const streak = useStreak();
   const [showStreakToast, setShowStreakToast] = useState(false);
@@ -206,29 +190,6 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
     ? `🎂 Ajoute-moi sur Birthday Game !\n👤 ${user.name} · né(e) le ${format(parseISO(user.birthDate), 'd MMMM yyyy', { locale: fr })}\n\n🔗 ${shareUrl}`
     : `🎂 Rejoins-moi sur Birthday Game !\n\n🔗 ${shareUrl}`;
 
-  const goCarousel = (delta: number) => {
-    setRawIdx(prev => prev + delta);
-  };
-
-  useEffect(() => {
-    if (carouselW === 0) return;
-    const cardW = carouselW * 0.62;
-    const getX = (idx: number) => carouselW / 2 - cardW / 2 - 24 - idx * (cardW + 12);
-
-    if (rawIdx >= 2 * 5) {
-      const reset = rawIdx - 5;
-      xMv.set(getX(reset));
-      setRawIdx(reset);
-      return;
-    }
-    if (rawIdx < 5) {
-      const reset = rawIdx + 5;
-      xMv.set(getX(reset));
-      setRawIdx(reset);
-      return;
-    }
-    motionAnimate(xMv, getX(rawIdx), { type: 'spring', stiffness: 300, damping: 32 });
-  }, [rawIdx, carouselW]);
 
   const openExternal = (url: string) => {
     window.open(url, '_blank', 'noopener,noreferrer');
@@ -731,75 +692,82 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
               )}
             </AnimatePresence>
           </div>
-          <div ref={carouselRef} className="overflow-hidden" style={{ margin: '0 -1.5rem' }}>
-            <motion.div
-              style={{ x: xMv, display: 'flex', gap: `${12}px`, paddingLeft: '24px', paddingRight: '24px' }}
-              drag="x"
-              dragConstraints={{ left: 0, right: 0 }}
-              dragElastic={0.18}
-              dragMomentum={false}
-              onDragEnd={(_, info) => {
-                const snap = () => {
-                  if (carouselW === 0) return;
-                  const cardW = carouselW * 0.62;
-                  motionAnimate(xMv, carouselW / 2 - cardW / 2 - 24 - rawIdx * (cardW + 12), { type: 'spring', stiffness: 300, damping: 32 });
-                };
-                if (Math.abs(info.velocity.x) > 400 || Math.abs(info.offset.x) > 60) {
-                  info.velocity.x < 0 || info.offset.x < -60 ? goCarousel(1) : goCarousel(-1);
-                } else {
-                  snap();
-                }
-              }}
-            >
-              {[...quickActions, ...quickActions, ...quickActions].map((action, i) => (
-                  <motion.button
-                    key={`${action.title}-${i}`}
-                    onClick={action.onClick}
-                    className="shrink-0 rounded-2xl bg-white overflow-hidden text-left"
-                    style={{
-                      width: carouselW ? `${Math.round(carouselW * 0.62)}px` : '62%',
-                      boxShadow: '0 4px 16px rgba(15,23,42,0.10)',
+          <div
+            ref={carouselScrollRef}
+            onScroll={() => {
+              const el = carouselScrollRef.current;
+              if (!el) return;
+              const cardW = el.scrollWidth / quickActions.length;
+              setCarouselIdx(Math.min(Math.round(el.scrollLeft / cardW), quickActions.length - 1));
+            }}
+            style={{
+              display: 'flex',
+              gap: '12px',
+              overflowX: 'auto',
+              scrollSnapType: 'x mandatory',
+              WebkitOverflowScrolling: 'touch',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+              paddingLeft: '17.5%',
+              paddingRight: '17.5%',
+              scrollPaddingLeft: '17.5%',
+              scrollPaddingRight: '17.5%',
+              margin: '0 -1.5rem',
+            }}
+          >
+            {quickActions.map((action) => (
+              <button
+                key={action.title}
+                onClick={action.onClick}
+                style={{
+                  flex: '0 0 65%',
+                  scrollSnapAlign: 'center',
+                  borderRadius: '16px',
+                  background: 'white',
+                  boxShadow: '0 4px 16px rgba(15,23,42,0.10)',
+                  overflow: 'hidden',
+                  border: 'none',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                }}
+              >
+                <div style={{ position: 'relative', width: '100%', height: '130px', overflow: 'hidden' }}>
+                  <img
+                    src={action.image}
+                    alt={action.title}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).style.display = 'none';
+                      const fb = e.currentTarget.nextElementSibling as HTMLElement | null;
+                      if (fb) fb.style.display = 'flex';
                     }}
+                  />
+                  <div
+                    className={`absolute inset-0 items-center justify-center ${action.iconWrapClassName}`}
+                    style={{ display: 'none' }}
                   >
-                    <div className="relative w-full overflow-hidden" style={{ height: '130px' }}>
-                      <img
-                        src={action.image}
-                        alt={action.title}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).style.display = 'none';
-                          const fb = e.currentTarget.nextElementSibling as HTMLElement | null;
-                          if (fb) fb.style.display = 'flex';
-                        }}
-                      />
-                      <div
-                        className={`absolute inset-0 items-center justify-center ${action.iconWrapClassName}`}
-                        style={{ display: 'none' }}
-                      >
-                        {action.icon}
-                      </div>
-                    </div>
-                    <div className="px-3 py-3">
-                      <p className="text-[13px] font-black leading-tight text-slate-900">{action.title}</p>
-                      <p className="text-[11px] font-medium mt-1 text-slate-400 leading-snug">{action.subtitle}</p>
-                    </div>
-                  </motion.button>
-              ))}
-            </motion.div>
-            <div className="flex justify-center gap-1.5 mt-3">
-              {quickActions.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setRawIdx(5 + i)}
-                  className="rounded-full transition-all duration-200"
-                  style={{
-                    width: (rawIdx % 5) === i ? '16px' : '6px',
-                    height: '6px',
-                    background: (rawIdx % 5) === i ? '#FF4B4B' : '#cbd5e1',
-                  }}
-                />
-              ))}
-            </div>
+                    {action.icon}
+                  </div>
+                </div>
+                <div style={{ padding: '10px 12px 12px' }}>
+                  <p className="text-[13px] font-black leading-tight text-slate-900">{action.title}</p>
+                  <p className="text-[11px] font-medium mt-1 text-slate-400 leading-snug">{action.subtitle}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+          <div className="flex justify-center gap-1.5 mt-3">
+            {quickActions.map((_, i) => (
+              <div
+                key={i}
+                className="rounded-full transition-all duration-200"
+                style={{
+                  width: i === carouselIdx ? '16px' : '6px',
+                  height: '6px',
+                  background: i === carouselIdx ? '#FF4B4B' : '#cbd5e1',
+                }}
+              />
+            ))}
           </div>
           </>
         )}
