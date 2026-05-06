@@ -217,35 +217,35 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
   const quickActions = [
     {
       title: 'Google Agenda',
-      subtitle: 'Ouvrir l’agenda',
+      subtitle: 'Ajoute tes anniversaires via Google Agenda',
         icon: <GoogleCalendarIcon />,
         onClick: () => openExternal('https://calendar.google.com/calendar/u/0/r'),
         iconWrapClassName: 'bg-white border border-slate-200',
       },
     {
       title: 'Contacts',
-      subtitle: 'Ajouter un ami',
+      subtitle: 'Ajoute tes contacts et note leur anniversaire',
         icon: <ContactRound size={18} strokeWidth={2.5} className="text-sky-500" />,
         onClick: () => onRequestAddFriend?.(),
         iconWrapClassName: 'bg-sky-100',
       },
     {
       title: 'Mes cartes',
-      subtitle: 'Voir la collection',
+      subtitle: 'Regarde les nouvelles cartes débloquées',
         icon: <PlayingCardIcon />,
         onClick: () => onOpenCollection?.(),
         iconWrapClassName: 'bg-white border border-slate-200',
       },
     {
       title: 'Inviter',
-      subtitle: 'WhatsApp / Insta',
+      subtitle: 'Invite tes amis à ne plus jamais rater un anniversaire',
         icon: <MessageCircleMore size={18} strokeWidth={2.5} className="text-emerald-500" />,
         onClick: () => setShowInviteActions(true),
         iconWrapClassName: 'bg-emerald-100',
       },
     {
       title: 'Idées cadeaux',
-      subtitle: 'Trouver l’inspiration',
+      subtitle: "Trouve l'inspiration pour le cadeau parfait",
         icon: <Gift size={18} strokeWidth={2.5} className="text-amber-500" />,
         onClick: () => openExternal('https://www.google.com/search?q=id%C3%A9es+cadeaux+anniversaire'),
         iconWrapClassName: 'bg-amber-100',
@@ -443,7 +443,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
               style={{ background: '#FF4B4B', boxShadow: '0 4px 0 #CC2E2E' }}
             >
               <Plus size={16} strokeWidth={3} />
-              Ajouter un ami
+              Ajoute tes contacts et note leur anniversaire
             </motion.button>
           </div>
         )}
@@ -939,7 +939,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
               style={{ background: '#FF4B4B', boxShadow: '0 4px 0 #CC2E2E' }}
             >
               <Plus size={16} strokeWidth={3} />
-              Ajouter un ami
+              Ajoute tes contacts et note leur anniversaire
             </motion.button>
           </div>
         )}
