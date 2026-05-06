@@ -109,31 +109,14 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
   }, []);
 
 
-  // Carousel: init at middle set + seamless infinite reset
+  // Carousel: scroll to "Inviter" (index 3) on mount
   useEffect(() => {
     const el = carouselScrollRef.current;
     if (!el) return;
-    const N = quickActions.length;
-    const getUnit = () => el.offsetWidth * 0.65 + 12;
-
     requestAnimationFrame(() => {
-      el.scrollLeft = N * getUnit();
-      carouselInitDone.current = true;
+      const unit = el.offsetWidth * 0.65 + 12;
+      el.scrollLeft = 3 * unit; // Inviter = index 3
     });
-
-    let timer: ReturnType<typeof setTimeout>;
-    const onScroll = () => {
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        const unit = getUnit();
-        const idx = Math.round(el.scrollLeft / unit);
-        if (idx >= 2 * N) el.scrollLeft -= N * unit;
-        else if (idx < N) el.scrollLeft += N * unit;
-      }, 50);
-    };
-
-    el.addEventListener('scroll', onScroll, { passive: true });
-    return () => { el.removeEventListener('scroll', onScroll); clearTimeout(timer); };
   }, []);
 
   const streak = useStreak();
@@ -723,12 +706,10 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
           <div
             ref={carouselScrollRef}
             onScroll={() => {
-              if (!carouselInitDone.current) return;
               const el = carouselScrollRef.current;
               if (!el) return;
               const unit = el.offsetWidth * 0.65 + 12;
-              const idx = Math.round(el.scrollLeft / unit);
-              setCarouselIdx(((idx % 5) + 5) % 5);
+              setCarouselIdx(Math.min(Math.round(el.scrollLeft / unit), quickActions.length - 1));
             }}
             style={{
               display: 'flex',
@@ -746,9 +727,9 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
               boxSizing: 'border-box',
             }}
           >
-            {[...quickActions, ...quickActions, ...quickActions].map((action, i) => (
+            {quickActions.map((action, i) => (
               <button
-                key={`${action.title}-${i}`}
+                key={action.title}
                 onClick={action.onClick}
                 style={{
                   flex: '0 0 65%',
