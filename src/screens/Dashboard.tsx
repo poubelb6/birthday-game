@@ -21,6 +21,50 @@ function WhatsAppLogo() {
   );
 }
 
+
+function GoogleCalendarIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+      <rect x="4" y="8" width="40" height="36" rx="3" fill="white" stroke="#dadce0" strokeWidth="2"/>
+      <rect x="4" y="8" width="40" height="14" rx="3" fill="#4285F4"/>
+      <rect x="4" y="18" width="40" height="4" fill="#4285F4"/>
+      <rect x="13" y="3" width="5" height="9" rx="2.5" fill="#EA4335"/>
+      <rect x="30" y="3" width="5" height="9" rx="2.5" fill="#EA4335"/>
+      <text x="24" y="38" textAnchor="middle" fontSize="16" fontWeight="800" fill="#4285F4" fontFamily="sans-serif">31</text>
+    </svg>
+  );
+}
+
+function PlayingCardIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+      <rect x="3" y="10" width="28" height="36" rx="4" fill="white" stroke="#0f172a" strokeWidth="2.5"/>
+      <text x="17" y="34" textAnchor="middle" fontSize="20" fill="#e11d48" fontFamily="Georgia,serif">&#9829;</text>
+      <rect x="17" y="2" width="28" height="36" rx="4" fill="white" stroke="#0f172a" strokeWidth="2.5"/>
+      <text x="31" y="26" textAnchor="middle" fontSize="20" fill="#0f172a" fontFamily="Georgia,serif">&#9824;</text>
+    </svg>
+  );
+}
+
+function InstagramBrandIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="ig-g" x1="24" y1="24" x2="0" y2="0" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#f09433"/>
+          <stop offset="30%" stopColor="#e6683c"/>
+          <stop offset="55%" stopColor="#dc2743"/>
+          <stop offset="78%" stopColor="#cc2366"/>
+          <stop offset="100%" stopColor="#bc1888"/>
+        </linearGradient>
+      </defs>
+      <rect x="1" y="1" width="22" height="22" rx="6.5" fill="url(#ig-g)"/>
+      <circle cx="12" cy="12" r="4.8" stroke="white" strokeWidth="1.8" fill="none"/>
+      <circle cx="17.8" cy="6.2" r="1.3" fill="white"/>
+    </svg>
+  );
+}
+
 export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollection, onUpdateBirthday, onDeleteBirthday }: {
   birthdays: Birthday[],
   user: UserProfile | null,
@@ -174,9 +218,9 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
     {
       title: 'Google Agenda',
       subtitle: 'Ouvrir l’agenda',
-        icon: <CalendarDays size={18} strokeWidth={2.5} className="text-rose-500" />,
+        icon: <GoogleCalendarIcon />,
         onClick: () => openExternal('https://calendar.google.com/calendar/u/0/r'),
-        iconWrapClassName: 'bg-rose-100',
+        iconWrapClassName: 'bg-white border border-slate-200',
       },
     {
       title: 'Contacts',
@@ -188,9 +232,9 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
     {
       title: 'Mes cartes',
       subtitle: 'Voir la collection',
-        icon: <LayoutGrid size={18} strokeWidth={2.5} className="text-violet-500" />,
+        icon: <PlayingCardIcon />,
         onClick: () => onOpenCollection?.(),
-        iconWrapClassName: 'bg-violet-100',
+        iconWrapClassName: 'bg-white border border-slate-200',
       },
     {
       title: 'Inviter',
@@ -718,7 +762,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-md bg-gradient-to-tr from-amber-400 via-rose-500 to-purple-600 text-white flex items-center justify-center">
-                      <Instagram size={18} />
+                      <InstagramBrandIcon />
                     </div>
                     <div>
                       <p className="text-sm font-black text-slate-900">Instagram</p>
