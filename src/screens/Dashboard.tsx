@@ -233,7 +233,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
     {
       title: 'Google Agenda',
       subtitle: 'Ajoute tes anniversaires via Google Agenda',
-      image: '/illustrations/google.png',
+      image: '/illustrations/google.webp',
         icon: <GoogleCalendarIcon />,
         onClick: () => openExternal('https://calendar.google.com/calendar/u/0/r'),
         iconWrapClassName: 'bg-white border border-slate-200',
@@ -241,7 +241,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
     {
       title: 'Contacts',
       subtitle: 'Ajoute tes contacts et note leur anniversaire',
-      image: '/illustrations/contact.png',
+      image: '/illustrations/contact.webp',
         icon: <ContactRound size={18} strokeWidth={2.5} className="text-sky-500" />,
         onClick: () => onRequestAddFriend?.(),
         iconWrapClassName: 'bg-sky-100',
@@ -249,7 +249,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
     {
       title: 'Mes cartes',
       subtitle: 'Regarde les nouvelles cartes débloquées',
-      image: '/illustrations/cartes.png',
+      image: '/illustrations/cartes.webp',
         icon: <PlayingCardIcon />,
         onClick: () => onOpenCollection?.(),
         iconWrapClassName: 'bg-white border border-slate-200',
@@ -257,7 +257,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
     {
       title: 'Inviter',
       subtitle: 'Invite tes amis à ne plus jamais rater un anniversaire',
-      image: '/illustrations/whatsapp.png',
+      image: '/illustrations/whatsapp.webp',
         icon: <MessageCircleMore size={18} strokeWidth={2.5} className="text-emerald-500" />,
         onClick: () => setShowInviteActions(true),
         iconWrapClassName: 'bg-emerald-100',
@@ -265,7 +265,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
     {
       title: 'Idées cadeaux',
       subtitle: "Trouve l'inspiration pour le cadeau parfait",
-      image: '/illustrations/cadeau.png',
+      image: '/illustrations/cadeau.webp',
         icon: <Gift size={18} strokeWidth={2.5} className="text-amber-500" />,
         onClick: () => openExternal('https://www.google.com/search?q=id%C3%A9es+cadeaux+anniversaire'),
         iconWrapClassName: 'bg-amber-100',
