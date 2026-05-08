@@ -89,7 +89,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
   const [showInviteActions, setShowInviteActions] = useState(false);
   const [cIdx, setCIdx] = useState(8);
   const [cOffset, setCOffset] = useState(0);
-  const [cAnim, setCAnim] = useState(true);
+  const [cAnim, setCAnim] = useState(false);
   const cDragX = useRef<number | null>(null);
   const cDragged = useRef(false);
 
@@ -111,6 +111,8 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
   }, []);
 
   const streak = useStreak();
+
+  useEffect(() => { setCAnim(true); }, []);
 
   const cGo = (dir: 1 | -1) => {
     const next = cIdx + dir;
@@ -680,7 +682,6 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
 
       <section className="space-y-2 order-3">
         {celebOfDay && (
-          <>
           <div className="bg-amber-50 border border-amber-200 rounded-md px-4 py-3 overflow-hidden shadow-sm">
             <div className="flex items-center gap-3">
               <span className="text-xl shrink-0">{celebOfDay.emoji}</span>
@@ -731,79 +732,78 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
               )}
             </AnimatePresence>
           </div>
-          <div
-            style={{ overflow: 'hidden', margin: '0 -1.5rem', touchAction: 'none', userSelect: 'none' }}
-            onPointerDown={cPDown}
-            onPointerMove={cPMove}
-            onPointerUp={cPUp}
-            onPointerCancel={cPUp}
-          >
-            <div style={{
-              display: 'flex',
-              gap: cGap + 'px',
-              transform: 'translateX(' + cTX + 'px)',
-              transition: cAnim && cOffset === 0 ? 'transform 0.35s cubic-bezier(0.25,0.46,0.45,0.94)' : 'none',
-              willChange: 'transform',
-            }}>
-              {cAll.map((action, i) => {
-                const active = i === cIdx;
-                return (
-                  <div
-                    key={action.title + i}
-                    onClick={() => { if (!cDragged.current) action.onClick(); }}
-                    style={{
-                      width: cW + 'px',
-                      flexShrink: 0,
-                      borderRadius: 20,
-                      overflow: 'hidden',
-                      background: 'white',
-                      cursor: 'pointer',
-                      transform: active ? 'scale(1)' : 'scale(0.87)',
-                      opacity: active ? 1 : 0.6,
-                      boxShadow: active ? '0 8px 28px rgba(0,0,0,0.14)' : '0 2px 6px rgba(0,0,0,0.05)',
-                      transition: 'transform 0.35s ease, opacity 0.35s ease, box-shadow 0.35s ease',
-                    }}
-                  >
-                    <div style={{ height: 140, overflow: 'hidden', position: 'relative' }}>
-                      <img
-                        src={action.image}
-                        alt={action.title}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).style.display = 'none';
-                          const fb = e.currentTarget.nextElementSibling as HTMLElement | null;
-                          if (fb) fb.style.display = 'flex';
-                        }}
-                      />
-                      <div
-                        className={'absolute inset-0 items-center justify-center ' + action.iconWrapClassName}
-                        style={{ display: 'none' }}
-                      >
-                        {action.icon}
-                      </div>
-                    </div>
-                    <div style={{ padding: '12px 14px 14px' }}>
-                      <p style={{ fontSize: 13, fontWeight: 900, color: '#0f172a', lineHeight: 1.2, margin: 0 }}>{action.title}</p>
-                      <p style={{ fontSize: 11, fontWeight: 500, color: '#94a3b8', marginTop: 4, lineHeight: 1.4, margin: '4px 0 0' }}>{action.subtitle}</p>
+        )}
+        <div
+          style={{ overflow: 'hidden', margin: '0 -1.5rem', touchAction: 'none', userSelect: 'none' }}
+          onPointerDown={cPDown}
+          onPointerMove={cPMove}
+          onPointerUp={cPUp}
+          onPointerCancel={cPUp}
+        >
+          <div style={{
+            display: 'flex',
+            gap: cGap + 'px',
+            transform: 'translateX(' + cTX + 'px)',
+            transition: cAnim && cOffset === 0 ? 'transform 0.35s cubic-bezier(0.25,0.46,0.45,0.94)' : 'none',
+            willChange: 'transform',
+          }}>
+            {cAll.map((action, i) => {
+              const active = i === cIdx;
+              return (
+                <div
+                  key={action.title + i}
+                  onClick={() => { if (!cDragged.current) action.onClick(); }}
+                  style={{
+                    width: cW + 'px',
+                    flexShrink: 0,
+                    borderRadius: 20,
+                    overflow: 'hidden',
+                    background: 'white',
+                    cursor: 'pointer',
+                    transform: active ? 'scale(1)' : 'scale(0.87)',
+                    opacity: active ? 1 : 0.6,
+                    boxShadow: active ? '0 8px 28px rgba(0,0,0,0.14)' : '0 2px 6px rgba(0,0,0,0.05)',
+                    transition: 'transform 0.35s ease, opacity 0.35s ease, box-shadow 0.35s ease',
+                  }}
+                >
+                  <div style={{ height: 140, overflow: 'hidden', position: 'relative' }}>
+                    <img
+                      src={action.image}
+                      alt={action.title}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).style.display = 'none';
+                        const fb = e.currentTarget.nextElementSibling as HTMLElement | null;
+                        if (fb) fb.style.display = 'flex';
+                      }}
+                    />
+                    <div
+                      className={'absolute inset-0 items-center justify-center ' + action.iconWrapClassName}
+                      style={{ display: 'none' }}
+                    >
+                      {action.icon}
                     </div>
                   </div>
-                );
-              })}
-            </div>
+                  <div style={{ padding: '12px 14px 14px' }}>
+                    <p style={{ fontSize: 13, fontWeight: 900, color: '#0f172a', lineHeight: 1.2, margin: 0 }}>{action.title}</p>
+                    <p style={{ fontSize: 11, fontWeight: 500, color: '#94a3b8', marginTop: 4, lineHeight: 1.4, margin: '4px 0 0' }}>{action.subtitle}</p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 10 }}>
-            {quickActions.map((_, i) => (
-              <div key={i} style={{
-                width: i === cActive ? 20 : 6,
-                height: 6,
-                borderRadius: 99,
-                background: i === cActive ? '#FF4B4B' : '#cbd5e1',
-                transition: 'width 0.25s ease, background 0.25s ease',
-              }} />
-            ))}
-          </div>
-          </>
-        )}
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 10 }}>
+          {quickActions.map((_, i) => (
+            <div key={i} style={{
+              width: i === cActive ? 20 : 6,
+              height: 6,
+              borderRadius: 99,
+              background: i === cActive ? '#FF4B4B' : '#cbd5e1',
+              transition: 'width 0.25s ease, background 0.25s ease',
+            }} />
+          ))}
+        </div>
       </section>
       </div>
 
