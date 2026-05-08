@@ -87,7 +87,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
   const [celebExpanded, setCelebExpanded] = useState(false);
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
   const [showInviteActions, setShowInviteActions] = useState(false);
-  const [carouselIdx, setCarouselIdx] = useState(0);
+  const [carouselIdx, setCarouselIdx] = useState(3);
   const carouselScrollRef = useRef<HTMLDivElement>(null);
   const carouselInitDone = useRef(false);
 
@@ -708,8 +708,11 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
             onScroll={() => {
               const el = carouselScrollRef.current;
               if (!el) return;
-              const unit = el.offsetWidth * 0.65 + 12;
-              setCarouselIdx(Math.min(Math.round(el.scrollLeft / unit), quickActions.length - 1));
+              clearTimeout((el as HTMLDivElement & { _snapTimer?: ReturnType<typeof setTimeout> })._snapTimer);
+              (el as HTMLDivElement & { _snapTimer?: ReturnType<typeof setTimeout> })._snapTimer = setTimeout(() => {
+                const unit = el.offsetWidth * 0.65 + 12;
+                setCarouselIdx(Math.min(Math.round(el.scrollLeft / unit), quickActions.length - 1));
+              }, 80);
             }}
             style={{
               display: 'flex',
