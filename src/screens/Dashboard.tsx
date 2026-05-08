@@ -1,5 +1,5 @@
 ﻿import { motion, AnimatePresence } from 'motion/react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { ZODIAC_EMOJI, formatZodiac, getAvatarColor } from '../utils/zodiac';
 import { Star, ChevronLeft, ChevronRight, Plus, ChevronDown, Sparkles, Globe2, Flame, Heart, Users, UserCircle, Gift, ContactRound, CalendarDays, LayoutGrid, MessageCircleMore, Instagram, X } from 'lucide-react';
 import { Birthday, UserProfile } from '../types';
@@ -87,9 +87,13 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
   const [celebExpanded, setCelebExpanded] = useState(false);
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
   const [showInviteActions, setShowInviteActions] = useState(false);
-  const [carouselIdx, setCarouselIdx] = useState(3);
-  const carouselScrollRef = useRef<HTMLDivElement>(null);
-  const carouselInitDone = useRef(false);
+  const [carouselRawIdx, setCarouselRawIdx] = useState(8);
+  const [carouselDrag, setCarouselDrag] = useState(0);
+  const [carouselNoAnim, setCarouselNoAnim] = useState(false);
+  const [carouselContainerWidth, setCarouselContainerWidth] = useState(0);
+  const carouselContainerRef = useRef<HTMLDivElement>(null);
+  const carouselDragStartX = useRef<number | null>(null);
+  const carouselHasDragged = useRef(false);
 
   // Swipe touch tracking
   const touchStartX = useRef<number | null>(null);
@@ -108,18 +112,54 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
     return () => clearInterval(interval);
   }, []);
 
+  const streak = useStreak();
 
-  // Carousel: scroll to "Inviter" (index 3) on mount
-  useEffect(() => {
-    const el = carouselScrollRef.current;
+  useLayoutEffect(() => {
+    const el = carouselContainerRef.current;
     if (!el) return;
-    requestAnimationFrame(() => {
-      const unit = el.offsetWidth * 0.65 + 12;
-      el.scrollLeft = 3 * unit; // Inviter = index 3
-    });
+    const measure = () => setCarouselContainerWidth(el.offsetWidth);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
   }, []);
 
-  const streak = useStreak();
+  const carouselNav = (dir: 1 | -1) => {
+    const next = carouselRawIdx + dir;
+    setCarouselNoAnim(false);
+    setCarouselRawIdx(next);
+    setTimeout(() => {
+      if (next < 5) {
+        setCarouselNoAnim(true);
+        setCarouselRawIdx(next + 5);
+        requestAnimationFrame(() => requestAnimationFrame(() => setCarouselNoAnim(false)));
+      } else if (next >= 10) {
+        setCarouselNoAnim(true);
+        setCarouselRawIdx(next - 5);
+        requestAnimationFrame(() => requestAnimationFrame(() => setCarouselNoAnim(false)));
+      }
+    }, 360);
+  };
+
+  const onCarouselTouchStart = (e: React.TouchEvent) => {
+    carouselDragStartX.current = e.touches[0].clientX;
+    carouselHasDragged.current = false;
+  };
+
+  const onCarouselTouchMove = (e: React.TouchEvent) => {
+    if (carouselDragStartX.current === null) return;
+    const delta = e.touches[0].clientX - carouselDragStartX.current;
+    if (Math.abs(delta) > 5) carouselHasDragged.current = true;
+    setCarouselDrag(delta);
+  };
+
+  const onCarouselTouchEnd = (e: React.TouchEvent) => {
+    if (carouselDragStartX.current === null) return;
+    const delta = e.changedTouches[0].clientX - carouselDragStartX.current;
+    setCarouselDrag(0);
+    carouselDragStartX.current = null;
+    if (Math.abs(delta) > 40) carouselNav(delta < 0 ? 1 : -1);
+  };
   const [showStreakToast, setShowStreakToast] = useState(false);
 
   useEffect(() => {
@@ -271,6 +311,17 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
         iconWrapClassName: 'bg-amber-100',
       },
   ];
+
+
+  const CARD_GAP_PX = 12;
+  const CARD_W_RATIO = 0.65;
+  const TRIPLED_ACTIONS = [...quickActions, ...quickActions, ...quickActions];
+  const carouselCardW = carouselContainerWidth * CARD_W_RATIO;
+  const carouselCenterOff = carouselContainerWidth > 0 ? (carouselContainerWidth - carouselCardW) / 2 : 0;
+  const carouselTranslateX = carouselContainerWidth > 0
+    ? carouselCenterOff - carouselRawIdx * (carouselCardW + CARD_GAP_PX) + carouselDrag
+    : 0;
+  const carouselActiveIdx = ((carouselRawIdx % 5) + 5) % 5;
 
   return (
     <div className="p-6 space-y-8">
@@ -704,75 +755,72 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
             </AnimatePresence>
           </div>
           <div
-            ref={carouselScrollRef}
-            onScroll={() => {
-              const el = carouselScrollRef.current;
-              if (!el) return;
-              clearTimeout((el as HTMLDivElement & { _snapTimer?: ReturnType<typeof setTimeout> })._snapTimer);
-              (el as HTMLDivElement & { _snapTimer?: ReturnType<typeof setTimeout> })._snapTimer = setTimeout(() => {
-                const unit = el.offsetWidth * 0.65 + 12;
-                setCarouselIdx(Math.min(Math.round(el.scrollLeft / unit), quickActions.length - 1));
-              }, 80);
-            }}
+            ref={carouselContainerRef}
             style={{
-              display: 'flex',
-              gap: '12px',
-              overflowX: 'auto',
-              scrollSnapType: 'x mandatory',
-              WebkitOverflowScrolling: 'touch',
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
-              paddingLeft: 'calc((100% - 65%) / 2)',
-              paddingRight: 'calc((100% - 65%) / 2)',
-              scrollPaddingLeft: 'calc((100% - 65%) / 2)',
-              scrollPaddingRight: 'calc((100% - 65%) / 2)',
+              overflow: 'hidden',
               margin: '0 -1.5rem',
-              boxSizing: 'border-box',
+              position: 'relative',
+              touchAction: 'pan-y',
             }}
+            onTouchStart={onCarouselTouchStart}
+            onTouchMove={onCarouselTouchMove}
+            onTouchEnd={onCarouselTouchEnd}
           >
-            {quickActions.map((action, i) => (
-              <button
-                key={action.title}
-                onClick={action.onClick}
-                style={{
-                  flex: '0 0 65%',
-                  scrollSnapAlign: 'center',
-                  borderRadius: '16px',
-                  background: 'white',
-                  boxShadow: i === carouselIdx ? '0 10px 30px rgba(15,23,42,0.18)' : 'none',
-                  overflow: 'hidden',
-                  border: 'none',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  transform: i === carouselIdx ? 'scale(1.0)' : 'scale(0.84)',
-                  opacity: i === carouselIdx ? 1 : 0.65,
-                  transition: 'transform 0.25s ease, box-shadow 0.25s ease',
-                }}
-              >
-                <div style={{ position: 'relative', width: '100%', height: '130px', overflow: 'hidden' }}>
-                  <img
-                    src={action.image}
-                    alt={action.title}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).style.display = 'none';
-                      const fb = e.currentTarget.nextElementSibling as HTMLElement | null;
-                      if (fb) fb.style.display = 'flex';
+            <div
+              style={{
+                display: 'flex',
+                gap: CARD_GAP_PX + 'px',
+                transform: 'translateX(' + carouselTranslateX + 'px)',
+                transition: carouselNoAnim || carouselDrag !== 0 ? 'none' : 'transform 0.32s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                willChange: 'transform',
+              }}
+            >
+              {TRIPLED_ACTIONS.map((action, i) => {
+                const isActive = i === carouselRawIdx;
+                return (
+                  <button
+                    key={action.title + '-' + i}
+                    onClick={() => { if (!carouselHasDragged.current) action.onClick(); }}
+                    style={{
+                      flex: '0 0 ' + (CARD_W_RATIO * 100) + '%',
+                      borderRadius: '16px',
+                      background: 'white',
+                      boxShadow: isActive ? '0 10px 30px rgba(15,23,42,0.18)' : 'none',
+                      overflow: 'hidden',
+                      border: 'none',
+                      cursor: 'pointer',
+                      textAlign: 'left' as const,
+                      transform: isActive ? 'scale(1.0)' : 'scale(0.82)',
+                      opacity: isActive ? 1 : 0.55,
+                      transition: 'transform 0.32s ease, opacity 0.32s ease, box-shadow 0.32s ease',
                     }}
-                  />
-                  <div
-                    className={`absolute inset-0 items-center justify-center ${action.iconWrapClassName}`}
-                    style={{ display: 'none' }}
                   >
-                    {action.icon}
-                  </div>
-                </div>
-                <div style={{ padding: '10px 12px 12px' }}>
-                  <p className="text-[13px] font-black leading-tight text-slate-900">{action.title}</p>
-                  <p className="text-[11px] font-medium mt-1 text-slate-400 leading-snug">{action.subtitle}</p>
-                </div>
-              </button>
-            ))}
+                    <div style={{ position: 'relative', width: '100%', height: '130px', overflow: 'hidden' }}>
+                      <img
+                        src={action.image}
+                        alt={action.title}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).style.display = 'none';
+                          const fb = e.currentTarget.nextElementSibling as HTMLElement | null;
+                          if (fb) fb.style.display = 'flex';
+                        }}
+                      />
+                      <div
+                        className={'absolute inset-0 items-center justify-center ' + action.iconWrapClassName}
+                        style={{ display: 'none' }}
+                      >
+                        {action.icon}
+                      </div>
+                    </div>
+                    <div style={{ padding: '10px 12px 12px' }}>
+                      <p className="text-[13px] font-black leading-tight text-slate-900">{action.title}</p>
+                      <p className="text-[11px] font-medium mt-1 text-slate-400 leading-snug">{action.subtitle}</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
           <div className="flex justify-center gap-1.5 mt-3">
             {quickActions.map((_, i) => (
@@ -780,9 +828,9 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
                 key={i}
                 className="rounded-full transition-all duration-200"
                 style={{
-                  width: i === carouselIdx ? '16px' : '6px',
+                  width: i === carouselActiveIdx ? '16px' : '6px',
                   height: '6px',
-                  background: i === carouselIdx ? '#FF4B4B' : '#cbd5e1',
+                  background: i === carouselActiveIdx ? '#FF4B4B' : '#cbd5e1',
                 }}
               />
             ))}
