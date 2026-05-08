@@ -736,12 +736,13 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
                   scrollSnapAlign: 'center',
                   borderRadius: '16px',
                   background: 'white',
-                  boxShadow: i === carouselIdx ? '0 8px 24px rgba(15,23,42,0.14)' : '0 4px 16px rgba(15,23,42,0.08)',
+                  boxShadow: i === carouselIdx ? '0 10px 30px rgba(15,23,42,0.18)' : 'none',
                   overflow: 'hidden',
                   border: 'none',
                   cursor: 'pointer',
                   textAlign: 'left',
-                  transform: i === carouselIdx ? 'scale(1.04)' : 'scale(1)',
+                  transform: i === carouselIdx ? 'scale(1.0)' : 'scale(0.84)',
+                  opacity: i === carouselIdx ? 1 : 0.65,
                   transition: 'transform 0.25s ease, box-shadow 0.25s ease',
                 }}
               >
