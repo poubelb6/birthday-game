@@ -1,4 +1,6 @@
 ﻿import { motion, AnimatePresence } from 'motion/react';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import 'swiper/css';
 import { useState, useEffect, useRef } from 'react';
 import { ZODIAC_EMOJI, formatZodiac, getAvatarColor } from '../utils/zodiac';
 import { Star, ChevronLeft, ChevronRight, Plus, ChevronDown, Sparkles, Globe2, Flame, Heart, Users, UserCircle, Gift, ContactRound, CalendarDays, LayoutGrid, MessageCircleMore, Instagram, X } from 'lucide-react';
@@ -87,11 +89,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
   const [celebExpanded, setCelebExpanded] = useState(false);
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
   const [showInviteActions, setShowInviteActions] = useState(false);
-  const [cIdx, setCIdx] = useState(8);
-  const [cOffset, setCOffset] = useState(0);
-  const [cAnim, setCAnim] = useState(false);
-  const cDragX = useRef<number | null>(null);
-  const cDragged = useRef(false);
+  const [cActive, setCActive] = useState(3);
 
   // Swipe touch tracking
   const touchStartX = useRef<number | null>(null);
@@ -112,36 +110,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
 
   const streak = useStreak();
 
-  useEffect(() => { setCAnim(true); }, []);
 
-  const cGo = (dir: 1 | -1) => {
-    const next = cIdx + dir;
-    setCAnim(true);
-    setCIdx(next);
-    setTimeout(() => {
-      if (next < 5)  { setCAnim(false); setCIdx(next + 5); requestAnimationFrame(() => requestAnimationFrame(() => setCAnim(true))); }
-      if (next >= 10){ setCAnim(false); setCIdx(next - 5); requestAnimationFrame(() => requestAnimationFrame(() => setCAnim(true))); }
-    }, 360);
-  };
-
-  const cPDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    e.currentTarget.setPointerCapture(e.pointerId);
-    cDragX.current = e.clientX;
-    cDragged.current = false;
-  };
-  const cPMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (cDragX.current === null) return;
-    const d = e.clientX - cDragX.current;
-    if (Math.abs(d) > 8) cDragged.current = true;
-    setCOffset(d);
-  };
-  const cPUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (cDragX.current === null) return;
-    const d = e.clientX - cDragX.current;
-    cDragX.current = null;
-    setCOffset(0);
-    if (Math.abs(d) > 50) cGo(d < 0 ? 1 : -1);
-  };
   const [showStreakToast, setShowStreakToast] = useState(false);
 
   useEffect(() => {
@@ -294,13 +263,6 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
       },
   ];
 
-
-  const cAll = [...quickActions, ...quickActions, ...quickActions];
-  const cVW  = typeof window !== 'undefined' ? window.innerWidth : 390;
-  const cW   = Math.round(cVW * 0.72);
-  const cGap = 16;
-  const cActive = ((cIdx % 5) + 5) % 5;
-  const cTX = Math.round((cVW - cW) / 2 - cIdx * (cW + cGap) + cOffset);
 
   return (
     <div className="p-6 space-y-8">
@@ -733,65 +695,63 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
             </AnimatePresence>
           </div>
         )}
-        <div
-          style={{ overflow: 'hidden', margin: '0 -1.5rem', touchAction: 'none', userSelect: 'none' }}
-          onPointerDown={cPDown}
-          onPointerMove={cPMove}
-          onPointerUp={cPUp}
-          onPointerCancel={cPUp}
-        >
-          <div style={{
-            display: 'flex',
-            gap: cGap + 'px',
-            transform: 'translateX(' + cTX + 'px)',
-            transition: cAnim && cOffset === 0 ? 'transform 0.35s cubic-bezier(0.25,0.46,0.45,0.94)' : 'none',
-            willChange: 'transform',
-          }}>
-            {cAll.map((action, i) => {
-              const active = i === cIdx;
-              return (
-                <div
-                  key={action.title + i}
-                  onClick={() => { if (!cDragged.current) action.onClick(); }}
-                  style={{
-                    width: cW + 'px',
-                    flexShrink: 0,
-                    borderRadius: 20,
-                    overflow: 'hidden',
-                    background: 'white',
-                    cursor: 'pointer',
-                    transform: active ? 'scale(1)' : 'scale(0.87)',
-                    opacity: active ? 1 : 0.6,
-                    boxShadow: active ? '0 8px 28px rgba(0,0,0,0.14)' : '0 2px 6px rgba(0,0,0,0.05)',
-                    transition: 'transform 0.35s ease, opacity 0.35s ease, box-shadow 0.35s ease',
-                  }}
-                >
-                  <div style={{ height: 140, overflow: 'hidden', position: 'relative' }}>
-                    <img
-                      src={action.image}
-                      alt={action.title}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).style.display = 'none';
-                        const fb = e.currentTarget.nextElementSibling as HTMLElement | null;
-                        if (fb) fb.style.display = 'flex';
-                      }}
-                    />
-                    <div
-                      className={'absolute inset-0 items-center justify-center ' + action.iconWrapClassName}
-                      style={{ display: 'none' }}
-                    >
-                      {action.icon}
+        <div style={{ margin: '0 -1.5rem', overflow: 'hidden' }}>
+          <Swiper
+            centeredSlides
+            loop
+            initialSlide={3}
+            slidesPerView="auto"
+            spaceBetween={16}
+            style={{ overflow: 'visible', padding: '8px 0 4px' }}
+            onSlideChange={(swiper) => setCActive(swiper.realIndex)}
+          >
+            {quickActions.map((action, i) => (
+              <SwiperSlide key={action.title} style={{ width: '72vw' }}>
+                {({ isActive }) => (
+                  <button
+                    onClick={action.onClick}
+                    style={{
+                      width: '100%',
+                      borderRadius: 20,
+                      overflow: 'hidden',
+                      background: 'white',
+                      border: 'none',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      display: 'block',
+                      transform: isActive ? 'scale(1)' : 'scale(0.87)',
+                      opacity: isActive ? 1 : 0.6,
+                      boxShadow: isActive ? '0 8px 28px rgba(0,0,0,0.14)' : '0 2px 6px rgba(0,0,0,0.05)',
+                      transition: 'transform 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease',
+                    }}
+                  >
+                    <div style={{ height: 140, overflow: 'hidden', position: 'relative' }}>
+                      <img
+                        src={action.image}
+                        alt={action.title}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).style.display = 'none';
+                          const fb = e.currentTarget.nextElementSibling as HTMLElement | null;
+                          if (fb) fb.style.display = 'flex';
+                        }}
+                      />
+                      <div
+                        className={'absolute inset-0 items-center justify-center ' + action.iconWrapClassName}
+                        style={{ display: 'none' }}
+                      >
+                        {action.icon}
+                      </div>
                     </div>
-                  </div>
-                  <div style={{ padding: '12px 14px 14px' }}>
-                    <p style={{ fontSize: 13, fontWeight: 900, color: '#0f172a', lineHeight: 1.2, margin: 0 }}>{action.title}</p>
-                    <p style={{ fontSize: 11, fontWeight: 500, color: '#94a3b8', marginTop: 4, lineHeight: 1.4, margin: '4px 0 0' }}>{action.subtitle}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                    <div style={{ padding: '12px 14px 14px' }}>
+                      <p style={{ fontSize: 13, fontWeight: 900, color: '#0f172a', lineHeight: 1.2, margin: 0 }}>{action.title}</p>
+                      <p style={{ fontSize: 11, fontWeight: 500, color: '#94a3b8', marginTop: 4, lineHeight: 1.4, margin: '4px 0 0' }}>{action.subtitle}</p>
+                    </div>
+                  </button>
+                )}
+              </SwiperSlide>
+            ))}
+          </Swiper>
         </div>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 10 }}>
           {quickActions.map((_, i) => (
