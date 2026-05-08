@@ -1,5 +1,5 @@
 ﻿import { motion, AnimatePresence } from 'motion/react';
-import { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ZODIAC_EMOJI, formatZodiac, getAvatarColor } from '../utils/zodiac';
 import { Star, ChevronLeft, ChevronRight, Plus, ChevronDown, Sparkles, Globe2, Flame, Heart, Users, UserCircle, Gift, ContactRound, CalendarDays, LayoutGrid, MessageCircleMore, Instagram, X } from 'lucide-react';
 import { Birthday, UserProfile } from '../types';
@@ -90,8 +90,6 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
   const [carouselRawIdx, setCarouselRawIdx] = useState(8);
   const [carouselDrag, setCarouselDrag] = useState(0);
   const [carouselNoAnim, setCarouselNoAnim] = useState(false);
-  const [carouselContainerWidth, setCarouselContainerWidth] = useState(0);
-  const carouselContainerRef = useRef<HTMLDivElement>(null);
   const carouselDragStartX = useRef<number | null>(null);
   const carouselHasDragged = useRef(false);
 
@@ -114,16 +112,6 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
 
   const streak = useStreak();
 
-  useLayoutEffect(() => {
-    const el = carouselContainerRef.current;
-    if (!el) return;
-    const measure = () => setCarouselContainerWidth(el.offsetWidth);
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
   const carouselNav = (dir: 1 | -1) => {
     const next = carouselRawIdx + dir;
     setCarouselNoAnim(false);
@@ -141,21 +129,22 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
     }, 360);
   };
 
-  const onCarouselTouchStart = (e: React.TouchEvent) => {
-    carouselDragStartX.current = e.touches[0].clientX;
+  const onCarouselPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    carouselDragStartX.current = e.clientX;
     carouselHasDragged.current = false;
   };
 
-  const onCarouselTouchMove = (e: React.TouchEvent) => {
+  const onCarouselPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (carouselDragStartX.current === null) return;
-    const delta = e.touches[0].clientX - carouselDragStartX.current;
+    const delta = e.clientX - carouselDragStartX.current;
     if (Math.abs(delta) > 5) carouselHasDragged.current = true;
     setCarouselDrag(delta);
   };
 
-  const onCarouselTouchEnd = (e: React.TouchEvent) => {
+  const onCarouselPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
     if (carouselDragStartX.current === null) return;
-    const delta = e.changedTouches[0].clientX - carouselDragStartX.current;
+    const delta = e.clientX - carouselDragStartX.current;
     setCarouselDrag(0);
     carouselDragStartX.current = null;
     if (Math.abs(delta) > 40) carouselNav(delta < 0 ? 1 : -1);
@@ -314,13 +303,12 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
 
 
   const CARD_GAP_PX = 12;
-  const CARD_W_RATIO = 0.65;
+  const CARD_W_RATIO = 0.72;
   const TRIPLED_ACTIONS = [...quickActions, ...quickActions, ...quickActions];
-  const carouselCardW = carouselContainerWidth * CARD_W_RATIO;
-  const carouselCenterOff = carouselContainerWidth > 0 ? (carouselContainerWidth - carouselCardW) / 2 : 0;
-  const carouselTranslateX = carouselContainerWidth > 0
-    ? carouselCenterOff - carouselRawIdx * (carouselCardW + CARD_GAP_PX) + carouselDrag
-    : 0;
+  const _vw = typeof window !== 'undefined' ? window.innerWidth : 390;
+  const carouselCardW = _vw * CARD_W_RATIO;
+  const carouselCenterOff = (_vw - carouselCardW) / 2;
+  const carouselTranslateX = carouselCenterOff - carouselRawIdx * (carouselCardW + CARD_GAP_PX) + carouselDrag;
   const carouselActiveIdx = ((carouselRawIdx % 5) + 5) % 5;
 
   return (
@@ -755,16 +743,17 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
             </AnimatePresence>
           </div>
           <div
-            ref={carouselContainerRef}
             style={{
               overflow: 'hidden',
               margin: '0 -1.5rem',
               position: 'relative',
-              touchAction: 'pan-y',
+              touchAction: 'none',
+              userSelect: 'none',
             }}
-            onTouchStart={onCarouselTouchStart}
-            onTouchMove={onCarouselTouchMove}
-            onTouchEnd={onCarouselTouchEnd}
+            onPointerDown={onCarouselPointerDown}
+            onPointerMove={onCarouselPointerMove}
+            onPointerUp={onCarouselPointerUp}
+            onPointerCancel={onCarouselPointerUp}
           >
             <div
               style={{
