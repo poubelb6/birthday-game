@@ -736,11 +736,13 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
                   scrollSnapAlign: 'center',
                   borderRadius: '16px',
                   background: 'white',
-                  boxShadow: '0 4px 16px rgba(15,23,42,0.10)',
+                  boxShadow: i === carouselIdx ? '0 8px 24px rgba(15,23,42,0.14)' : '0 4px 16px rgba(15,23,42,0.08)',
                   overflow: 'hidden',
                   border: 'none',
                   cursor: 'pointer',
                   textAlign: 'left',
+                  transform: i === carouselIdx ? 'scale(1.04)' : 'scale(1)',
+                  transition: 'transform 0.25s ease, box-shadow 0.25s ease',
                 }}
               >
                 <div style={{ position: 'relative', width: '100%', height: '130px', overflow: 'hidden' }}>
