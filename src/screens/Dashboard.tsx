@@ -87,11 +87,11 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
   const [celebExpanded, setCelebExpanded] = useState(false);
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
   const [showInviteActions, setShowInviteActions] = useState(false);
-  const [carouselRawIdx, setCarouselRawIdx] = useState(8);
-  const [carouselDrag, setCarouselDrag] = useState(0);
-  const [carouselNoAnim, setCarouselNoAnim] = useState(false);
-  const carouselDragStartX = useRef<number | null>(null);
-  const carouselHasDragged = useRef(false);
+  const [cIdx, setCIdx] = useState(8);
+  const [cOffset, setCOffset] = useState(0);
+  const [cAnim, setCAnim] = useState(true);
+  const cDragX = useRef<number | null>(null);
+  const cDragged = useRef(false);
 
   // Swipe touch tracking
   const touchStartX = useRef<number | null>(null);
@@ -112,42 +112,33 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
 
   const streak = useStreak();
 
-  const carouselNav = (dir: 1 | -1) => {
-    const next = carouselRawIdx + dir;
-    setCarouselNoAnim(false);
-    setCarouselRawIdx(next);
+  const cGo = (dir: 1 | -1) => {
+    const next = cIdx + dir;
+    setCAnim(true);
+    setCIdx(next);
     setTimeout(() => {
-      if (next < 5) {
-        setCarouselNoAnim(true);
-        setCarouselRawIdx(next + 5);
-        requestAnimationFrame(() => requestAnimationFrame(() => setCarouselNoAnim(false)));
-      } else if (next >= 10) {
-        setCarouselNoAnim(true);
-        setCarouselRawIdx(next - 5);
-        requestAnimationFrame(() => requestAnimationFrame(() => setCarouselNoAnim(false)));
-      }
+      if (next < 5)  { setCAnim(false); setCIdx(next + 5); requestAnimationFrame(() => requestAnimationFrame(() => setCAnim(true))); }
+      if (next >= 10){ setCAnim(false); setCIdx(next - 5); requestAnimationFrame(() => requestAnimationFrame(() => setCAnim(true))); }
     }, 360);
   };
 
-  const onCarouselPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+  const cPDown = (e: React.PointerEvent<HTMLDivElement>) => {
     e.currentTarget.setPointerCapture(e.pointerId);
-    carouselDragStartX.current = e.clientX;
-    carouselHasDragged.current = false;
+    cDragX.current = e.clientX;
+    cDragged.current = false;
   };
-
-  const onCarouselPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (carouselDragStartX.current === null) return;
-    const delta = e.clientX - carouselDragStartX.current;
-    if (Math.abs(delta) > 5) carouselHasDragged.current = true;
-    setCarouselDrag(delta);
+  const cPMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (cDragX.current === null) return;
+    const d = e.clientX - cDragX.current;
+    if (Math.abs(d) > 8) cDragged.current = true;
+    setCOffset(d);
   };
-
-  const onCarouselPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (carouselDragStartX.current === null) return;
-    const delta = e.clientX - carouselDragStartX.current;
-    setCarouselDrag(0);
-    carouselDragStartX.current = null;
-    if (Math.abs(delta) > 40) carouselNav(delta < 0 ? 1 : -1);
+  const cPUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (cDragX.current === null) return;
+    const d = e.clientX - cDragX.current;
+    cDragX.current = null;
+    setCOffset(0);
+    if (Math.abs(d) > 50) cGo(d < 0 ? 1 : -1);
   };
   const [showStreakToast, setShowStreakToast] = useState(false);
 
@@ -302,14 +293,12 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
   ];
 
 
-  const CARD_GAP_PX = 12;
-  const CARD_W_RATIO = 0.72;
-  const TRIPLED_ACTIONS = [...quickActions, ...quickActions, ...quickActions];
-  const _vw = typeof window !== 'undefined' ? window.innerWidth : 390;
-  const carouselCardW = _vw * CARD_W_RATIO;
-  const carouselCenterOff = (_vw - carouselCardW) / 2;
-  const carouselTranslateX = carouselCenterOff - carouselRawIdx * (carouselCardW + CARD_GAP_PX) + carouselDrag;
-  const carouselActiveIdx = ((carouselRawIdx % 5) + 5) % 5;
+  const cAll = [...quickActions, ...quickActions, ...quickActions];
+  const cVW  = typeof window !== 'undefined' ? window.innerWidth : 390;
+  const cW   = Math.round(cVW * 0.72);
+  const cGap = 16;
+  const cActive = ((cIdx % 5) + 5) % 5;
+  const cTX = Math.round((cVW - cW) / 2 - cIdx * (cW + cGap) + cOffset);
 
   return (
     <div className="p-6 space-y-8">
@@ -743,48 +732,39 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
             </AnimatePresence>
           </div>
           <div
-            style={{
-              overflow: 'hidden',
-              margin: '0 -1.5rem',
-              position: 'relative',
-              touchAction: 'none',
-              userSelect: 'none',
-            }}
-            onPointerDown={onCarouselPointerDown}
-            onPointerMove={onCarouselPointerMove}
-            onPointerUp={onCarouselPointerUp}
-            onPointerCancel={onCarouselPointerUp}
+            style={{ overflow: 'hidden', margin: '0 -1.5rem', touchAction: 'none', userSelect: 'none' }}
+            onPointerDown={cPDown}
+            onPointerMove={cPMove}
+            onPointerUp={cPUp}
+            onPointerCancel={cPUp}
           >
-            <div
-              style={{
-                display: 'flex',
-                gap: CARD_GAP_PX + 'px',
-                transform: 'translateX(' + carouselTranslateX + 'px)',
-                transition: carouselNoAnim || carouselDrag !== 0 ? 'none' : 'transform 0.32s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                willChange: 'transform',
-              }}
-            >
-              {TRIPLED_ACTIONS.map((action, i) => {
-                const isActive = i === carouselRawIdx;
+            <div style={{
+              display: 'flex',
+              gap: cGap + 'px',
+              transform: 'translateX(' + cTX + 'px)',
+              transition: cAnim && cOffset === 0 ? 'transform 0.35s cubic-bezier(0.25,0.46,0.45,0.94)' : 'none',
+              willChange: 'transform',
+            }}>
+              {cAll.map((action, i) => {
+                const active = i === cIdx;
                 return (
-                  <button
-                    key={action.title + '-' + i}
-                    onClick={() => { if (!carouselHasDragged.current) action.onClick(); }}
+                  <div
+                    key={action.title + i}
+                    onClick={() => { if (!cDragged.current) action.onClick(); }}
                     style={{
-                      flex: '0 0 ' + (CARD_W_RATIO * 100) + '%',
-                      borderRadius: '16px',
-                      background: 'white',
-                      boxShadow: isActive ? '0 10px 30px rgba(15,23,42,0.18)' : 'none',
+                      width: cW + 'px',
+                      flexShrink: 0,
+                      borderRadius: 20,
                       overflow: 'hidden',
-                      border: 'none',
+                      background: 'white',
                       cursor: 'pointer',
-                      textAlign: 'left' as const,
-                      transform: isActive ? 'scale(1.0)' : 'scale(0.82)',
-                      opacity: isActive ? 1 : 0.55,
-                      transition: 'transform 0.32s ease, opacity 0.32s ease, box-shadow 0.32s ease',
+                      transform: active ? 'scale(1)' : 'scale(0.87)',
+                      opacity: active ? 1 : 0.6,
+                      boxShadow: active ? '0 8px 28px rgba(0,0,0,0.14)' : '0 2px 6px rgba(0,0,0,0.05)',
+                      transition: 'transform 0.35s ease, opacity 0.35s ease, box-shadow 0.35s ease',
                     }}
                   >
-                    <div style={{ position: 'relative', width: '100%', height: '130px', overflow: 'hidden' }}>
+                    <div style={{ height: 140, overflow: 'hidden', position: 'relative' }}>
                       <img
                         src={action.image}
                         alt={action.title}
@@ -802,26 +782,24 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
                         {action.icon}
                       </div>
                     </div>
-                    <div style={{ padding: '10px 12px 12px' }}>
-                      <p className="text-[13px] font-black leading-tight text-slate-900">{action.title}</p>
-                      <p className="text-[11px] font-medium mt-1 text-slate-400 leading-snug">{action.subtitle}</p>
+                    <div style={{ padding: '12px 14px 14px' }}>
+                      <p style={{ fontSize: 13, fontWeight: 900, color: '#0f172a', lineHeight: 1.2, margin: 0 }}>{action.title}</p>
+                      <p style={{ fontSize: 11, fontWeight: 500, color: '#94a3b8', marginTop: 4, lineHeight: 1.4, margin: '4px 0 0' }}>{action.subtitle}</p>
                     </div>
-                  </button>
+                  </div>
                 );
               })}
             </div>
           </div>
-          <div className="flex justify-center gap-1.5 mt-3">
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 10 }}>
             {quickActions.map((_, i) => (
-              <div
-                key={i}
-                className="rounded-full transition-all duration-200"
-                style={{
-                  width: i === carouselActiveIdx ? '16px' : '6px',
-                  height: '6px',
-                  background: i === carouselActiveIdx ? '#FF4B4B' : '#cbd5e1',
-                }}
-              />
+              <div key={i} style={{
+                width: i === cActive ? 20 : 6,
+                height: 6,
+                borderRadius: 99,
+                background: i === cActive ? '#FF4B4B' : '#cbd5e1',
+                transition: 'width 0.25s ease, background 0.25s ease',
+              }} />
             ))}
           </div>
           </>
