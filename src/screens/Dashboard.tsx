@@ -1,6 +1,4 @@
 ﻿import { motion, AnimatePresence } from 'motion/react';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import 'swiper/css';
 import { useState, useEffect, useRef } from 'react';
 import { ZODIAC_EMOJI, formatZodiac, getAvatarColor } from '../utils/zodiac';
 import { Star, ChevronLeft, ChevronRight, Plus, ChevronDown, Sparkles, Globe2, Flame, Heart, Users, UserCircle, Gift, ContactRound, CalendarDays, LayoutGrid, MessageCircleMore, Instagram, X } from 'lucide-react';
@@ -90,6 +88,10 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
   const [showInviteActions, setShowInviteActions] = useState(false);
   const [cActive, setCActive] = useState(3);
+  const cRef = useRef<HTMLDivElement>(null);
+  const cCards = useRef<(HTMLElement | null)[]>([]);
+  const cTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cLocked = useRef(false);
 
   // Swipe touch tracking
   const touchStartX = useRef<number | null>(null);
@@ -263,6 +265,41 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
       },
   ];
 
+
+  const C_ALL = [...quickActions, ...quickActions, ...quickActions];
+
+  // Scroll to Inviter (index 8 = middle set) on mount
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      cCards.current[8]?.scrollIntoView({ behavior: 'instant', inline: 'center' });
+    });
+  }, []);
+
+  const handleCarouselScroll = () => {
+    if (cLocked.current) return;
+    if (cTimer.current) clearTimeout(cTimer.current);
+    cTimer.current = setTimeout(() => {
+      const el = cRef.current;
+      if (!el) return;
+      const mid = el.scrollLeft + el.clientWidth / 2;
+      let nearest = 0;
+      let minDist = Infinity;
+      cCards.current.forEach((card, i) => {
+        if (!card) return;
+        const dist = Math.abs(card.offsetLeft + card.clientWidth / 2 - mid);
+        if (dist < minDist) { minDist = dist; nearest = i; }
+      });
+      setCActive(nearest % 5);
+      if (nearest < 5 || nearest >= 10) {
+        const target = cCards.current[nearest < 5 ? nearest + 5 : nearest - 5];
+        if (target) {
+          cLocked.current = true;
+          target.scrollIntoView({ behavior: 'instant', inline: 'center' });
+          requestAnimationFrame(() => { cLocked.current = false; });
+        }
+      }
+    }, 80);
+  };
 
   return (
     <div className="p-6 space-y-8">
@@ -695,64 +732,74 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
             </AnimatePresence>
           </div>
         )}
-        <div style={{ margin: '0 -1.5rem', overflow: 'hidden' }}>
-          <Swiper
-            centeredSlides
-            loop
-            loopAdditionalSlides={5}
-            initialSlide={3}
-            slidesPerView={1.35}
-            spaceBetween={16}
-            style={{ overflow: 'visible', padding: '8px 0 4px' }}
-            onSlideChange={(swiper) => setCActive(swiper.realIndex)}
-          >
-            {quickActions.map((action, i) => (
-              <SwiperSlide key={action.title}>
-                {({ isActive }) => (
-                  <button
-                    onClick={action.onClick}
-                    style={{
-                      width: '100%',
-                      borderRadius: 20,
-                      overflow: 'hidden',
-                      background: 'white',
-                      border: 'none',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      display: 'block',
-                      transform: isActive ? 'scale(1)' : 'scale(0.87)',
-                      opacity: isActive ? 1 : 0.6,
-                      boxShadow: isActive ? '0 8px 28px rgba(0,0,0,0.14)' : '0 2px 6px rgba(0,0,0,0.05)',
-                      transition: 'transform 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease',
+        <div
+          ref={cRef}
+          onScroll={handleCarouselScroll}
+          style={{
+            display: 'flex',
+            gap: '12px',
+            overflowX: 'scroll',
+            scrollSnapType: 'x mandatory',
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            margin: '0 -1.5rem',
+            paddingLeft: '14vw',
+            paddingRight: '14vw',
+            scrollPaddingInline: '14vw',
+            boxSizing: 'border-box',
+            paddingTop: 8,
+            paddingBottom: 4,
+          }}
+        >
+          {C_ALL.map((action, i) => {
+            const active = i % 5 === cActive;
+            return (
+              <button
+                key={action.title + i}
+                ref={el => { cCards.current[i] = el; }}
+                onClick={action.onClick}
+                style={{
+                  width: '72vw',
+                  flexShrink: 0,
+                  scrollSnapAlign: 'center',
+                  borderRadius: 20,
+                  overflow: 'hidden',
+                  background: 'white',
+                  border: 'none',
+                  cursor: 'pointer',
+                  textAlign: 'left' as const,
+                  transform: active ? 'scale(1)' : 'scale(0.87)',
+                  opacity: active ? 1 : 0.6,
+                  boxShadow: active ? '0 8px 28px rgba(0,0,0,0.14)' : '0 2px 6px rgba(0,0,0,0.05)',
+                  transition: 'transform 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease',
+                }}
+              >
+                <div style={{ height: 140, overflow: 'hidden', position: 'relative' }}>
+                  <img
+                    src={action.image}
+                    alt={action.title}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).style.display = 'none';
+                      const fb = e.currentTarget.nextElementSibling as HTMLElement | null;
+                      if (fb) fb.style.display = 'flex';
                     }}
+                  />
+                  <div
+                    className={'absolute inset-0 items-center justify-center ' + action.iconWrapClassName}
+                    style={{ display: 'none' }}
                   >
-                    <div style={{ height: 140, overflow: 'hidden', position: 'relative' }}>
-                      <img
-                        src={action.image}
-                        alt={action.title}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).style.display = 'none';
-                          const fb = e.currentTarget.nextElementSibling as HTMLElement | null;
-                          if (fb) fb.style.display = 'flex';
-                        }}
-                      />
-                      <div
-                        className={'absolute inset-0 items-center justify-center ' + action.iconWrapClassName}
-                        style={{ display: 'none' }}
-                      >
-                        {action.icon}
-                      </div>
-                    </div>
-                    <div style={{ padding: '12px 14px 14px' }}>
-                      <p style={{ fontSize: 13, fontWeight: 900, color: '#0f172a', lineHeight: 1.2, margin: 0 }}>{action.title}</p>
-                      <p style={{ fontSize: 11, fontWeight: 500, color: '#94a3b8', marginTop: 4, lineHeight: 1.4, margin: '4px 0 0' }}>{action.subtitle}</p>
-                    </div>
-                  </button>
-                )}
-              </SwiperSlide>
-            ))}
-          </Swiper>
+                    {action.icon}
+                  </div>
+                </div>
+                <div style={{ padding: '12px 14px 14px' }}>
+                  <p style={{ fontSize: 13, fontWeight: 900, color: '#0f172a', lineHeight: 1.2, margin: 0 }}>{action.title}</p>
+                  <p style={{ fontSize: 11, fontWeight: 500, color: '#94a3b8', marginTop: 4, lineHeight: 1.4, margin: '4px 0 0' }}>{action.subtitle}</p>
+                </div>
+              </button>
+            );
+          })}
         </div>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 10 }}>
           {quickActions.map((_, i) => (
