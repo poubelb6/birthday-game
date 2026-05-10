@@ -699,6 +699,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
           <Swiper
             centeredSlides
             loop
+            loopAdditionalSlides={5}
             initialSlide={3}
             slidesPerView={1.35}
             spaceBetween={16}
