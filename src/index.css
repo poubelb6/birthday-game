@@ -259,3 +259,6 @@ html.dark .shadow-slate-200\/50 { box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4) !im
 html.dark .shadow-2xl { box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.07), 0 25px 50px rgba(0, 0, 0, 0.5) !important; }
 html.dark .shadow-xl  { box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.07), 0 20px 25px rgba(0, 0, 0, 0.4) !important; }
 html.dark .shadow-sm  { box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05) !important; }
+
+/* ===== CAROUSEL — hide native scrollbar on all browsers ===== */
+.carousel-snap::-webkit-scrollbar { display: none; }

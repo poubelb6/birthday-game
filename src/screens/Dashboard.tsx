@@ -740,6 +740,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
         )}
         <div
           ref={cRef}
+          className="carousel-snap"
           onScroll={handleCarouselScroll}
           style={{
             display: 'flex',
