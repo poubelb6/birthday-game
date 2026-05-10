@@ -700,13 +700,13 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
             centeredSlides
             loop
             initialSlide={3}
-            slidesPerView="auto"
+            slidesPerView={1.35}
             spaceBetween={16}
             style={{ overflow: 'visible', padding: '8px 0 4px' }}
             onSlideChange={(swiper) => setCActive(swiper.realIndex)}
           >
             {quickActions.map((action, i) => (
-              <SwiperSlide key={action.title} style={{ width: '72vw' }}>
+              <SwiperSlide key={action.title}>
                 {({ isActive }) => (
                   <button
                     onClick={action.onClick}
