@@ -268,11 +268,17 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
 
   const C_ALL = [...quickActions, ...quickActions, ...quickActions];
 
-  // Scroll to Inviter (index 8 = middle set) on mount
+  const scrollToCard = (el: HTMLDivElement, card: HTMLElement) => {
+    el.scrollLeft = card.offsetLeft + card.offsetWidth / 2 - el.clientWidth / 2;
+  };
+
+  // Scroll to Inviter (index 8 = middle set) on mount — double rAF for Android layout
   useEffect(() => {
-    requestAnimationFrame(() => {
-      cCards.current[8]?.scrollIntoView({ behavior: 'instant', inline: 'center' });
-    });
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const el = cRef.current;
+      const card = cCards.current[8];
+      if (el && card) scrollToCard(el, card);
+    }));
   }, []);
 
   const handleCarouselScroll = () => {
@@ -286,7 +292,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
       let minDist = Infinity;
       cCards.current.forEach((card, i) => {
         if (!card) return;
-        const dist = Math.abs(card.offsetLeft + card.clientWidth / 2 - mid);
+        const dist = Math.abs(card.offsetLeft + card.offsetWidth / 2 - mid);
         if (dist < minDist) { minDist = dist; nearest = i; }
       });
       setCActive(nearest % 5);
@@ -294,7 +300,7 @@ export function Dashboard({ birthdays, user, onRequestAddFriend, onOpenCollectio
         const target = cCards.current[nearest < 5 ? nearest + 5 : nearest - 5];
         if (target) {
           cLocked.current = true;
-          target.scrollIntoView({ behavior: 'instant', inline: 'center' });
+          scrollToCard(el, target);
           requestAnimationFrame(() => { cLocked.current = false; });
         }
       }
